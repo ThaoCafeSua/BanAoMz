@@ -14,20 +14,19 @@
 </style>
 
 <div>
-    <h3 class="title-primary">Chi tiết Thương Hiệu</h3>
+    <h3 class="title-primary">Chi tiết Size</h3>
 
-    <a href="/admin/brand" class="btn mb-2">
+    <a href="/admin/size" class="btn mb-2">
         <i class="fa-solid fa-arrow-left"></i> Quay lại
     </a>
 
     <div class="card">
         <div class="card-body">
-            <!-- Hidden ID -->
-            <input type="hidden" class="form-control" name="id" id="id" value="${thuongHieu.id}">
+            <input type="hidden" class="form-control" name="id" id="id" value="${size.id}">
 
             <div class="mb-3">
-                <label class="form-label label-primary">Tên Thương Hiệu:</label>
-                <input type="text" class="form-control" name="tenThuongHieu" readonly value="${thuongHieu.tenThuongHieu}">
+                <label class="form-label label-primary">Tên Xuất Xứ:</label>
+                <input type="text" class="form-control" name="tenSize" readonly value="${size.tenSize}">
             </div>
         </div>
     </div>

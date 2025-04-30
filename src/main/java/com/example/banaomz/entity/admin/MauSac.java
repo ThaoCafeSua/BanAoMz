@@ -1,5 +1,6 @@
 package com.example.banaomz.entity.admin;
 
+import com.example.banaomz.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 @Entity
 @Table(name = "mau_sac")
-public class MauSac  {
+public class MauSac extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

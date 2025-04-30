@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <div class="container mt-4">
-    <h2 class="mb-4">Quản Lý Xuất Xứ</h2> <!-- Đổi tiêu đề thành "Quản Lý Xuất Xứ" -->
+    <h2 class="mb-4">Quản Lý Size</h2>
 
     <!-- Bộ lọc tìm kiếm -->
     <div class="card mb-4" style="border: 1px solid #006d7f; background-color: white;">
@@ -19,7 +19,7 @@
             <div class="row justify-content-center mb-3">
                 <div class="col-md-6">
                     <div class="input-group w-100">
-                        <input id="input_search" class="form-control" name="key" placeholder="Tìm kiếm tên xuất xứ ..." /> <!-- Cập nhật placeholder -->
+                        <input id="input_search" class="form-control" name="key" placeholder="Tìm kiếm tên size ..." />
                         <button id="btn_search" class="btn btn-teal" type="submit">
                             <i class="fas fa-search"></i> Tìm kiếm
                         </button>
@@ -30,17 +30,17 @@
         </div>
     </div>
 
-    <div class="card mt-4 custom-border"> <!-- Áp dụng custom-border cho card danh sách -->
+    <div class="card mt-4 custom-border">
         <div class="card-body">
             <div class="d-flex justify-content-between mb-3">
-                <h5 class="card-title">Danh sách xuất xứ</h5> <!-- Đổi "Danh mục" thành "Xuất xứ" -->
-                <a href="/admin/origin/create" class="btn btn-teal"><i class="fa-solid fa-plus"></i> Thêm xuất xứ</a> <!-- Đổi "Danh mục" thành "Xuất xứ" -->
+                <h5 class="card-title">Danh sách size</h5>
+                <a href="/admin/size/create" class="btn btn-teal"><i class="fa-solid fa-plus"></i> Thêm size</a>
             </div>
-            <table class="table" id="originTable">
+            <table class="table" id="sizeTable">
                 <thead>
                 <tr>
                     <th>STT</th>
-                    <th>Tên xuất xứ</th> <!-- Đổi "Tên danh mục" thành "Tên xuất xứ" -->
+                    <th>Tên size</th>
                     <th>Hành động</th>
                 </tr>
                 </thead>
@@ -51,7 +51,6 @@
     </div>
 </div>
 
-<!-- Custom Styles -->
 <style>
     .custom-border {
         border: 1px solid  #001f3d;
@@ -59,34 +58,34 @@
         margin-bottom: 20px;
         border-radius: 8px;
     }
-    /* Thay đổi màu sắc các nút */
+
     .btn-teal {
-        background-color: #001f3d; /* Màu nền xanh than */
+        background-color: #001f3d;
         border-radius: 20px;
-        color: white; /* Màu chữ trắng */
+        color: white;
     }
 
     .btn-teal:hover {
-        background-color: #004080; /* Thay đổi màu nền khi hover */
-        color: white; /* Màu chữ vẫn là trắng */
+        background-color: #004080;
+        color: white;
     }
 
     #input_search {
         border-radius: 20px;
         padding: 10px;
-        border: 1px solid #001f3d; /* Viền cho ô tìm kiếm */
+        border: 1px solid #001f3d;
     }
 
     #btn_search {
         border-radius: 20px;
         padding: 10px 20px;
-        background-color: #001f3d; /* Nền cho nút tìm kiếm */
-        color: white; /* Màu chữ trắng */
+        background-color: #001f3d;
+        color: white;
     }
 
     #btn_search:hover {
-        background-color: #004080; /* Màu nền khi hover */
-        color: white; /* Màu chữ vẫn là trắng */
+        background-color: #004080;
+        color: white;
     }
 
     .table th, .table td {
@@ -104,38 +103,28 @@
         font-weight: bold;
     }
 
-    #input_search {
-        border-radius: 20px;
-        padding: 10px;
-        border: 1px solid #001f3d; /* Thêm viền cho input */
-    }
-    /* Màu xanh dương cho các nút */
     .btn-info {
-        background-color: #001f3d; /* Màu xanh dương đậm */
-        border-color: #001f3d; /* Màu viền */
-        margin-right: 5px; /* Tạo khoảng cách giữa icon và chữ */
-
+        background-color: #001f3d;
+        border-color: #001f3d;
+        margin-right: 5px;
     }
+
     .btn-info:hover {
-        background-color: #004080; /* Màu nền khi hover (xanh dương nhạt hơn) */
-        border-color: #004080; /* Màu viền khi hover */
+        background-color: #004080;
+        border-color: #004080;
     }
 
-    /* Chỉnh màu icon bên trong button */
     .btn-info i {
-        color: white; /* Màu trắng cho các icon */
+        color: white;
     }
 
-    /* Màu nền khi hover */
     .btn-info:hover i {
-        color: white; /* Giữ màu icon trắng khi hover */
+        color: white;
     }
-
 </style>
-
 <script>
     $(document).ready(function () {
-        let originTable = $('#originTable').DataTable({ // Chỉnh lại tên bảng
+        let sizeTable = $('#sizeTable').DataTable({
             "paging": true,
             "searching": false,
             "ordering": false,
@@ -148,40 +137,39 @@
             }
         });
 
-        function loadTableOrigin() { // Đổi tên hàm cho đúng
+        function loadTableSize() {
             const search = $('#input_search').val();
             $.ajax({
-                url: '/admin/origin/list',
+                url: '/admin/size/list',
                 method: 'GET',
                 dataType: 'json',
                 data: {search: search},
                 success: function (response) {
-                    originTable.clear();
+                    sizeTable.clear();
                     if (response.data.length === 0) {
-                        toastr.warning('Không tìm thấy xuất xứ nào phù hợp.', 'Thông báo');
+                        toastr.warning('Không tìm thấy size nào phù hợp.', 'Thông báo');
                     }
-                    $.each(response.data, function (index, origin) {
-                        originTable.row.add([
+                    $.each(response.data, function (index, size) {
+                        sizeTable.row.add([
                             index + 1,
-                            origin.tenXuatXu,
-                            '<a href="/admin/origin/detail/' + origin.id + '" class="btn btn-info btn-sm mr-2"><i class="fa-solid fa-info"></i></a>' +
-                            '<a href="/admin/origin/update/' + origin.id + '" class="btn btn-info btn-sm mr-2"><i class="fa-solid fa-pen"></i></a>'
+                            size.tenSize,
+                            '<a href="/admin/size/detail/' + size.id + '" class="btn btn-info btn-sm mr-2"><i class="fa-solid fa-info"></i></a>' +
+                            '<a href="/admin/size/update/' + size.id + '" class="btn btn-info btn-sm mr-2"><i class="fa-solid fa-pen"></i></a>'
                         ]);
                     });
-                    originTable.draw(); // Dùng đúng biến originTable
+                    sizeTable.draw();
                 },
                 error: function (xhr, status, error) {
                     console.error(error);
-                    toastr.error('Đã xảy ra lỗi khi tải xuất xứ.', 'Lỗi hệ thống');
+                    toastr.error('Đã xảy ra lỗi khi tải size.', 'Lỗi hệ thống');
                 }
             });
         }
 
         $('#btn_search').click(function () {
-            loadTableOrigin(); // Gọi hàm đúng tên
+            loadTableSize();
         });
 
-        loadTableOrigin(); // Gọi hàm để tải bảng ban đầu
+        loadTableSize();
     });
 </script>
-
