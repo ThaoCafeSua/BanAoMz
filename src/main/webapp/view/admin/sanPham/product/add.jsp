@@ -1,17 +1,56 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<div>
+<!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<style>
+    .btn-teal {
+        background-color: #001f3d;
+        border-radius: 20px;
+        color: white;
+    }
+
+    .btn-teal:hover {
+        background-color: #004080;
+        color: white;
+    }
+
+    .btn {
+        border: 1px solid #cccccc !important;
+        border-radius: 4px !important;
+    }
+
+    .btn:hover {
+        background-color: #004080 !important;
+        color: white !important;
+    }
+
+    .table th, .table td {
+        border: 1px solid #dcdcdc !important;
+        vertical-align: middle;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f9f9f9;
+    }
+
+    thead {
+        border: 1px solid #dcdcdc !important;
+    }
+</style>
+
+<div class="container">
     <h3>Thêm Sản Phẩm</h3>
     <a href="/admin/product" class="btn mb-4"><i class="fa-solid fa-arrow-left"></i></a>
     <!-- Form thêm sản phẩm -->
-    <div class="card" style="border: 2px solid #b85555; background-color: white;">
+    <div class="card" style="border: 1px solid #006d7f; background-color: white;">
         <div class="card-body row">
             <div class="col-7">
                 <div class="mb-3">
                     <label for="tenSanPham" class="form-label required">Tên Sản Phẩm</label>
-                    <input type="text" class="form-control" id="tenSanPham"
-                           placeholder="Nhập tên sản phẩm">
+                    <input type="text" class="form-control" id="tenSanPham" placeholder="Nhập tên sản phẩm">
                 </div>
                 <div class="mb-3">
                     <label class="form-label required" for="danhMucSelect">Danh Mục</label>
@@ -20,7 +59,7 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="thuongHieuSelect"  class="form-label required">Thương Hiệu</label>
+                    <label for="thuongHieuSelect" class="form-label required">Thương Hiệu</label>
                     <select class="form-control" id="thuongHieuSelect" name="thuongHieu">
                         <option value="">Chọn thương hiệu</option>
                     </select>
@@ -32,25 +71,21 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label required" >Trạng Thái</label>
+                    <label class="form-label required">Trạng Thái</label>
                     <div class="col d-flex">
                         <div class="form-check">
-                            <input class="form-check-input" id="status_type_on" type="radio" name="status_product"  value="HOAT_DONG" checked>
-                            <label class="form-check-label" for="status_type_on">
-                                Đang bán
-                            </label>
+                            <input class="form-check-input" id="status_type_on" type="radio" name="status_product" value="HOAT_DONG" checked>
+                            <label class="form-check-label" for="status_type_on">Đang bán</label>
                         </div>
                         <div class="form-check ml-2">
                             <input class="form-check-input" id="status_type_off" type="radio" name="status_product" value="NGUNG_HOAT_DONG">
-                            <label class="form-check-label" for="status_type_off">
-                                Ngừng bán
-                            </label>
+                            <label class="form-check-label" for="status_type_off">Ngừng bán</label>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-5">
-                <label class="form-label required" >Hình ảnh</label>
+                <label class="form-label required">Hình ảnh</label>
                 <input type="file" id="imageInput" class="form-control">
                 <div class="mt-4">
                     <img id="imagePreview" src="" class="rounded mx-auto d-block" style="display: none; max-width: 100%; height: auto; padding: 20px">
@@ -59,9 +94,8 @@
         </div>
     </div>
 
-
     <!-- Form thêm sản phẩm chi tiết -->
-    <div class="card mt-4" style="border: 2px solid #b85555; background-color: white;">
+    <div class="card mt-4" style="border: 1px solid #006d7f; background-color: white;">
         <div class="card-body">
             <div class="row">
                 <div class="col-6">
@@ -70,25 +104,20 @@
                     </select>
                 </div>
                 <div class="col-6">
-                    <label for="massSelect" class="form-label required">Khối Lượng</label>
-                    <select class="form-control" id="massSelect" name="massSelect" multiple="multiple" data-placeholder="Chọn khối lượng">
+                    <label for="massSelect" class="form-label required">Size</label>
+                    <select class="form-control" id="massSelect" name="massSelect" multiple data-placeholder="Chọn size">
                     </select>
                 </div>
             </div>
         </div>
-        <div class="d-flex justify-content-end align-items-center mb-2 mr-4">
-            <button type="button" class="btn btn-primary ml-4 btn-gen-product-detail">
-                <i class="fa-solid fa-plus"></i> Thêm chi tiết sản phẩm
-            </button>
-        </div>
     </div>
 
     <!-- Danh sách sản phẩm -->
-    <div class="card mt-4" style="border: 2px solid #b85555; background-color: white;">
+    <div class="card mt-4" style="border: 1px solid #006d7f; background-color: white;">
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-2">Sản Phẩm Chi Tiết</h5>
-                <button type="button" class="btn btn-primary ml-4 btn-create-product">
+                <button type="button" class="btn btn-teal ml-4 btn-create-product">
                     <i class="fa-solid fa-plus"></i> Hoàn Tất
                 </button>
             </div>
@@ -211,27 +240,27 @@
         }
         getDataMauSac()
 
-        function getDataKhoiLuong() {
+        function getDataSize() {
             $('#massSelect').empty();
             $.ajax({
-                url: '/admin/weight/list',
+                url: '/admin/size/list',
                 method: 'GET',
                 dataType: 'json',
                 data: {search: ''},
                 success: function (response) {
-                    massData = response.data
+                    massData = response.data;
                     response.data.forEach(function (item) {
                         $('#massSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenKhoiLuong)
+                            $('<option></option>').val(item.id).text(item.tenSize)
                         );
                     });
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
-        getDataKhoiLuong()
+        getDataSize();
 
         function createProduct() {
             let xuatXu = $('#xuatXuSelect').val()
@@ -270,7 +299,7 @@
             }
             let lstChiTiet = productDetailArr.map(item =>{
                 return {
-                    khoiLuongId: item.mass.id,
+                    sizeId: item.mass.id, // Đã đổi mass thành size
                     mauSacId: item.color.id,
                     soLuong: item.quantity,
                     giaBan: item.price
@@ -344,7 +373,7 @@
                     index+1,
                     item.product,
                     item.color.tenMauSac,
-                    item.mass.tenKhoiLuong,
+                    item.mass.tenSize,
                     '<input class="form-control quantity-input" type="number" min="1" value="' + item.quantity + '" data-index="' + index + '" />',
                     '<input class="form-control price-input" type="number" min="1" value="' + item.price + '" data-index="' + index + '" />',
                     '<button class="btn btn-danger deleteProduct" data-index="' + index + '"><i class="fa-solid fa-trash"></i></button>'
@@ -362,44 +391,50 @@
         // $('#massSelect').change(function() {
         //     genDataProductDetail()
         // })
-        $('.btn-gen-product-detail').click(function() {
-            genDataProductDetail()
-            $('#colorSelect').val('').trigger('change'); // Reset select color
-            $('#massSelect').val('').trigger('change'); // Reset select mass
-        })
-        function genDataProductDetail(){
-            let tenSanPham =  $('#tenSanPham').val()
-
-            let colorSelectId = $('#colorSelect').val()
+        // $('.btn-gen-product-detail').click(function() {
+        //     genDataProductDetail()
+        //     $('#colorSelect').val('').trigger('change'); // Reset select color
+        //     $('#massSelect').val('').trigger('change'); // Reset select mass
+        // })
+        function genDataProductDetailIfReady() {
+            let tenSanPham =  $('#tenSanPham').val();
+            let colorSelectId = $('#colorSelect').val();
             let colorArr = colorData.filter(item => colorSelectId.includes(String(item.id)));
 
-            let massSelectId = $('#massSelect').val()
+            let massSelectId = $('#massSelect').val();
             let massArr = massData.filter(item => massSelectId.includes(String(item.id)));
-            if (!colorArr.length || !massArr.length) {
-                return;
-            }
+
+            if (!colorArr.length || !massArr.length) return;
+
+            // Loại bỏ các tổ hợp không còn được chọn
+            productDetailArr = productDetailArr.filter(product =>
+                colorSelectId.includes(String(product.color.id)) &&
+                massSelectId.includes(String(product.mass.id))
+            );
+
             let productArr = [];
             colorArr.forEach(color => {
                 massArr.forEach(mass => {
-                    console.log(productDetailArr)
-                    // Kiểm tra xem sản phẩm với màu sắc và khối lượng đã tồn tại hay chưa
                     let exists = productDetailArr.some(product => product.color.id === color.id && product.mass.id === mass.id);
-                    console.log(exists)
-                    if (!exists) { // Nếu chưa tồn tại, thêm vào mảng mới
-                        let productDetail = {
+                    if (!exists) {
+                        productArr.push({
                             product: tenSanPham,
                             color: color,
                             mass: mass,
                             quantity: 1,
                             price: 100000
-                        };
-                        productArr.push(productDetail);
+                        });
                     }
                 });
             });
-            productDetailArr = [...productDetailArr, ...productArr]
-            loadTableProductDetail(productDetailArr)
+
+            productDetailArr = [...productDetailArr, ...productArr];
+            loadTableProductDetail(productDetailArr);
         }
+
+        $('#colorSelect, #massSelect').on('change', function () {
+            genDataProductDetailIfReady();
+        });
 
         $('#productTable').on('click', '.deleteProduct', function () {
             var indexToDelete = $(this).data('index'); // Lấy index của item cần xóa

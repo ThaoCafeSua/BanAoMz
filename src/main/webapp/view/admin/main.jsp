@@ -21,7 +21,7 @@
                 window.location.href = "/admin/login";
             }
         }
-        checkAuth();
+        // checkAuth();
     });
 </script>
 

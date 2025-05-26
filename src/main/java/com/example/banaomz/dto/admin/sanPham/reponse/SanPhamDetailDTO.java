@@ -14,6 +14,8 @@ public class SanPhamDetailDTO {
 
     private Long id;
 
+    private String maSanPham;
+
     private String tenSanPham;
 
     private DanhMucDTO danhMuc;
@@ -25,6 +27,8 @@ public class SanPhamDetailDTO {
     private String trangThai;
 
     private String urlAnh;
+
+    private String slDaBan;
 
     private List<SanPhamChiTietDTO> lstChiTietSanPham;
 

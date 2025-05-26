@@ -1,5 +1,6 @@
 package com.example.banaomz.entity.admin;
 
+import com.example.banaomz.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
 @Entity
 @Builder
 @Table(name = "san_pham_chi_tiet")
-public class SanPhamChiTiet {
+public class SanPhamChiTiet extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

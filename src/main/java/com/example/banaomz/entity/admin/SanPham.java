@@ -1,5 +1,6 @@
 package com.example.banaomz.entity.admin;
 
+import com.example.banaomz.entity.common.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +16,7 @@ import java.util.Set;
 @DynamicUpdate
 @Getter
 @Setter
-public class SanPham {
+public class SanPham extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,14 +33,21 @@ public class SanPham {
     @JoinColumn(name = "id_thuong_hieu")
     private ThuongHieu thuongHieu;
 
+    @Column( name = "ma_san_pham")
+    private String maSanPham;
+
     @Column(name = "ten_san_pham")
     private String tenSanPham;
 
     @Column(name = "trang_thai")
     private String trangThai;
 
+    @Column(name = "so_luong_da_ban")
+    private String slDaBan;
+
     @Column(name = "url_anh")
     private String urlAnh;
+
 
     @OneToMany(mappedBy = "sanPham")
     @JsonIgnore

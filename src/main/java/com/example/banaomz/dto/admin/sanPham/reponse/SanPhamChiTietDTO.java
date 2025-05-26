@@ -18,4 +18,5 @@ public class SanPhamChiTietDTO {
     private Integer soLuong;
 
     private Integer giaBan;
+
 }

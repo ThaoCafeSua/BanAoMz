@@ -1,11 +1,32 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<style>
+    .card {
+        border: 1px solid #006d7f !important;
+        background-color: white;
+    }
+    .card-header {
+        background-color: white !important;
+        color: black;
+        font-weight: bold;
+    }
+    .table th, .table td {
+        border: 1px solid #dcdcdc !important;
+        vertical-align: middle;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f9f9f9;
+    }
+    thead {
+        border: 1px solid #dcdcdc !important;
+    }
+</style>
 
-<div>
+<div class="container">
     <h3>Thông Tin Sản Phẩm</h3>
     <a href="/admin/product" class="btn mb-4"><i class="fa-solid fa-arrow-left"></i></a>
     <!-- Form thêm sản phẩm -->
-    <div class="card" style="border: 2px solid #b85555; background-color: white;">
+    <div class="card">
         <div class="card-body row">
             <div class="col-7">
                 <div class="mb-3">
@@ -59,21 +80,21 @@
     </div>
 
     <!-- Danh sách sản phẩm -->
-    <div class="card mt-4" style="border: 2px solid #b85555; background-color: white;">
-        <div class="card-header bg-white">
+    <div class="card mt-4">
+        <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-2">Sản Phẩm Chi Tiết</h5>
             </div>
         </div>
 
-        <div class="card-body bg-white">
+        <div class="card-body">
             <table class="table" id="productTable">
                 <thead>
                 <tr>
                     <th>#</th>
                     <th>Tên Sản Phẩm</th>
                     <th>Màu Sắc</th>
-                    <th>Khối Lượng</th>
+                    <th>Size</th>
                     <th>Số Lượng</th>
                     <th>Giá Bán</th>
                 </tr>
@@ -183,27 +204,27 @@
         }
         getDataMauSac()
 
-        function getDataKhoiLuong() {
+        function getDataSize() {
             $('#massSelect').empty();
             $.ajax({
-                url: '/admin/weight/list',
+                url: '/admin/size/list',
                 method: 'GET',
                 dataType: 'json',
                 data: {search: ''},
                 success: function (response) {
-                    massData = response.data
+                    massData = response.data;
                     response.data.forEach(function (item) {
                         $('#massSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenKhoiLuong)
+                            $('<option></option>').val(item.id).text(item.tenSize)
                         );
                     });
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
-        getDataKhoiLuong()
+        getDataSize();
 
         function getDetailProduct() {
             $.ajax({
@@ -260,16 +281,16 @@
         }
 
         function loadTableProductDetail(data) {
-            console.log(data)
+            let productTable = $('#productTable').DataTable();
             productTable.clear();
             $.each(data, function (index, item) {
                 productTable.row.add([
-                    index+1,
+                    index + 1,
                     item.tenSanPham,
-                    item.mauSac.tenMauSac,
-                    item.khoiLuong.tenKhoiLuong,
+                    item.mauSac?.tenMauSac || '',
+                    item.size?.tenSize || '',
                     item.soLuong,
-                    formatCurrency(item.giaBan),
+                    item.giaBan?.toLocaleString('vi-VN') + ' ₫'
                 ]);
             });
             productTable.draw();

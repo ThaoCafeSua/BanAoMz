@@ -1,17 +1,38 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<style>
+    .card {
+        border: 1px solid #006d7f !important;
+        background-color: white;
+    }
+    .card-header {
+        background-color: white !important;
+        color: black;
+        font-weight: bold;
+    }
+    .table th, .table td {
+        border: 1px solid #dcdcdc !important;
+        vertical-align: middle;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f9f9f9;
+    }
+    thead {
+        border: 1px solid #dcdcdc !important;
+    }
+</style>
 
-<div>
+<div class="container">
     <h3>Cập Nhật Sản Phẩm</h3>
     <a href="/admin/product" class="btn mb-4"><i class="fa-solid fa-arrow-left"></i></a>
-    <!-- Form thêm sản phẩm -->
-    <div class="card" style="border: 2px solid #b85555; background-color: white;">
+
+    <!-- Form cập nhật sản phẩm -->
+    <div class="card">
         <div class="card-body row">
             <div class="col-7">
                 <div class="mb-3">
                     <label for="tenSanPham" class="form-label required">Tên Sản Phẩm</label>
-                    <input type="text" class="form-control" id="tenSanPham"
-                           placeholder="Nhập tên sản phẩm">
+                    <input type="text" class="form-control" id="tenSanPham" placeholder="Nhập tên sản phẩm">
                 </div>
                 <div class="mb-3">
                     <label class="form-label required" for="danhMucSelect">Danh Mục</label>
@@ -20,7 +41,7 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="thuongHieuSelect"  class="form-label required">Thương Hiệu</label>
+                    <label for="thuongHieuSelect" class="form-label required">Thương Hiệu</label>
                     <select class="form-control" id="thuongHieuSelect" name="thuongHieu">
                         <option value="">Chọn thương hiệu</option>
                     </select>
@@ -32,88 +53,72 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label required" >Trạng Thái</label>
+                    <label class="form-label required">Trạng Thái</label>
                     <div class="col d-flex">
                         <div class="form-check">
-                            <input class="form-check-input" id="status_type_on" type="radio" name="status_product"  value="HOAT_DONG" checked>
-                            <label class="form-check-label" for="status_type_on">
-                                Đang bán
-                            </label>
+                            <input class="form-check-input" id="status_type_on" type="radio" name="status_product" value="HOAT_DONG" checked>
+                            <label class="form-check-label" for="status_type_on">Đang bán</label>
                         </div>
                         <div class="form-check ml-2">
                             <input class="form-check-input" id="status_type_off" type="radio" name="status_product" value="NGUNG_HOAT_DONG">
-                            <label class="form-check-label" for="status_type_off">
-                                Ngừng bán
-                            </label>
+                            <label class="form-check-label" for="status_type_off">Ngừng bán</label>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-5">
-                <label class="form-label required" >Hình ảnh</label>
+                <label class="form-label required">Hình ảnh</label>
                 <input type="file" id="imageInput" class="form-control">
-                <div class="mt-4">
-                    <img id="imagePreview" src="" class="rounded mx-auto d-block" style="display: none; max-width: 100%; height: auto; padding: 20px">
+                <div class="mt-4 text-center">
+                    <img id="imagePreview" src="" class="rounded" style="display:none;max-width:100%;height:auto;padding:20px">
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Form thêm sản phẩm chi tiết -->
-    <div class="card mt-4" style="border: 2px solid #b85555; background-color: white;">
+    <!-- Form chọn thuộc tính sản phẩm -->
+    <div class="card mt-4">
         <div class="card-body">
             <div class="row">
                 <div class="col-6">
-                    <label for="colorSelect" class="form-label required">Màu Sắc</label>
-                    <select class="form-control" id="colorSelect" name="colorSelect" multiple="multiple" data-placeholder="Chọn màu sắc">
-                    </select>
+                    <label class="form-label required" for="colorSelect">Màu Sắc</label>
+                    <select class="form-control" id="colorSelect" name="colorSelect" multiple data-placeholder="Chọn màu sắc"></select>
                 </div>
                 <div class="col-6">
-                    <label for="massSelect" class="form-label required">Khối Lượng</label>
-                    <select class="form-control" id="massSelect" name="massSelect" multiple="multiple" data-placeholder="Chọn khối lượng">
-                    </select>
+                    <label class="form-label required" for="sizeSelect">Size</label>
+                    <select class="form-control" id="sizeSelect" name="sizeSelect" multiple data-placeholder="Chọn size"></select>
                 </div>
             </div>
-        </div>
-        <div class="d-flex justify-content-end align-items-center mb-2 mr-4">
-            <button type="button" class="btn btn-primary ml-4 btn-gen-product-detail">
-                <i class="fa-solid fa-plus"></i> Thêm chi tiết sản phẩm
-            </button>
         </div>
     </div>
 
     <!-- Danh sách sản phẩm -->
-    <div class="card mt-4" style="border: 2px solid #b85555; background-color: white;">
-        <div class="card-header bg-white">
+    <div class="card mt-4">
+        <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-2">Sản Phẩm Chi Tiết</h5>
-                <button type="button" class="btn btn-primary btn-update-product">
-                    Cập Nhật
-                </button>
+                <button type="button" class="btn btn-primary btn-update-product">Cập Nhật</button>
             </div>
         </div>
-
-        <div class="card-body bg-white">
+        <div class="card-body">
             <table class="table" id="productTable">
                 <thead>
                 <tr>
                     <th>#</th>
                     <th>Tên Sản Phẩm</th>
                     <th>Màu Sắc</th>
-                    <th>Khối Lượng</th>
+                    <th>Size</th>
                     <th>Số Lượng</th>
                     <th>Giá Bán</th>
                     <th>Hành Động</th>
                 </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
     </div>
-
 </div>
+
 <script>
     $(document).ready(function () {
         let colorData = []
