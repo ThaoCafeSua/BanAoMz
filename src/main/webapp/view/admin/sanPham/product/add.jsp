@@ -299,7 +299,7 @@
             }
             let lstChiTiet = productDetailArr.map(item =>{
                 return {
-                    sizeId: item.mass.id, // Đã đổi mass thành size
+                    sizeId: item.mass.id,
                     mauSacId: item.color.id,
                     soLuong: item.quantity,
                     giaBan: item.price

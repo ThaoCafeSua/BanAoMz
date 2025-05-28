@@ -1,5 +1,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <style>
     .card {
         border: 1px solid #006d7f !important;
@@ -20,6 +25,27 @@
     thead {
         border: 1px solid #dcdcdc !important;
     }
+    .btn-teal {
+        background-color: #001f3d;
+        border-radius: 20px;
+        color: white;
+    }
+
+    .btn-teal:hover {
+        background-color: #004080;
+        color: white;
+    }
+
+    .btn {
+        border: 1px solid #cccccc !important;
+        border-radius: 4px !important;
+    }
+
+    .btn:hover {
+        background-color: #004080 !important;
+        color: white !important;
+    }
+
 </style>
 
 <div class="container">
@@ -85,8 +111,9 @@
                     <select class="form-control" id="colorSelect" name="colorSelect" multiple data-placeholder="Chọn màu sắc"></select>
                 </div>
                 <div class="col-6">
-                    <label class="form-label required" for="sizeSelect">Size</label>
-                    <select class="form-control" id="sizeSelect" name="sizeSelect" multiple data-placeholder="Chọn size"></select>
+                    <label for="massSelect" class="form-label required">Size</label>
+                    <select class="form-control" id="massSelect" name="massSelect" multiple data-placeholder="Chọn size">
+                    </select>
                 </div>
             </div>
         </div>
@@ -97,7 +124,9 @@
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-2">Sản Phẩm Chi Tiết</h5>
-                <button type="button" class="btn btn-primary btn-update-product">Cập Nhật</button>
+                <button type="button" class="btn btn-teal ml-4 btn-update-product">
+                    <i class="fa-solid fa-plus"></i> Cập nhật
+                </button>
             </div>
         </div>
         <div class="card-body">
@@ -217,27 +246,27 @@
         }
         getDataMauSac()
 
-        function getDataKhoiLuong() {
+        function getDataSize() {
             $('#massSelect').empty();
             $.ajax({
-                url: '/admin/weight/list',
+                url: '/admin/size/list',
                 method: 'GET',
                 dataType: 'json',
                 data: {search: ''},
                 success: function (response) {
-                    massData = response.data
+                    massData = response.data;
                     response.data.forEach(function (item) {
                         $('#massSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenKhoiLuong)
+                            $('<option></option>').val(item.id).text(item.tenSize)
                         );
                     });
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
-        getDataKhoiLuong()
+        getDataSize();
 
         function getDetailProduct() {
             $.ajax({
@@ -302,7 +331,7 @@
             }
             let lstChiTiet = productDetailArr.map(item =>{
                 return {
-                    khoiLuongId: item.khoiLuong.id,
+                    sizeId: item.size.id,
                     mauSacId: item.mauSac.id,
                     soLuong: item.soLuong,
                     giaBan: item.giaBan
@@ -375,12 +404,8 @@
             $('#thuongHieuSelect').val(data.thuongHieu.id); // Gán giá trị ID của thương hiệu
             $('#tenSanPham').val(data.tenSanPham); // Gán tên sản phẩm
             $("input[name='status_product'][value='" + data.trangThai + "']").prop('checked', true); // Gán trạng thái
-            $('#imagePreview').attr('src', data.urlAnh); // Gán URL ảnh
-            // let lstMauSac = data.lstChiTietSanPham.map(item => item.mauSac.id); // Lấy danh sách ID màu sắc
-            // $('#colorSelect').val(lstMauSac).trigger('change'); // Gán giá trị vào select và kích hoạt sự kiện change (nếu dùng thư viện)
-            //
-            // let lstKhoiLuong = data.lstChiTietSanPham.map(item => item.khoiLuong.id); // Lấy danh sách ID màu sắc
-            // $('#massSelect').val(lstKhoiLuong).trigger('change');
+            $('#imagePreview').attr('src', data.urlAnh).show();
+
         }
 
         function loadTableProductDetail(data) {
@@ -392,7 +417,7 @@
                     index+1,
                     item.tenSanPham,
                     item.mauSac.tenMauSac,
-                    item.khoiLuong.tenKhoiLuong,
+                    item.size.tenSize,
                     '<input class="form-control soLuong-input" type="number" min="1" value="' + item.soLuong + '" data-index="' + index + '" />',
                     '<input class="form-control giaBan-input" type="number" min="1" value="' + item.giaBan + '" data-index="' + index + '" />',
                     '<button class="btn btn-danger deleteProduct" data-index="' + index + '"><i class="fa-solid fa-trash"></i></button>'
@@ -404,41 +429,45 @@
         $('#tenSanPham').change(function() {
             genDataProductDetail()
         })
-        // $('#colorSelect').change(function() {
-        //     genDataProductDetail()
-        // })
-        // $('#massSelect').change(function() {
-        //     genDataProductDetail()
-        // })
-
-        $('.btn-gen-product-detail').click(function() {
+        $('#colorSelect').change(function() {
             genDataProductDetail()
-            $('#colorSelect').val('').trigger('change'); // Reset select color
-            $('#massSelect').val('').trigger('change'); // Reset select mass
+        })
+        $('#massSelect').change(function() {
+            genDataProductDetail()
         })
 
-        function genDataProductDetail(){
-            let product =  $('#tenSanPham').val()
+        // $('.btn-gen-product-detail').click(function() {
+        //     genDataProductDetail()
+        //     $('#colorSelect').val('').trigger('change'); // Reset select color
+        //     $('#massSelect').val('').trigger('change'); // Reset select mass
+        // })
 
-            let colorSelectId = $('#colorSelect').val()
+        function genDataProductDetail() {
+            let product = $('#tenSanPham').val();
+
+            let colorSelectId = $('#colorSelect').val();
             let colorArr = colorData.filter(item => colorSelectId.includes(String(item.id)));
 
-            let massSelectId = $('#massSelect').val()
-            let massArr = massData.filter(item => massSelectId.includes(String(item.id)));
-            if (!colorArr.length || !massArr.length) {
+            let sizeSelectId = $('#massSelect').val(); // ✅ massSelect là combo chọn size
+            let sizeArr = massData.filter(item => sizeSelectId.includes(String(item.id))); // massData chính là size
+
+            // Nếu thiếu màu hoặc size thì không làm gì
+            if (!colorArr.length || !sizeArr.length) {
                 return;
             }
+
             let productArr = [];
             colorArr.forEach(color => {
-                massArr.forEach(mass => {
-                    // Kiểm tra xem sản phẩm với màu sắc và khối lượng đã tồn tại hay chưa
-                    let exists = productDetailArr.some(product => product.mauSac.id === color.id && product.khoiLuong.id === mass.id);
+                sizeArr.forEach(size => {
+                    let exists = productDetailArr.some(product =>
+                        product.mauSac.id === color.id && product.size.id === size.id
+                    );
 
-                    if (!exists) { // Nếu chưa tồn tại, thêm vào mảng mới
+                    if (!exists) {
                         let productDetail = {
                             tenSanPham: product,
                             mauSac: color,
-                            khoiLuong: mass,
+                            size: size,
                             soLuong: 1,
                             giaBan: 100000
                         };
@@ -446,9 +475,11 @@
                     }
                 });
             });
-            productDetailArr = [...productDetailArr, ...productArr]
-            loadTableProductDetail(productDetailArr)
+
+            productDetailArr = [...productDetailArr, ...productArr];
+            loadTableProductDetail(productDetailArr);
         }
+
 
         $('#productTable').on('click', '.deleteProduct', function () {
             var indexToDelete = $(this).data('index'); // Lấy index của item cần xóa
@@ -520,5 +551,6 @@
         });
 
     })
+
 
 </script>
