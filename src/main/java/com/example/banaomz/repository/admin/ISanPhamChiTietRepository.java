@@ -1,7 +1,9 @@
 package com.example.banaomz.repository.admin;
 
 import com.example.banaomz.dto.admin.sanPham.request.SanPhamChiTietDTO;
+import com.example.banaomz.entity.admin.MauSac;
 import com.example.banaomz.entity.admin.SanPhamChiTiet;
+import com.example.banaomz.entity.admin.Size;
 import com.example.banaomz.repository.common.IBaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,6 +30,16 @@ public interface ISanPhamChiTietRepository extends IBaseRepository<SanPhamChiTie
             and spct.mauSac.id = :#{#dto.mauSacId}
             """)
     Optional<SanPhamChiTiet> findSanPhamChiTietBySanPham(@Param("dto") SanPhamChiTietDTO dto);
+
+    List<SanPhamChiTiet> findByTrangThai(String trangThai);
+    Optional<SanPhamChiTiet> findBySanPham_IdAndMauSac_IdAndSize_IdAndTrangThai(
+            Long idSanPham, Long idMauSac, Long idKichThuoc, String trangThai);
+    @Query("SELECT DISTINCT s.mauSac FROM SanPhamChiTiet s WHERE s.sanPham.id = :idSanPham")
+    List<MauSac> findDistinctMauSacBySanPhamId(@Param("idSanPham") Long idSanPham);
+
+    @Query("SELECT DISTINCT s.size FROM SanPhamChiTiet s WHERE s.sanPham.id = :idSanPham")
+    List<Size> findDistinctSizeBySanPhamId(@Param("idSanPham") Long idSanPham);
+
 
 
 }

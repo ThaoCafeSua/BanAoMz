@@ -158,7 +158,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/sales" aria-label="Bán hàng tại quầy">
+            <a class="nav-link text-white h5" href="/admin/banHang" aria-label="Bán hàng tại quầy">
                 <i class="fas fa-cash-register me-2"></i> Bán hàng tại quầy
             </a>
         </li>
