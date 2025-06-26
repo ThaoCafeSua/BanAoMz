@@ -64,6 +64,7 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
                     .sanPham(sanPhamEntity)
                     .soLuong(Integer.valueOf(item.getSoLuong()))
                     .giaBan(BigDecimal.valueOf(Double.valueOf(item.getGiaBan())))
+                    .trangThai(item.getSoLuong().equals("0") ? "Hết hàng" : "Còn hàng")
                     .build();
             return entity;
         }).toList();
@@ -89,10 +90,13 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
             Optional<SanPhamChiTiet> otp = sanPhamChiTietRepository.findSanPhamChiTietBySanPham(item);
             if (otp.isPresent()) {
                 SanPhamChiTiet entity = otp.get();
-                entity.setSoLuong(Integer.valueOf(item.getSoLuong()));
-                entity.setGiaBan(BigDecimal.valueOf(Double.valueOf(item.getGiaBan())));
+                int soLuong = Integer.parseInt(item.getSoLuong()); // ép kiểu để dùng
+                entity.setSoLuong(soLuong);
+                entity.setGiaBan(BigDecimal.valueOf(Double.parseDouble(item.getGiaBan())));
+                entity.setTrangThai(soLuong == 0 ? "Hết hàng" : "Còn hàng");
                 return entity;
-            } else {
+            }
+            else {
                 MauSac mauSac = mauSacService.findById(item.getMauSacId()).orElseThrow();
                 Size size = sizeService.findById(item.getSizeId()).orElseThrow();
                 SanPhamChiTiet entity = SanPhamChiTiet.builder()
@@ -101,6 +105,7 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
                         .sanPham(sanPham) // Thay vì item.setSanPhamId(dto.getId())
                         .soLuong(Integer.valueOf(item.getSoLuong()))
                         .giaBan(BigDecimal.valueOf(Double.valueOf(item.getGiaBan())))
+                        .trangThai(item.getSoLuong().equals("0") ? "Hết hàng" : "Còn hàng")
                         .build();
                 return entity;
             }

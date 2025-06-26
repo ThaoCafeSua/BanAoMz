@@ -1,7 +1,5 @@
 package com.example.banaomz.controller.admin.product;
 
-
-
 import com.example.banaomz.dto.admin.ResponseObject;
 import com.example.banaomz.dto.admin.sanPham.reponse.SanPhamDTO;
 import com.example.banaomz.dto.admin.sanPham.reponse.SanPhamDetailDTO;
