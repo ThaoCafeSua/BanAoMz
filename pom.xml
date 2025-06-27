@@ -112,6 +112,7 @@
             <version>1.2</version>
         </dependency>
 
+
         <!-- iText 7 PDF (Free modules from Maven Central) -->
         <dependency>
             <groupId>com.itextpdf</groupId>
