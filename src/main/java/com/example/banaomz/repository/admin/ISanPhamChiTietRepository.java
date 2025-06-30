@@ -31,7 +31,8 @@ public interface ISanPhamChiTietRepository extends IBaseRepository<SanPhamChiTie
             """)
     Optional<SanPhamChiTiet> findSanPhamChiTietBySanPham(@Param("dto") SanPhamChiTietDTO dto);
 
-    List<SanPhamChiTiet> findByTrangThai(String trangThai);
+    List<SanPhamChiTiet> findBySanPham_Id(Long idSanPham);
+
     Optional<SanPhamChiTiet> findBySanPham_IdAndMauSac_IdAndSize_IdAndTrangThai(
             Long idSanPham, Long idMauSac, Long idKichThuoc, String trangThai);
     @Query("SELECT DISTINCT s.mauSac FROM SanPhamChiTiet s WHERE s.sanPham.id = :idSanPham")
@@ -40,6 +41,10 @@ public interface ISanPhamChiTietRepository extends IBaseRepository<SanPhamChiTie
     @Query("SELECT DISTINCT s.size FROM SanPhamChiTiet s WHERE s.sanPham.id = :idSanPham")
     List<Size> findDistinctSizeBySanPhamId(@Param("idSanPham") Long idSanPham);
 
+    @Query("SELECT spct FROM SanPhamChiTiet spct " +
+            "WHERE spct.trangThai = :trangThai " +
+            "AND spct.sanPham.trangThai = 'HOAT_DONG'")
+    List<SanPhamChiTiet> findByTrangThaiAndSanPhamHoatDong(@Param("trangThai") String trangThai);
 
 
 }

@@ -175,17 +175,41 @@
         $('#modalTenSanPham').text(ten);
 
         getThuocTinhSanPham(id, function (data) {
+            console.warn("⚠️ Dữ liệu trả về từ API /lay-thuoc-tinh: ", data);
+
+            const mauSacList = data.mauSacList || [];
+            const sizeList = data.sizeList || [];
+            const chiTietList = data.sanPhamChiTietList || [];
+
             $('#selectMauSac').empty();
             $('#selectSize').empty();
 
-            data.mauSacList.forEach(function (item) {
-                $('#selectMauSac').append($('<option></option>').val(item.id).text(item.ten));
+            const sizeTheoMau = {};
+
+            chiTietList.forEach(item => {
+                if (!sizeTheoMau[item.idMauSac]) {
+                    sizeTheoMau[item.idMauSac] = new Set();
+                }
+                sizeTheoMau[item.idMauSac].add(item.idSize);
             });
 
-            data.sizeList.forEach(function (item) {
-                $('#selectSize').append($('<option></option>').val(item.id).text(item.ten));
+            mauSacList.forEach(mau => {
+                $('#selectMauSac').append($('<option></option>').val(mau.id).text(mau.ten));
             });
 
+            $('#selectMauSac').off('change').on('change', function () {
+                const selectedMau = $(this).val();
+                $('#selectSize').empty();
+
+                const sizeIds = sizeTheoMau[selectedMau] || new Set();
+                sizeList.forEach(size => {
+                    if (sizeIds.has(size.id)) {
+                        $('#selectSize').append($('<option></option>').val(size.id).text(size.ten));
+                    }
+                });
+            });
+
+            $('#selectMauSac').trigger('change');
             modal.show();
         });
     }
@@ -205,24 +229,31 @@
             idMauSac: idMau,
             idSize: idSize
         }, function (res) {
+            console.log("📦 Kết quả trả về từ /tim-san-pham-chi-tiet:", res);
+
             if (!res.id) {
                 alert("Không tìm thấy sản phẩm phù hợp!");
                 return;
             }
 
-            const soLuongTon = res.soLuongTon || 0;
-            if (soLuongTon <= 0) {
+            const soLuongTon = parseInt(res.soLuongTon || 0);
+            if (isNaN(soLuongTon) || soLuongTon <= 0) {
                 alert("Sản phẩm đã hết hàng.");
                 return;
             }
 
             const idSPCT = res.id;
-
-            $.post('/admin/banHang/them-san-pham', {
-                idHoaDon: invoiceId || '', // Gửi null hoặc rỗng nếu chưa có
+            const data = {
                 idSanPhamChiTiet: idSPCT,
                 soLuong: 1
-            }, function (hdct) {
+            };
+
+            if (invoiceId) {
+                data.idHoaDon = invoiceId;
+            }
+
+            // ✅ Gọi API thêm sản phẩm
+            $.post('/admin/banHang/them-san-pham', data, function (hdct) {
                 if (!invoiceId && hdct.hoaDon && hdct.hoaDon.id) {
                     invoiceId = hdct.hoaDon.id;
                     localStorage.setItem('invoiceId', invoiceId);
@@ -230,11 +261,18 @@
 
                 modal.hide();
                 loadCart();
+            }).fail(function (xhr) {
+                alert("❌ Lỗi khi thêm sản phẩm: " + xhr.responseText);
             });
+        }).fail(function () {
+            alert("Không tìm thấy sản phẩm phù hợp!");
         });
     }
 
+
+
     function themSanPham(idChiTiet, callback) {
+
         $.post('/admin/banHang/them-san-pham', {
             idHoaDon: invoiceId,
             idSanPhamChiTiet: idChiTiet,

@@ -47,17 +47,24 @@ public class BanHangController {
 
     @PostMapping("/them-san-pham")
     @ResponseBody
-    public HoaDonChiTiet themSanPham(@RequestParam(required = false) Long idHoaDon,
-                                     @RequestParam Long idSanPhamChiTiet,
-                                     @RequestParam int soLuong) {
+    public ResponseEntity<?> themSanPham(@RequestParam(required = false) Long idHoaDon,
+                                         @RequestParam Long idSanPhamChiTiet,
+                                         @RequestParam int soLuong) {
+        try {
+            if (idHoaDon == null || !banHangService.tonTaiHoaDon(idHoaDon)) {
+                HoaDon hoaDon = banHangService.taoHoaDonMoi(1L, 1L); // mặc định
+                idHoaDon = hoaDon.getId().longValue();
+            }
 
-        if (idHoaDon == null || !banHangService.tonTaiHoaDon(idHoaDon)) {
-            HoaDon hoaDon = banHangService.taoHoaDonMoi(1L, 1L); // mặc định id nhân viên + khách hàng
-            idHoaDon = hoaDon.getId().longValue();
+            HoaDonChiTiet hdct = banHangService.themSanPhamVaoHoaDon(idHoaDon, idSanPhamChiTiet, soLuong);
+            return ResponseEntity.ok(hdct);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi hệ thống");
         }
-
-        return banHangService.themSanPhamVaoHoaDon(idHoaDon, idSanPhamChiTiet, soLuong);
     }
+
 
 
     @PostMapping("/xoa-san-pham")
@@ -126,7 +133,9 @@ public class BanHangController {
 
         List<Map<String, Object>> mauSacList = new ArrayList<>();
         List<Map<String, Object>> sizeList = new ArrayList<>();
+        List<Map<String, Object>> spctList = new ArrayList<>();
 
+        // Lấy màu
         banHangService.getMauSacBySanPham(idSanPham).forEach(mau -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", mau.getId());
@@ -134,6 +143,7 @@ public class BanHangController {
             mauSacList.add(item);
         });
 
+        // Lấy size
         banHangService.getSizeBySanPham(idSanPham).forEach(size -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", size.getId());
@@ -141,11 +151,22 @@ public class BanHangController {
             sizeList.add(item);
         });
 
+        // ✅ Lấy tất cả các SPCT có idSanPham này (để xử lý combo màu-size)
+        sanPhamChiTietRepository.findBySanPham_Id(idSanPham).forEach(spct -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", spct.getId());
+            item.put("idMauSac", spct.getMauSac().getId());
+            item.put("idSize", spct.getSize().getId());
+            spctList.add(item);
+        });
+
         result.put("mauSacList", mauSacList);
         result.put("sizeList", sizeList);
+        result.put("sanPhamChiTietList", spctList); // ✅ Bổ sung dòng này
 
         return result;
     }
+
     @PostMapping("/cap-nhat-so-luong")
     public ResponseEntity<?> capNhatSoLuong(
             @RequestParam Long idHoaDonChiTiet,

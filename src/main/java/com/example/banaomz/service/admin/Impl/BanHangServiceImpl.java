@@ -40,7 +40,7 @@ public class BanHangServiceImpl implements IBanHangService {
 
     @Override
     public List<SanPhamTaiQuayViewModel> layDanhSachSanPhamGoc() {
-        List<SanPhamChiTiet> danhSachSP = sanPhamChiTietRepo.findByTrangThai("Còn hàng");
+        List<SanPhamChiTiet> danhSachSP = sanPhamChiTietRepo.findByTrangThaiAndSanPhamHoatDong("Còn hàng");
 
         Map<Long, SanPhamTaiQuayViewModel> map = new HashMap<>();
 
@@ -118,14 +118,23 @@ public class BanHangServiceImpl implements IBanHangService {
         }
 
         SanPhamChiTiet spct = sanPhamChiTietRepo.findById(idSPCT).orElseThrow();
+        int soLuongTonKho = spct.getSoLuong() != null ? spct.getSoLuong() : 0;
 
         HoaDonChiTiet existing = hoaDonChiTietRepo
                 .findByHoaDon_IdAndSanPhamChiTiet_Id(idHoaDon, idSPCT)
                 .orElse(null);
 
         if (existing != null) {
-            existing.setSoLuong(existing.getSoLuong() + soLuong);
+            int tongSoLuong = existing.getSoLuong() + soLuong;
+            if (tongSoLuong > soLuongTonKho) {
+                throw new IllegalArgumentException("Không thể thêm vì vượt quá số lượng tồn kho!");
+            }
+            existing.setSoLuong(tongSoLuong);
             return hoaDonChiTietRepo.save(existing);
+        }
+
+        if (soLuong > soLuongTonKho) {
+            throw new IllegalArgumentException("Không thể thêm vì vượt quá số lượng tồn kho!");
         }
 
         HoaDonChiTiet ct = new HoaDonChiTiet();
