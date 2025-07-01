@@ -173,6 +173,18 @@
         $("#employeeForm").on("submit", validateForm);
     });
 
-
 // (Optional: Thêm kiểm tra form bằng JS nếu muốn)
 </script>
+<c:if test="${not empty sessionScope.error}">
+    <script>
+        toastr.error('${sessionScope.error}');
+    </script>
+    <c:remove var="error" scope="session"/>
+</c:if>
+
+<c:if test="${not empty sessionScope.success}">
+    <script>
+        toastr.success('${sessionScope.success}');
+    </script>
+    <c:remove var="success" scope="session"/>
+</c:if>
