@@ -25,4 +25,5 @@ public interface  IBanHangService {
     List<MauSacDTO> getMauSacBySanPham(Long idSanPham);
     List<SizeDTO> getSizeBySanPham(Long idSanPham);
     boolean tonTaiHoaDon(Long idHoaDon);
+    List<HoaDon> layDanhSachHoaDonCho();
 }

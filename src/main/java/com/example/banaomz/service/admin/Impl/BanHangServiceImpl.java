@@ -93,11 +93,17 @@ public class BanHangServiceImpl implements IBanHangService {
         HoaDon hoaDon = new HoaDon();
         hoaDon.setNgayTao(LocalDateTime.now());
         hoaDon.setTrangThai("CHO_THANH_TOAN");
+        hoaDon.setLoaiHoaDon("CHO");
         hoaDon.setNhanVien(nhanVienRepo.findById(idNhanVien).orElse(null));
         hoaDon.setKhachHang(khachHangRepo.findById(idKhachHang).orElse(null));
         hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
         return hoaDonRepo.save(hoaDon);
     }
+    @Override
+    public List<HoaDon> layDanhSachHoaDonCho() {
+        return hoaDonRepo.findByTrangThaiAndLoaiHoaDon("CHO_THANH_TOAN", "CHO");
+    }
+
     @Override
     public boolean tonTaiHoaDon(Long id) {
         return hoaDonRepo.existsById(id);
@@ -197,6 +203,8 @@ public class BanHangServiceImpl implements IBanHangService {
         hoaDon.setPhuongThucThanhToan(phuongThucTT);
         hoaDon.setNgayHoanThanh(LocalDateTime.now());
         hoaDon.setTrangThai("DA_THANH_TOAN");
+        hoaDon.setLoaiHoaDon("TAI_QUAY");
+
 
         for (HoaDonChiTiet ct : dsCT) {
             SanPhamChiTiet spct = ct.getSanPhamChiTiet();

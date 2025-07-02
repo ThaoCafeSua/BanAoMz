@@ -163,7 +163,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/order" aria-label="Quản lý đơn hàng">
+            <a class="nav-link text-white h5" href="/admin/hoaDon" aria-label="Quản lý đơn hàng">
                 <i class="fas fa-shopping-cart me-2"></i> Quản lý đơn hàng
             </a>
         </li>

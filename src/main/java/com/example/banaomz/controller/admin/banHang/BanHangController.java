@@ -4,6 +4,7 @@ import com.example.banaomz.dto.admin.GioHang.GioHangDTO;
 import com.example.banaomz.dto.admin.sanPham.reponse.SanPhamTaiQuayViewModel;
 import com.example.banaomz.entity.admin.HoaDon;
 import com.example.banaomz.entity.admin.HoaDonChiTiet;
+import com.example.banaomz.repository.admin.IHoaDonRepository;
 import com.example.banaomz.repository.admin.ISanPhamChiTietRepository;
 import com.example.banaomz.service.admin.IBanHangService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class BanHangController {
     @Autowired
     private ISanPhamChiTietRepository sanPhamChiTietRepository;
 
+    @Autowired
+    private IHoaDonRepository hoaDonRepo;
+
     @GetMapping
     public String hienThiTrangBanHang(Model model) {
         // Dùng ViewModel để hiển thị ảnh, màu, size theo từng sản phẩm
@@ -41,8 +45,10 @@ public class BanHangController {
 
     @PostMapping("/tao-hoa-don")
     @ResponseBody
-    public HoaDon taoHoaDonMoi(@RequestParam Long idNhanVien, @RequestParam Long idKhachHang) {
-        return banHangService.taoHoaDonMoi(idNhanVien, idKhachHang);
+    public HoaDon taoHoaDonMoi() {
+        Long idNhanVienMacDinh = 1L;   // hoặc lấy từ session nếu bạn có login
+        Long idKhachHangMacDinh = 1L;  // khách lẻ
+        return banHangService.taoHoaDonMoi(idNhanVienMacDinh, idKhachHangMacDinh);
     }
 
     @PostMapping("/them-san-pham")
@@ -51,13 +57,23 @@ public class BanHangController {
                                          @RequestParam Long idSanPhamChiTiet,
                                          @RequestParam int soLuong) {
         try {
+            HoaDon hoaDon;
+
             if (idHoaDon == null || !banHangService.tonTaiHoaDon(idHoaDon)) {
-                HoaDon hoaDon = banHangService.taoHoaDonMoi(1L, 1L); // mặc định
+                hoaDon = banHangService.taoHoaDonMoi(1L, 1L);
                 idHoaDon = hoaDon.getId().longValue();
+            } else {
+                hoaDon = hoaDonRepo.findById(idHoaDon).orElseThrow();
             }
 
             HoaDonChiTiet hdct = banHangService.themSanPhamVaoHoaDon(idHoaDon, idSanPhamChiTiet, soLuong);
-            return ResponseEntity.ok(hdct);
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("hdct", hdct);
+            res.put("hoaDon", hoaDon); // ✅ thêm vào đây
+
+            return ResponseEntity.ok(res);
+
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (Exception ex) {
@@ -166,7 +182,6 @@ public class BanHangController {
 
         return result;
     }
-
     @PostMapping("/cap-nhat-so-luong")
     public ResponseEntity<?> capNhatSoLuong(
             @RequestParam Long idHoaDonChiTiet,
@@ -176,6 +191,11 @@ public class BanHangController {
             return ResponseEntity.badRequest().body("Số lượng vượt quá tồn kho");
         }
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/danh-sach-hoa-don-cho")
+    @ResponseBody
+    public ResponseEntity<List<HoaDon>> getHoaDonCho() {
+        return ResponseEntity.ok(banHangService.layDanhSachHoaDonCho());
     }
 
 
