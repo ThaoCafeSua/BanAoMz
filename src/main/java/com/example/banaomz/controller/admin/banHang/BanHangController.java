@@ -91,11 +91,14 @@ public class BanHangController {
 
     @PostMapping("/thanh-toan")
     @ResponseBody
-    public HoaDon hoanTatThanhToan(@RequestParam Long idHoaDon,
-                                   @RequestParam(required = false) Long idPhieuGiamGia,
-                                   @RequestParam String phuongThucThanhToan) {
-        return banHangService.hoanTatHoaDon(idHoaDon, idPhieuGiamGia, phuongThucThanhToan);
+    public HoaDon hoanTatThanhToan(@RequestBody Map<String, Object> payload) {
+        List<Map<String, Object>> danhSachSanPham = (List<Map<String, Object>>) payload.get("danhSachSanPham");
+        Long idPhieuGiamGia = payload.get("idPhieuGiamGia") != null ? Long.valueOf(payload.get("idPhieuGiamGia").toString()) : null;
+        String phuongThucThanhToan = payload.get("phuongThucThanhToan").toString();
+
+        return banHangService.hoanTatHoaDon(danhSachSanPham, idPhieuGiamGia, phuongThucThanhToan);
     }
+
 
     // ✅ Lấy danh sách sản phẩm trong hóa đơn (giỏ hàng)
     @GetMapping("/danh-sach-san-pham")
@@ -138,6 +141,10 @@ public class BanHangController {
 
         Map<String, Object> res = new HashMap<>();
         res.put("id", spct.getId());
+        res.put("tenSanPham", spct.getSanPham().getTenSanPham());
+        res.put("tenMauSac", spct.getMauSac().getTenMauSac());
+        res.put("tenSize", spct.getSize().getTenSize());
+        res.put("giaBan", spct.getGiaBan());
         res.put("soLuongTon", spct.getSoLuong());
         return res;
     }

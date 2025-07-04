@@ -7,6 +7,7 @@ import com.example.banaomz.entity.admin.HoaDon;
 import com.example.banaomz.entity.admin.HoaDonChiTiet;
 
 import java.util.List;
+import java.util.Map;
 
 public interface  IBanHangService {
     HoaDon taoHoaDonMoi(Long idNhanVien, Long idKhachHang);
@@ -17,7 +18,7 @@ public interface  IBanHangService {
 
     void xoaSanPhamKhoiHoaDon(Long idHDCT);
 
-    HoaDon hoanTatHoaDon(Long idHoaDon, Long idPhieuGiamGia, String phuongThucTT);
+    HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idPhieuGiamGia, String phuongThucTT);
 
     List<HoaDonChiTiet> layDanhSachSanPhamTrongHoaDon(Long idHoaDon);
 

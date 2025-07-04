@@ -110,7 +110,7 @@
             info: false,
             lengthChange: false,
             language: {
-                url: '/includes/js/Vietnamese.json'
+                url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json'
             },
             columnDefs: [
                 { className: "text-center", targets: "_all" }

@@ -177,13 +177,42 @@ public class BanHangServiceImpl implements IBanHangService {
 
     @Override
     @Transactional
-    public HoaDon hoanTatHoaDon(Long idHoaDon, Long idPhieuGiamGia, String phuongThucTT) {
-        HoaDon hoaDon = hoaDonRepo.findById(idHoaDon).orElseThrow();
-        List<HoaDonChiTiet> dsCT = hoaDonChiTietRepo.findByHoaDonId(idHoaDon);
+    public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idPhieuGiamGia, String phuongThucTT) {
+        HoaDon hoaDon = new HoaDon();
+        hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
+        hoaDon.setNgayTao(LocalDateTime.now());
+        hoaDon.setTrangThai("DA_THANH_TOAN");
+        hoaDon.setLoaiHoaDon("TAI_QUAY");
+        hoaDon.setNhanVien(nhanVienRepo.findById(1L).orElse(null));
+        hoaDon.setKhachHang(khachHangRepo.findById(1L).orElse(null));
 
-        BigDecimal tongTien = dsCT.stream()
-                .map(ct -> ct.getGiaBan().multiply(BigDecimal.valueOf(ct.getSoLuong())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        hoaDon = hoaDonRepo.save(hoaDon);
+
+        BigDecimal tongTien = BigDecimal.ZERO;
+
+        for (Map<String, Object> item : danhSachSanPham) {
+            Long idSPCT = Long.valueOf(item.get("idSanPhamChiTiet").toString());
+            Integer soLuong = Integer.valueOf(item.get("soLuong").toString());
+
+            SanPhamChiTiet spct = sanPhamChiTietRepo.findById(idSPCT).orElseThrow();
+
+            HoaDonChiTiet ct = new HoaDonChiTiet();
+            ct.setHoaDon(hoaDon);
+            ct.setSanPhamChiTiet(spct);
+            ct.setSoLuong(soLuong);
+            ct.setGiaBan(spct.getGiaBan());
+            ct.setGiaGoc(spct.getGiaBan());
+            ct.setGiaGiam(BigDecimal.ZERO);
+            ct.setNgayTao(LocalDateTime.now());
+
+            hoaDonChiTietRepo.save(ct);
+
+            tongTien = tongTien.add(spct.getGiaBan().multiply(BigDecimal.valueOf(soLuong)));
+
+            int tonKho = spct.getSoLuong() != null ? spct.getSoLuong() : 0;
+            spct.setSoLuong(Math.max(0, tonKho - soLuong));
+            sanPhamChiTietRepo.save(spct);
+        }
 
         BigDecimal tienGiam = BigDecimal.ZERO;
         if (idPhieuGiamGia != null) {
@@ -202,17 +231,6 @@ public class BanHangServiceImpl implements IBanHangService {
         hoaDon.setThanhTien(tongTien.subtract(tienGiam));
         hoaDon.setPhuongThucThanhToan(phuongThucTT);
         hoaDon.setNgayHoanThanh(LocalDateTime.now());
-        hoaDon.setTrangThai("DA_THANH_TOAN");
-        hoaDon.setLoaiHoaDon("TAI_QUAY");
-
-
-        for (HoaDonChiTiet ct : dsCT) {
-            SanPhamChiTiet spct = ct.getSanPhamChiTiet();
-            int slHienTai = spct.getSoLuong() != null ? spct.getSoLuong() : 0;
-            int slTru = ct.getSoLuong();
-            spct.setSoLuong(Math.max(0, slHienTai - slTru));
-            sanPhamChiTietRepo.save(spct);
-        }
 
         return hoaDonRepo.save(hoaDon);
     }

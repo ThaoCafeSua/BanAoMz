@@ -121,6 +121,18 @@
         </div>
     </div>
 </div>
+<div class="card mt-3">
+    <div class="card-header text-white" style="background-color: #001f3d;">
+        <h6 class="mb-0">Danh sách hóa đơn chờ</h6>
+    </div>
+    <div class="card-body p-2" id="hoaDonListContainer">
+        <ul class="list-group" id="hoaDonList">
+            <!-- Danh sách hóa đơn sẽ hiển thị ở đây -->
+        </ul>
+        <button class="btn btn-sm btn-primary mt-2 w-100" onclick="taoHoaDonMoiVaRender()">+ Tạo hóa đơn mới</button>
+    </div>
+</div>
+
 
 <style>
     .table th, .table td {
@@ -149,49 +161,86 @@
 
 
 <script>
-    let invoiceId = localStorage.getItem('invoiceId');
     const modal = new bootstrap.Modal(document.getElementById('variantModal'));
-    if (invoiceId) {
-        loadCart(); // Khôi phục giỏ hàng nếu invoiceId còn lưu
+
+    let hoaDonList = JSON.parse(localStorage.getItem('hoaDonList')) || [];
+    let currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
+
+    renderHoaDonList();
+    loadCart();
+
+    function taoHoaDonMoiVaRender() {
+        const id = 'HD' + Date.now();
+        hoaDonList.push({ id: id, items: [] });
+        currentHoaDonId = id;
+        saveHoaDonList();
+        renderHoaDonList();
+        loadCart();
     }
 
-    function getThuocTinhSanPham(idSanPham, callback) {
-        $.ajax({
-            url: '/admin/banHang/lay-thuoc-tinh',
-            method: 'GET',
-            dataType: 'json',
-            data: { idSanPham: idSanPham },
-            success: function (data) {
-                callback(data);
-            },
-            error: function () {
-                toastr.error("Không thể lấy thuộc tính sản phẩm");
-            }
+    function chonHoaDon(id) {
+        currentHoaDonId = id;
+        renderHoaDonList();
+        loadCart();
+    }
+
+    function xoaHoaDon(id) {
+        hoaDonList = hoaDonList.filter(hd => hd.id !== id);
+        if (currentHoaDonId === id) {
+            currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
+        }
+        saveHoaDonList();
+        renderHoaDonList();
+        loadCart();
+    }
+
+    function saveHoaDonList() {
+        localStorage.setItem('hoaDonList', JSON.stringify(hoaDonList));
+    }
+
+    function renderHoaDonList() {
+        const ul = $('#hoaDonList');
+        ul.empty();
+
+        hoaDonList.forEach(hd => {
+            const li = $('<li class="list-group-item d-flex justify-content-between align-items-center"></li>');
+            const text = $('<span></span>').text(hd.id);
+            const removeBtn = $('<button class="btn btn-sm btn-danger ms-2"><i class="fa fa-trash"></i></button>').click(e => {
+                e.stopPropagation();
+                if (confirm('Xóa hóa đơn này?')) {
+                    xoaHoaDon(hd.id);
+                }
+            });
+            li.append(text).append(removeBtn);
+            li.click(() => chonHoaDon(hd.id));
+            if (hd.id === currentHoaDonId) li.addClass('active');
+            ul.append(li);
         });
     }
 
-    function openModal(id, ten) {
-        $('#modalSanPhamId').val(id);
-        $('#modalTenSanPham').text(ten);
+    function openModalFromBtn(button) {
+        const id = $(button).data('id');
+        const ten = $(button).data('ten');
+        openModal(id, ten);
+    }
 
-        getThuocTinhSanPham(id, function (data) {
-            console.warn("⚠️ Dữ liệu trả về từ API /lay-thuoc-tinh: ", data);
+    function openModal(idSanPham, tenSanPham) {
+        $('#modalSanPhamId').val(idSanPham);
+        $('#modalTenSanPham').text(tenSanPham);
 
+        $.get('/admin/banHang/lay-thuoc-tinh', { idSanPham: idSanPham }, function (data) {
             const mauSacList = data.mauSacList || [];
             const sizeList = data.sizeList || [];
             const chiTietList = data.sanPhamChiTietList || [];
 
-            $('#selectMauSac').empty();
-            $('#selectSize').empty();
-
             const sizeTheoMau = {};
-
             chiTietList.forEach(item => {
-                if (!sizeTheoMau[item.idMauSac]) {
-                    sizeTheoMau[item.idMauSac] = new Set();
-                }
+                if (!sizeTheoMau[item.idMauSac]) sizeTheoMau[item.idMauSac] = new Set();
                 sizeTheoMau[item.idMauSac].add(item.idSize);
             });
+
+            $('#selectMauSac').empty();
+            $('#selectSize').empty();
 
             mauSacList.forEach(mau => {
                 $('#selectMauSac').append($('<option></option>').val(mau.id).text(mau.ten));
@@ -200,7 +249,6 @@
             $('#selectMauSac').off('change').on('change', function () {
                 const selectedMau = $(this).val();
                 $('#selectSize').empty();
-
                 const sizeIds = sizeTheoMau[selectedMau] || new Set();
                 sizeList.forEach(size => {
                     if (sizeIds.has(size.id)) {
@@ -219,8 +267,8 @@
         const idMau = $('#selectMauSac').val();
         const idSize = $('#selectSize').val();
 
-        if (!idMau || !idSize) {
-            alert("Vui lòng chọn đầy đủ màu và size.");
+        if (!idMau || !idSize || !currentHoaDonId) {
+            alert('Vui lòng chọn đầy đủ và tạo hóa đơn trước.');
             return;
         }
 
@@ -229,158 +277,167 @@
             idMauSac: idMau,
             idSize: idSize
         }, function (res) {
-            console.log("📦 Kết quả trả về từ /tim-san-pham-chi-tiet:", res);
-
             if (!res.id) {
-                alert("Không tìm thấy sản phẩm phù hợp!");
+                alert('Không tìm thấy sản phẩm phù hợp!');
                 return;
             }
 
-            const soLuongTon = parseInt(res.soLuongTon || 0);
-            if (isNaN(soLuongTon) || soLuongTon <= 0) {
-                alert("Sản phẩm đã hết hàng.");
+            if (res.soLuongTon <= 0) {
+                alert('Sản phẩm đã hết hàng.');
                 return;
             }
 
-            const idSPCT = res.id;
-            const data = {
-                idSanPhamChiTiet: idSPCT,
-                soLuong: 1
+            const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+            if (!hd) return;
+
+            const spct = {
+                idSPCT: res.id,
+                ten: res.tenSanPham,
+                mau: res.tenMauSac,
+                size: res.tenSize,
+                soLuong: 1,
+                giaBan: res.giaBan || 0,
+                soLuongTon: res.soLuongTon
             };
 
-            if (invoiceId) {
-                data.idHoaDon = invoiceId;
-            }
-
-            // ✅ Gọi API thêm sản phẩm
-            $.post('/admin/banHang/them-san-pham', data, function (hdct) {
-                if (!invoiceId && hdct.hoaDon && hdct.hoaDon.id) {
-                    invoiceId = hdct.hoaDon.id;
-                    localStorage.setItem('invoiceId', invoiceId);
+            const existing = hd.items.find(i => i.idSPCT === spct.idSPCT);
+            if (existing) {
+                if (existing.soLuong < spct.soLuongTon) {
+                    existing.soLuong += 1;
+                } else {
+                    alert('Đã đạt số lượng tối đa trong kho.');
                 }
-
-                modal.hide();
-                loadCart();
-            }).fail(function (xhr) {
-                alert("❌ Lỗi khi thêm sản phẩm: " + xhr.responseText);
-            });
-        }).fail(function () {
-            alert("Không tìm thấy sản phẩm phù hợp!");
-        });
-    }
-
-
-
-    function themSanPham(idChiTiet, callback) {
-
-        $.post('/admin/banHang/them-san-pham', {
-            idHoaDon: invoiceId,
-            idSanPhamChiTiet: idChiTiet,
-            soLuong: 1
-        }, function () {
-            if (typeof callback === 'function') {
-                callback();
+            } else {
+                hd.items.push(spct);
             }
+            console.log('👉 Sản phẩm sau khi thêm:', hd.items);
+            saveHoaDonList();
+            modal.hide();
+            loadCart();
         });
     }
 
-
-    function getGioHang(callback) {
-        if (!invoiceId) return;
-
-        $.ajax({
-            url: '/admin/banHang/danh-sach-san-pham',
-            method: 'GET',
-            dataType: 'json',
-            data: { idHoaDon: invoiceId },
-            success: function (data) {
-                console.log("✅ Dữ liệu giỏ hàng trả về:");
-                console.table(data);
-                callback(data);
-            },
-            error: function () {
-                toastr.error("Không thể lấy danh sách sản phẩm trong giỏ hàng");
-            }
-        });
-    }
 
     function loadCart() {
-        getGioHang(function (data) {
-            let html = '', total = 0;
-
-            data.forEach(item => {
-                const ten = item.tenSanPham || 'Không tên';
-                const mau = item.tenMauSac || '';
-                const size = item.tenSize || '';
-                const quantity = item.soLuong || 0;
-                const price = item.giaBan || 0;
-                const thanhTien = item.tongTien || (price * quantity);
-                const id = item.id;
-                const tonKho = item.soLuongTon || 1000; // fallback nếu backend chưa trả về
-
-                const name = ten + ' - ' + mau + ' - ' + size;
-
-                html += '<tr class="text-center">';
-                html += '<td>' + name + '</td>';
-                html += '<td><input type="number" min="1" max="' + tonKho + '" value="' + quantity + '" onchange="capNhatSoLuong(' + id + ', this.value)" class="form-control form-control-sm text-center"/></td>';
-                html += '<td>' + thanhTien.toLocaleString('vi-VN') + ' ₫</td>';
-                html += '<td><button class="btn btn-danger btn-sm" onclick="removeItem(' + id + ')">X</button></td>';
-                html += '</tr>';
-
-                total += thanhTien;
-            });
-
-            $('#cartItems').html(html);
-            $('#totalAmount').text(total.toLocaleString('vi-VN') + ' ₫');
-        });
-    }
-
-    function openModalFromBtn(button) {
-        const id = $(button).data('id');
-        const ten = $(button).data('ten');
-        openModal(id, ten);
-    }
-
-
-    function removeItem(idChiTiet) {
-        $.post('/admin/banHang/xoa-san-pham', {
-            idHoaDonChiTiet: idChiTiet
-        }, function () {
-            loadCart();
-        });
-    }
-
-    $('#btnCheckout').click(function () {
-        if (!invoiceId) return;
-        $.post('/admin/banHang/thanh-toan', {
-            idHoaDon: invoiceId,
-            phuongThucThanhToan: 'Tiền mặt'
-        }, function () {
-            alert("Thanh toán thành công!");
-            localStorage.removeItem('invoiceId');
-            $('#cartItems').empty();
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+        if (!hd) {
+            $('#cartItems').html('<tr><td colspan="4" class="text-center">Chưa có hóa đơn nào</td></tr>');
             $('#totalAmount').text('0 ₫');
-            location.reload();
+            return;
+        }
+        console.log('🛒 Danh sách sản phẩm trong giỏ:', hd.items);  // LOG KIỂM TRA
+        let html = '', total = 0;
+
+        hd.items.forEach(item => {
+            const ten = item.ten || 'Không tên';
+            const mau = item.mau || '';
+            const size = item.size || '';
+            const quantity = item.soLuong || 0;
+            const price = item.giaBan || 0;
+            const tonKho = item.soLuongTon || 1000;
+            const thanhTien = price * quantity;
+
+            const name = ten + ' - ' + mau + ' - ' + size;
+
+            html += '<tr class="text-center">';
+            html += '<td>' + name + '</td>';
+            html += '<td><input type="number" min="1" max="' + tonKho + '" value="' + quantity + '" onchange="capNhatSoLuongLocal(\'' + item.idSPCT + '\', this.value)" class="form-control form-control-sm text-center"/></td>';
+            html += '<td>' + thanhTien.toLocaleString('vi-VN') + ' ₫</td>';
+            html += '<td><button class="btn btn-danger btn-sm" onclick="xoaSanPhamLocal(\'' + item.idSPCT + '\')">X</button></td>';
+            html += '</tr>';
+
+            total += thanhTien;
         });
-    });
-    function capNhatSoLuong(idHoaDonChiTiet, soLuongMoi) {
+
+        if (hd.items.length === 0) {
+            html = '<tr><td colspan="4" class="text-center">Giỏ hàng trống</td></tr>';
+        }
+
+        $('#cartItems').html(html);
+        $('#totalAmount').text(total.toLocaleString('vi-VN') + ' ₫');
+    }
+
+
+    function capNhatSoLuongLocal(idSPCT, soLuongMoi) {
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+        if (!hd) return;
+
+        const item = hd.items.find(i => i.idSPCT === idSPCT);
+        if (!item) return;
+
         soLuongMoi = parseInt(soLuongMoi);
-        if (isNaN(soLuongMoi) || soLuongMoi <= 0) {
-            alert("Số lượng không hợp lệ!");
-            loadCart();
+        if (isNaN(soLuongMoi) || soLuongMoi <= 0) return;
+
+        if (soLuongMoi > item.soLuongTon) {
+            alert('Vượt quá tồn kho.');
             return;
         }
 
-        $.post('/admin/banHang/cap-nhat-so-luong', {
-            idHoaDonChiTiet: idHoaDonChiTiet,
-            soLuongMoi: soLuongMoi
-        }, function () {
-            loadCart();
-        }).fail(function (xhr) {
-            alert("Không thể cập nhật số lượng: " + xhr.responseText);
-            loadCart(); // reset lại nếu lỗi
-        });
+        item.soLuong = soLuongMoi;
+        saveHoaDonList();
+        loadCart();
     }
 
+    function xoaSanPhamLocal(idSPCT) {
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+        if (!hd) return;
+        hd.items = hd.items.filter(i => String(i.idSPCT) !== String(idSPCT));
+        saveHoaDonList();
+        loadCart();
+    }
+
+    function xoaTatCaSanPham() {
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+        if (!hd) return;
+        if (confirm('Xóa toàn bộ sản phẩm trong giỏ?')) {
+            hd.items = [];
+            saveHoaDonList();
+            loadCart();
+        }
+    }
+
+    $('#btnCheckout').click(function () {
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+        if (!hd || hd.items.length === 0) {
+            alert('Giỏ hàng trống.');
+            return;
+        }
+
+        // Chuẩn bị dữ liệu
+        const danhSachSanPham = hd.items.map(item => ({
+            idSanPhamChiTiet: item.idSPCT,
+            soLuong: item.soLuong
+        }));
+
+        const idPhieuGiamGia = hd.idPhieuGiamGia || null;  // Nếu bạn có chọn mã giảm giá, gán vào hd.idPhieuGiamGia
+        const phuongThucThanhToan = $('#phuongThucThanhToan').val() || 'TIEN_MAT';  // Lấy từ select nếu có
+
+        const payload = {
+            danhSachSanPham: danhSachSanPham,
+            idPhieuGiamGia: idPhieuGiamGia,
+            phuongThucThanhToan: phuongThucThanhToan
+        };
+
+        $.ajax({
+            url: '/admin/banHang/thanh-toan',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (hoaDon) {
+                alert('Thanh toán thành công!\nMã hóa đơn: ' + hoaDon.maHoaDon);
+
+                hoaDonList = hoaDonList.filter(h => h.id !== currentHoaDonId);
+                currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
+                saveHoaDonList();
+                renderHoaDonList();
+                loadCart();
+
+            },
+            error: function (xhr) {
+                alert('Lỗi thanh toán: ' + xhr.responseText);
+            }
+        });
+    });
 
 </script>
+
