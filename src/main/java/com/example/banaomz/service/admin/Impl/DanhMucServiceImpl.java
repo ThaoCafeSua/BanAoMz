@@ -22,11 +22,12 @@ public class DanhMucServiceImpl extends BaseServiceImpl<DanhMuc, Long, IDanhMucR
     ModelMapper modelMapper;
 
     @Override
-    public List<DanhMucDTO> findAllDanhMuc(String value) {
-        List<DanhMucDTO> lst = repository.findAll(value).stream()
-                .map(item -> modelMapper.map(item, DanhMucDTO.class)).toList();
-        return lst;
+    public List<DanhMucDTO> findAllDanhMuc(String value, String status ) {
+        return repository.findAll(value, status).stream()
+                .map(item -> modelMapper.map(item, DanhMucDTO.class))
+                .toList();
     }
+
 
     @Override
     public DanhMucDTO createDanhMuc(DanhMucDTO dto) {
@@ -53,4 +54,5 @@ public class DanhMucServiceImpl extends BaseServiceImpl<DanhMuc, Long, IDanhMucR
         DanhMucDTO data = modelMapper.map(entity, DanhMucDTO.class);
         return data;
     }
+
 }

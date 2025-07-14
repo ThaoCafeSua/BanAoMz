@@ -16,5 +16,4 @@ public class SanPhamChiTietDTO {
     private BigDecimal giaBan;
     private String maVach;
     private Integer soLuong;
-    private String urlAnh;
 }

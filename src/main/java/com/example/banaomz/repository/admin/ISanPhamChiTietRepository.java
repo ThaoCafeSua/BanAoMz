@@ -23,12 +23,15 @@ public interface ISanPhamChiTietRepository extends IBaseRepository<SanPhamChiTie
             """)
     List<SanPhamChiTiet> findLstSanPhamChiTiet(@Param("search") String value, @Param("sts") String sts);
 
+
     @Query("""
             select spct from SanPhamChiTiet spct 
             where spct.sanPham.id = :#{#dto.sanPhamId}
             and spct.size.id = :#{#dto.sizeId}
             and spct.mauSac.id = :#{#dto.mauSacId}
             """)
+
+
     Optional<SanPhamChiTiet> findSanPhamChiTietBySanPham(@Param("dto") SanPhamChiTietDTO dto);
 
     List<SanPhamChiTiet> findBySanPham_Id(Long idSanPham);

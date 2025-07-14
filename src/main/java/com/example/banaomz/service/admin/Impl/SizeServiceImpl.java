@@ -20,8 +20,8 @@ public class SizeServiceImpl extends BaseServiceImpl<Size, Long, ISizeRepo> impl
     @Autowired
     ModelMapper modelMapper;
     @Override
-    public List<SizeDTO> findAllSize(String value) {
-        List<SizeDTO> list = repository.findAllStaff(value).stream()
+    public List<SizeDTO> findAllSize(String value, String status) {
+        List<SizeDTO> list = repository.findAllSize(value,status).stream()
                 .map(item -> modelMapper.map(item, SizeDTO.class))
                 .toList();
         return list;

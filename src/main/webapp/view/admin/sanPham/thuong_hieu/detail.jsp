@@ -29,6 +29,24 @@
                 <label class="form-label label-primary">Tên Thương Hiệu:</label>
                 <input type="text" class="form-control" name="tenThuongHieu" readonly value="${thuongHieu.tenThuongHieu}">
             </div>
+
+            <div class="mb-3">
+                <label class="form-label label-primary">Trạng Thái:</label>
+                <div>
+                    <label>
+                        <input type="radio" name="trangThai" value="HOAT_DONG"
+                               <c:if test="${thuongHieu.trangThai eq 'HOAT_DONG'}">checked</c:if> disabled>
+                        Hoạt Động
+                    </label>
+                    &nbsp;&nbsp;
+                    <label>
+                        <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                               <c:if test="${thuongHieu.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if> disabled>
+                        Ngừng Hoạt Động
+                    </label>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

@@ -116,67 +116,114 @@
         $('#colorSelect').select2();
         $('#massSelect').select2();
 
-        function getDataDanhMuc() {
+        function getDataDanhMuc(currentDanhMucId, currentDanhMucName) {
             $('#danhMucSelect').empty();
-            $('#danhMucSelect').append('<option value="" selected disabled>Chọn danh mục</option>');
+            $('#danhMucSelect').append('<option value="" disabled>Chọn danh mục</option>');
+
             $.ajax({
                 url: '/admin/category/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: {
+                    search: '',
+                    status: 'HOAT_DONG'  // chỉ lấy danh mục hoạt động
+                },
                 success: function (response) {
+                    let exists = false;
+
                     response.data.forEach(function (item) {
-                        $('#danhMucSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenDanhMuc)
-                        );
+                        const option = $('<option></option>').val(item.id).text(item.tenDanhMuc);
+                        $('#danhMucSelect').append(option);
+
+                        if (item.id == currentDanhMucId) {
+                            exists = true;
+                        }
                     });
+
+                    // Nếu danh mục hiện tại không có trong danh sách (vì nó ngừng hoạt động)
+                    if (!exists) {
+                        $('#danhMucSelect').append(
+                            $('<option></option>')
+                                .val(currentDanhMucId)
+                                .text(currentDanhMucName)
+                        );
+                    }
+
+                    $('#danhMucSelect').val(currentDanhMucId);
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
         getDataDanhMuc()
 
-        function getDataThuongHieu() {
+        function getDataThuongHieu(currentThuongHieuId, currentThuongHieuName) {
             $('#thuongHieuSelect').empty();
-            $('#thuongHieuSelect').append('<option value="" selected disabled>Chọn thương hiệu</option>');
+            $('#thuongHieuSelect').append('<option value="" disabled>Chọn thương hiệu</option>');
+
             $.ajax({
                 url: '/admin/brand/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' },
                 success: function (response) {
+                    let exists = false;
+
                     response.data.forEach(function (item) {
-                        $('#thuongHieuSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenThuongHieu)
-                        );
+                        const option = $('<option></option>').val(item.id).text(item.tenThuongHieu);
+                        $('#thuongHieuSelect').append(option);
+
+                        if (item.id == currentThuongHieuId) {
+                            exists = true;
+                        }
                     });
+
+                    if (!exists && currentThuongHieuId) {
+                        $('#thuongHieuSelect').append(
+                            $('<option></option>').val(currentThuongHieuId).text(currentThuongHieuName)
+                        );
+                    }
+
+                    $('#thuongHieuSelect').val(currentThuongHieuId);
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
         getDataThuongHieu()
-
-        function getDataXuatXu() {
+        function getDataXuatXu(currentXuatXuId, currentXuatXuName) {
             $('#xuatXuSelect').empty();
-            $('#xuatXuSelect').append('<option value="" selected disabled>Chọn xuất xứ</option>');
+            $('#xuatXuSelect').append('<option value="" disabled>Chọn xuất xứ</option>');
+
             $.ajax({
                 url: '/admin/origin/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' },
                 success: function (response) {
+                    let exists = false;
+
                     response.data.forEach(function (item) {
-                        $('#xuatXuSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenXuatXu)
-                        );
+                        const option = $('<option></option>').val(item.id).text(item.tenXuatXu);
+                        $('#xuatXuSelect').append(option);
+
+                        if (item.id == currentXuatXuId) {
+                            exists = true;
+                        }
                     });
+
+                    if (!exists && currentXuatXuId) {
+                        $('#xuatXuSelect').append(
+                            $('<option></option>').val(currentXuatXuId).text(currentXuatXuName)
+                        );
+                    }
+
+                    $('#xuatXuSelect').val(currentXuatXuId);
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
@@ -236,6 +283,7 @@
                     let data = response.data;
 
                     loadDataProdcutDetail(data)
+                    getDataDanhMuc(data.danhMuc.id, data.danhMuc.tenDanhMuc);
                     productDetailArr = response.data.lstChiTietSanPham.map(item => {
                         return {
                             tenSanPham: data.tenSanPham, // Gán giá trị cho thuộc tính tenSanPham

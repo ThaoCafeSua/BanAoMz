@@ -12,4 +12,7 @@ public class DanhMucDTO {
     @NotNull(message = "Tên danh mục không được để trống")
     @Size(min = 1, max = 50, message = "Tên danh mục phải từ 1 đến 50 ký tự")
     private String tenDanhMuc;
+    @NotNull(message = "Trạng thái không được để trống")
+    private String trangThai;
+
 }

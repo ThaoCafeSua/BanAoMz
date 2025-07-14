@@ -7,7 +7,7 @@ import com.example.banaomz.service.common.IBaseService;
 import java.util.List;
 
 public interface IXuatXuService extends IBaseService<XuatXu,Long> {
-    List<XuatXuDTO> findAllXuatXu(String value);
+    List<XuatXuDTO> findAllXuatXu(String value, String status);
     XuatXuDTO createXuatXu(XuatXuDTO dto);
     XuatXuDTO updateXuatXu(XuatXuDTO dto);
     XuatXuDTO detailXuatXu(Long id);

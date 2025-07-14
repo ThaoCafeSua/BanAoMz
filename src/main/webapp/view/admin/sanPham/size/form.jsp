@@ -3,8 +3,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Viết CSS riêng -->
 <style>
     .title-primary {
         color: #001f3d;
@@ -33,8 +33,25 @@
                 <input type="hidden" class="form-control" name="id" id="id" value="${size.id}">
 
                 <div class="mb-3">
-                    <label for="tenSize" class="form-label">Tên Size</label>
-                    <input type="text" class="form-control" name="tenSize" id="tenSize" placeholder="Nhập tên size" value="${size.tenSize}">
+                    <label for="sizeName" class="form-label">Tên Size</label>
+                    <input type="text" class="form-control" name="tenSize" id="sizeName" placeholder="Nhập tên size" value="${size.tenSize}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <div>
+                        <label>
+                            <input type="radio" name="trangThai" value="HOAT_DONG"
+                                   <c:if test="${empty size.trangThai || size.trangThai eq 'HOAT_DONG'}">checked</c:if> >
+                            Hoạt Động
+                        </label>
+                        &nbsp;&nbsp;
+                        <label>
+                            <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                                   <c:if test="${size.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if> >
+                            Ngừng hoạt động
+                        </label>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">
@@ -44,18 +61,19 @@
         </div>
     </div>
 </div>
+
 <script>
     function validateForm(event) {
         event.preventDefault(); // Ngăn submit mặc định
 
-        var name = $("#tenSize").val().trim();
+        var name = $("#sizeName").val().trim();
         if (name === "") {
             toastr.error("Tên size không được để trống");
             return false;
         }
 
         Swal.fire({
-            title: 'Bạn chắc chắn muốn ${btnText}?',
+            title: 'Bạn chắc chắn muốn ${btnText} này?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#001f3d',

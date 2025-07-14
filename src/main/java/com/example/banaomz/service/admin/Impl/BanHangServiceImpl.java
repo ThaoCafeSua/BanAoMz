@@ -72,13 +72,13 @@ public class BanHangServiceImpl implements IBanHangService {
             vm.setSoLuongTon(vm.getSoLuongTon() + soLuong);
 
             if (spct.getMauSac() != null) {
-                MauSacDTO mau = new MauSacDTO(spct.getMauSac().getId(), spct.getMauSac().getTenMauSac());
+                MauSacDTO mau = new MauSacDTO(spct.getMauSac().getId(), spct.getMauSac().getTenMauSac(), null);
                 boolean chuaCoMau = vm.getListMauSac().stream().noneMatch(m -> m.getId().equals(mau.getId()));
                 if (chuaCoMau) vm.getListMauSac().add(mau);
             }
 
             if (spct.getSize() != null) {
-                SizeDTO size = new SizeDTO(spct.getSize().getId(), spct.getSize().getTenSize());
+                SizeDTO size = new SizeDTO(spct.getSize().getId(), spct.getSize().getTenSize(), null);
                 boolean chuaCoSize = vm.getListKichThuoc().stream().noneMatch(s -> s.getId().equals(size.getId()));
                 if (chuaCoSize) vm.getListKichThuoc().add(size);
             }
@@ -218,7 +218,7 @@ public class BanHangServiceImpl implements IBanHangService {
         List<MauSac> ds = sanPhamChiTietRepo.findDistinctMauSacBySanPhamId(idSanPham);
         List<MauSacDTO> dtos = new ArrayList<>();
         for (MauSac m : ds) {
-            dtos.add(new MauSacDTO(m.getId(), m.getTenMauSac()));
+            dtos.add(new MauSacDTO(m.getId(), m.getTenMauSac(),m.getTrangThai()));
         }
         return dtos;
     }
@@ -228,7 +228,7 @@ public class BanHangServiceImpl implements IBanHangService {
         List<Size> ds = sanPhamChiTietRepo.findDistinctSizeBySanPhamId(idSanPham);
         List<SizeDTO> dtos = new ArrayList<>();
         for (Size s : ds) {
-            dtos.add(new SizeDTO(s.getId(), s.getTenSize()));
+            dtos.add(new SizeDTO(s.getId(), s.getTenSize(),s.getTrangThai()));
         }
         return dtos;
     }

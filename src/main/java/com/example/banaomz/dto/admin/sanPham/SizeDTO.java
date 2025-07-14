@@ -16,4 +16,8 @@ public class SizeDTO {
     @NotNull(message = "Tên size không được để trống")
     @Size(min = 1, max = 50, message = "Tên size phải từ 1 đến 50 ký tự")
     private String tenSize;
+    @NotNull(message = "Trạng thái không được để trống")
+    private String trangThai;
+
 }
+

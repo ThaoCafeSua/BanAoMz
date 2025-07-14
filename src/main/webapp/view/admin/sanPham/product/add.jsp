@@ -155,20 +155,28 @@
         function getDataDanhMuc() {
             $('#danhMucSelect').empty();
             $('#danhMucSelect').append('<option value="" selected disabled>Chọn danh mục</option>');
+
             $.ajax({
                 url: '/admin/category/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' },  // 👈 chỉ lấy HOAT_DONG
                 success: function (response) {
+                    if (!response.data || response.data.length === 0) {
+                        toastr.warning('Không có danh mục hoạt động nào.');
+                        return;
+                    }
                     response.data.forEach(function (item) {
                         $('#danhMucSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenDanhMuc)
+                            $('<option></option>')
+                                .val(item.id)
+                                .text(item.tenDanhMuc)
                         );
                     });
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.error(xhr.responseJSON || error);
+                    toastr.error('Đã xảy ra lỗi khi tải danh mục.');
                 }
             });
         }
@@ -177,12 +185,17 @@
         function getDataThuongHieu() {
             $('#thuongHieuSelect').empty();
             $('#thuongHieuSelect').append('<option value="" selected disabled>Chọn thương hiệu</option>');
+
             $.ajax({
                 url: '/admin/brand/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' }, // 👈 lấy HOAT_DONG
                 success: function (response) {
+                    if (!response.data || response.data.length === 0) {
+                        toastr.warning('Không có thương hiệu hoạt động nào.');
+                        return;
+                    }
                     response.data.forEach(function (item) {
                         $('#thuongHieuSelect').append(
                             $('<option></option>').val(item.id).text(item.tenThuongHieu)
@@ -190,7 +203,8 @@
                     });
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.error(xhr.responseJSON || error);
+                    toastr.error('Đã xảy ra lỗi khi tải thương hiệu.');
                 }
             });
         }
@@ -199,12 +213,17 @@
         function getDataXuatXu() {
             $('#xuatXuSelect').empty();
             $('#xuatXuSelect').append('<option value="" selected disabled>Chọn xuất xứ</option>');
+
             $.ajax({
                 url: '/admin/origin/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' }, // 👈 lấy HOAT_DONG
                 success: function (response) {
+                    if (!response.data || response.data.length === 0) {
+                        toastr.warning('Không có xuất xứ hoạt động nào.');
+                        return;
+                    }
                     response.data.forEach(function (item) {
                         $('#xuatXuSelect').append(
                             $('<option></option>').val(item.id).text(item.tenXuatXu)
@@ -212,54 +231,82 @@
                     });
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.error(xhr.responseJSON || error);
+                    toastr.error('Đã xảy ra lỗi khi tải xuất xứ.');
                 }
             });
         }
         getDataXuatXu()
 
-        function getDataMauSac() {
+        function getDataMauSac(currentMauSacId, currentMauSacName) {
             $('#colorSelect').empty();
+
             $.ajax({
                 url: '/admin/color/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' },
                 success: function (response) {
-                    colorData = response.data
+                    colorData = response.data;
+                    let exists = false;
                     response.data.forEach(function (item) {
-                        $('#colorSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenMauSac)
-                        );
-                    });
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
-                }
-            });
-        }
-        getDataMauSac()
+                        const option = $('<option></option>').val(item.id).text(item.tenMauSac);
+                        $('#colorSelect').append(option);
 
-        function getDataSize() {
-            $('#massSelect').empty();
-            $.ajax({
-                url: '/admin/size/list',
-                method: 'GET',
-                dataType: 'json',
-                data: {search: ''},
-                success: function (response) {
-                    massData = response.data;
-                    response.data.forEach(function (item) {
-                        $('#massSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenSize)
-                        );
+                        if (item.id == currentMauSacId) {
+                            exists = true;
+                        }
                     });
+
+                    if (!exists && currentMauSacId) {
+                        $('#colorSelect').append(
+                            $('<option></option>').val(currentMauSacId).text(currentMauSacName)
+                        );
+                    }
+
+                    $('#colorSelect').val(currentMauSacId).trigger('change');
                 },
                 error: function (xhr, status, error) {
                     console.log(xhr.responseJSON);
                 }
             });
         }
+        getDataMauSac()
+
+        function getDataSize(currentSizeId, currentSizeName) {
+            $('#massSelect').empty();
+
+            $.ajax({
+                url: '/admin/size/list',
+                method: 'GET',
+                dataType: 'json',
+                data: { search: '', status: 'HOAT_DONG' },
+                success: function (response) {
+                    massData = response.data;
+                    let exists = false;
+                    response.data.forEach(function (item) {
+                        const option = $('<option></option>').val(item.id).text(item.tenSize);
+                        $('#massSelect').append(option);
+
+                        if (item.id == currentSizeId) {
+                            exists = true;
+                        }
+                    });
+
+                    if (!exists && currentSizeId) {
+                        $('#massSelect').append(
+                            $('<option></option>').val(currentSizeId).text(currentSizeName)
+                        );
+                    }
+
+                    $('#massSelect').val(currentSizeId).trigger('change');
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseJSON);
+                }
+            });
+        }
+
         getDataSize();
 
         function createProduct() {
@@ -383,7 +430,7 @@
         }
 
         $('#tenSanPham').change(function() {
-            genDataProductDetail()
+            genDataProductDetailIfReady()
         })
         // $('#colorSelect').change(function() {
         //     genDataProductDetail()

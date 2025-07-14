@@ -26,7 +26,6 @@ public class SanPhamDetailDTO {
 
     private String trangThai;
 
-    private String urlAnh;
 
     private String slDaBan;
 

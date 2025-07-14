@@ -25,8 +25,25 @@
             <input type="hidden" class="form-control" name="id" id="id" value="${size.id}">
 
             <div class="mb-3">
-                <label class="form-label label-primary">Tên Xuất Xứ:</label>
+                <label class="form-label label-primary">Tên Size:</label>
                 <input type="text" class="form-control" name="tenSize" readonly value="${size.tenSize}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label label-primary">Trạng Thái:</label>
+                <div>
+                    <label>
+                        <input type="radio" name="trangThai" value="HOAT_DONG"
+                               <c:if test="${size.trangThai eq 'HOAT_DONG'}">checked</c:if> disabled>
+                        Hoạt Động
+                    </label>
+                    &nbsp;&nbsp;
+                    <label>
+                        <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                               <c:if test="${size.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if> disabled>
+                        Ngừng Hoạt Động
+                    </label>
+                </div>
             </div>
         </div>
     </div>

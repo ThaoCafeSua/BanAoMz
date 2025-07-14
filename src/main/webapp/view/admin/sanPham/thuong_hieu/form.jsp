@@ -3,8 +3,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Viết CSS riêng -->
 <style>
     .title-primary {
         color: #001f3d;
@@ -15,7 +15,7 @@
         transition: background-color 0.3s ease;
     }
     .btn-submit:hover {
-        background-color: #003366; /* màu hover đậm hơn */
+        background-color: #003366;
         color: #fff;
     }
 </style>
@@ -27,16 +27,32 @@
         <i class="fa-solid fa-arrow-left"></i> Quay lại
     </a>
 
-    <!-- Form cho thương hiệu -->
     <div class="card">
         <div class="card-body">
             <form id="brandForm" action="${action}" method="post" onsubmit="validateForm(event)">
                 <input type="hidden" class="form-control" name="id" id="id" value="${thuongHieu.id}">
 
-                <!-- Tên thương hiệu -->
                 <div class="mb-3">
                     <label for="inputName" class="form-label">Tên thương hiệu</label>
-                    <input type="text" class="form-control" name="tenThuongHieu" id="inputName" placeholder="Nhập tên thương hiệu" value="${thuongHieu.tenThuongHieu}">
+                    <input type="text" class="form-control" name="tenThuongHieu" id="inputName"
+                           placeholder="Nhập tên thương hiệu" value="${thuongHieu.tenThuongHieu}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <div>
+                        <label>
+                            <input type="radio" name="trangThai" value="HOAT_DONG"
+                                   <c:if test="${empty thuongHieu.trangThai || thuongHieu.trangThai eq 'HOAT_DONG'}">checked</c:if>>
+                            Hoạt động
+                        </label>
+                        &nbsp;&nbsp;
+                        <label>
+                            <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                                   <c:if test="${thuongHieu.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if>>
+                            Ngừng hoạt động
+                        </label>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">
@@ -49,29 +65,26 @@
 
 <script>
     function validateForm(event) {
-        event.preventDefault(); // Ngăn submit mặc định
+        event.preventDefault();
 
         var name = $("#inputName").val().trim();
         if (name === "") {
-            toastr.error("Tên danh mục không được để trống");
+            toastr.error("Tên thương hiệu không được để trống");
             return false;
         }
 
-
-        // Hiển thị xác nhận trước khi gửi form
         Swal.fire({
-            title: 'Bạn chắc chắn muốn ${btnText} thương hiệu này?',
+            title: 'Bạn chắc chắn muốn ${btnText} này?',
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#001f3d', // màu confirm
+            confirmButtonColor: '#001f3d',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Xác nhận',
             cancelButtonText: 'Hủy bỏ'
         }).then((result) => {
             if (result.isConfirmed) {
-                event.target.submit(); // Gửi form trực tiếp sau khi xác nhận
+                event.target.submit();
             }
         });
     }
-
 </script>

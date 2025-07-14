@@ -124,7 +124,7 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
     }
     private String genMaSanPham() {
         long count = repository.count(); // tổng số sản phẩm đã có
-        String stt = String.format("%04d", count + 1); // VD: 0001, 0002
+        String stt = String.format("%01d", count + 1); // VD: 0001, 0002
         return "SP" + stt; // --> SP0001, SP0002...
     }
 
