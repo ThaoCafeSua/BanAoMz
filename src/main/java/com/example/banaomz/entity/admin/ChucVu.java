@@ -1,24 +1,22 @@
 package com.example.banaomz.entity.admin;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.example.banaomz.entity.common.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
+import java.util.Date;
+import java.util.Set;
 
-@Entity
-@Table(name = "chuc_vu")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
+@Entity
+@Builder
+@Table(name = "chuc_vu")
 public class ChucVu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +24,9 @@ public class ChucVu {
 
     @Column(name = "ten_chuc_vu")
     private String tenChucVu;
+
+    @OneToMany(mappedBy = "chucVu")
+    @JsonIgnore
+    private Set<NhanVien> nhanVien;
+
 }

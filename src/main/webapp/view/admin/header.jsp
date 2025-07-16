@@ -142,11 +142,34 @@
 <body>
 
 <header>
-    <div class="container header-flex">
-        <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
-        <h3>MzShop</h3>
+    <div class="container header-flex justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
+            <h3>MzShop</h3>
+        </div>
+        <!-- ✅ Hiển thị quyền người dùng -->
+        <c:if test="${not empty sessionScope.userRole}">
+            <div id="user-role-alert" class="text-white bg-success px-3 py-1 rounded shadow" style="position: fixed; top: 70px; right: 20px; z-index: 2000; font-size: 10px">
+                <i class="fas fa-user-shield me-1"></i>
+                Đang đăng nhập với quyền: <strong>${sessionScope.userRole}</strong>
+            </div>
+            <%
+                session.removeAttribute("userRole");
+            %>
+        </c:if>
     </div>
 </header>
+
+<!-- ✅ THÔNG BÁO KHÔNG CÓ QUYỀN -->
+<c:if test="${not empty sessionScope.accessDenied}">
+    <div id="user-role-alert" class="text-white bg-success px-3 py-1 rounded shadow" style="position: fixed; top: 70px; right: 20px; z-index: 2000; font-size: 10px">
+            ${sessionScope.accessDenied}
+    </div>
+    <%
+        session.removeAttribute("accessDenied");
+    %>
+</c:if>
+
 
 
 <!-- Sidebar -->
@@ -218,18 +241,17 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/staff" aria-label="Nhân viên">
+            <a class="nav-link text-white h5" href="/admin/employee" aria-label="Nhân viên">
                 <i class="fas fa-user-tie me-2"></i> Nhân viên
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/logout" aria-label="Đăng xuất" id="logoutBtn">
+            <a class="nav-link text-white h5" href="/auth/logout" aria-label="Đăng xuất" id="logoutBtn">
                 <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
             </a>
         </li>
     </ul>
 </div>
-
 
 <!-- Toggle Sidebar Button -->
 <button id="toggleSidebar">
@@ -249,6 +271,20 @@
         sidebar.classList.toggle("collapsed");
         content.classList.toggle("expanded");
     });
+
+    $(document).ready(function () {
+        // Ẩn thông báo sau 4 giây (4000 ms)
+        setTimeout(function () {
+            $("#user-role-alert").fadeOut("slow");
+        }, 3000);
+    });
+
+        $(document).ready(function () {
+        setTimeout(function () {
+            $("#access-denied-alert").fadeOut("slow");
+        }, 3000);
+    });
+
 </script>
 
 </body>

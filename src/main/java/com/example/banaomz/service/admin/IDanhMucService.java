@@ -7,7 +7,7 @@ import com.example.banaomz.service.common.IBaseService;
 import java.util.List;
 
 public interface IDanhMucService extends IBaseService<DanhMuc, Long> {
-    List<DanhMucDTO> findAllDanhMuc(String value);
+    List<DanhMucDTO> findAllDanhMuc(String value, String status );
     DanhMucDTO createDanhMuc(DanhMucDTO dto);
     DanhMucDTO updateDanhMuc(DanhMucDTO dto);
     DanhMucDTO detailDanhMuc(Long id);

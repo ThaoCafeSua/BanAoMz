@@ -33,9 +33,6 @@ public class SanPhamChiTiet extends BaseEntity {
     @JoinColumn(name = "id_san_pham")
     private SanPham sanPham;
 
-    @Column(name = "url_anh")
-    private String urlAnh;
-
     @Column(name = "so_luong")
     private Integer soLuong;
 
@@ -46,6 +43,5 @@ public class SanPhamChiTiet extends BaseEntity {
     private BigDecimal giaBan;
 
     @Column(name = "trang_thai")
-    private String trangThai = "Còn hàng";
-
+    private String trangThai;
 }

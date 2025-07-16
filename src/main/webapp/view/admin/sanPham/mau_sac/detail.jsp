@@ -22,12 +22,30 @@
 
     <div class="card">
         <div class="card-body">
-            <input type="hidden" class="form-control" name="id" id="id" value="${mauSac.id}">
+            <input type="hidden" name="id" value="${mauSac.id}">
 
             <div class="mb-3">
                 <label class="form-label label-primary">Tên Màu Sắc:</label>
-                <input type="text" readonly class="form-control" name="tenMauSac" value="${mauSac.tenMauSac}">
+                <input type="text" class="form-control" name="tenMauSac" readonly value="${mauSac.tenMauSac}">
             </div>
+
+            <div class="mb-3">
+                <label class="form-label label-primary">Trạng Thái:</label>
+                <div>
+                    <label>
+                        <input type="radio" name="trangThai" value="HOAT_DONG"
+                               <c:if test="${mauSac.trangThai eq 'HOAT_DONG'}">checked</c:if> disabled>
+                        Hoạt Động
+                    </label>
+                    &nbsp;&nbsp;
+                    <label>
+                        <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                               <c:if test="${mauSac.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if> disabled>
+                        Ngừng Hoạt Động
+                    </label>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

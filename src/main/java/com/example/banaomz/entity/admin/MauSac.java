@@ -22,4 +22,7 @@ public class MauSac extends BaseEntity{
 
     @Column(name = "ten_mau_sac")
     private String tenMauSac;
+
+    @Column(name = "trang_thai")
+    private String trangThai;
 }

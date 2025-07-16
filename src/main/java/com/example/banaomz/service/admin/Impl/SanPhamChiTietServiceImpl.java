@@ -28,8 +28,10 @@ public class SanPhamChiTietServiceImpl extends BaseServiceImpl<SanPhamChiTiet, L
 
     @Override
     public List<SanPhamChiTiet> findLstSanPhamChiTiet(String search) {
-        List<SanPhamChiTiet> lst = repository.findLstSanPhamChiTiet(search, Status.HOAT_DONG.toString());
-        return lst;
+        return repository.findLstSanPhamChiTiet(
+                search,
+                Status.HOAT_DONG.name()
+        );
     }
 
 

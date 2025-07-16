@@ -12,4 +12,6 @@ public class ThuongHieuDTO {
     @NotNull(message = "Tên thương hiệu không được để trống")  // Kiểm tra không null
     @Size(min = 1, max = 50, message = "Tên thương hiệu phải từ 1 đến 50 ký tự")
     private String tenThuongHieu;
+    @NotNull(message = "Trạng thái không được để trống")
+    private String trangThai;
 }

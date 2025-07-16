@@ -7,9 +7,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IMauSacRepo extends IBaseRepository<MauSac,Long> {
-    @Query(value = "SELECT ms FROM MauSac ms WHERE ms.tenMauSac LIKE %:value% order by ms.ngayTao desc ")
-    List<MauSac> findAllStaff(@Param("value") String value);
+    @Query("""
+        SELECT ms FROM MauSac ms
+        WHERE ms.tenMauSac LIKE %:value%
+          AND (:status IS NULL OR :status = '' OR ms.trangThai = :status)
+        ORDER BY ms.ngayTao DESC
+    """)
+    List<MauSac> findAllMauSac(@Param("value") String value, @Param("status") String status);
+
 }

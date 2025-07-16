@@ -1,30 +1,23 @@
 package com.example.banaomz.entity.admin;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "phieu_giam_gia")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
+@Entity
+@Builder
+@Table(name = "phieu_giam_gia")
 public class PhieuGiamGia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "ma_phieu_giam_gia")
     private String maPhieuGiamGia;
@@ -33,10 +26,10 @@ public class PhieuGiamGia {
     private String tenPhieuGiamGia;
 
     @Column(name = "gia_tri_giam")
-    private BigDecimal giaTriGiam;
+    private int giaTriGiam;
 
     @Column(name = "dieu_kien_ap_dung")
-    private BigDecimal dieuKienApDung;
+    private int dieuKienApDung;
 
     @Column(name = "ngay_bat_dau")
     private LocalDateTime ngayBatDau;
@@ -45,7 +38,7 @@ public class PhieuGiamGia {
     private LocalDateTime ngayKetThuc;
 
     @Column(name = "so_luong")
-    private Integer soLuong;
+    private int soLuong;
 
     @Column(name = "mo_ta")
     private String moTa;
@@ -59,4 +52,3 @@ public class PhieuGiamGia {
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 }
-

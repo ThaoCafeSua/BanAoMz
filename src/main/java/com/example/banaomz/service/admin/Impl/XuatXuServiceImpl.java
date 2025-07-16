@@ -19,8 +19,8 @@ public class XuatXuServiceImpl extends BaseServiceImpl<XuatXu, Long, IXuatXuRepo
     @Autowired
     ModelMapper modelMapper;
     @Override
-    public List<XuatXuDTO> findAllXuatXu(String value) {
-        List<XuatXuDTO> list = repository.findAllStaff(value).stream()
+    public List<XuatXuDTO> findAllXuatXu(String value, String status) {
+        List<XuatXuDTO> list = repository.findAllXuatXu(value, status).stream()
                 .map(item -> modelMapper.map(item, XuatXuDTO.class))
                 .toList();
         return list;

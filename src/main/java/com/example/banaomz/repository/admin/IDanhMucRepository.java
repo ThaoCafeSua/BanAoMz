@@ -10,6 +10,11 @@ import java.util.List;
 
 @Repository
 public interface IDanhMucRepository extends IBaseRepository< DanhMuc,Long> {
-    @Query(value = "SELECT dm FROM DanhMuc dm WHERE dm.tenDanhMuc LIKE %:value% order by dm.ngayTao desc")
-    List<DanhMuc> findAll(@Param("value") String value);
+    @Query("""
+    SELECT dm FROM DanhMuc dm 
+    WHERE dm.tenDanhMuc LIKE %:value% 
+      AND (:status IS NULL OR :status = '' OR dm.trangThai = :status)
+""")
+    List<DanhMuc> findAll(@Param("value") String value, @Param("status") String status);
+
 }

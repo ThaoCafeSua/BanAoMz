@@ -19,8 +19,8 @@ public class MauSacServiceImpl extends BaseServiceImpl<MauSac, Long, IMauSacRepo
     @Autowired
     ModelMapper modelMapper;
     @Override
-    public List<MauSacDTO> findAllMauSac(String value) {
-        List<MauSacDTO> list = repository.findAllStaff(value).stream()
+    public List<MauSacDTO> findAllMauSac(String value, String status) {
+        List<MauSacDTO> list = repository.findAllMauSac(value,status).stream()
                 .map(item -> modelMapper.map(item, MauSacDTO.class))
                 .toList();
         return list;

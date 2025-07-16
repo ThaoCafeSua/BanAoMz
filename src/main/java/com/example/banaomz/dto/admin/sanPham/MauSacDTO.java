@@ -16,4 +16,8 @@ public class MauSacDTO {
     @NotNull(message = "Tên màu sắc không được để trống")
     @Size(min = 1, max = 50, message = "Tên màu sắc phải từ 1 đến 50 ký tự")
     private String tenMauSac;
+    @NotNull(message = "Trạng thái không được để trống")
+    private String trangThai;
+
+
 }

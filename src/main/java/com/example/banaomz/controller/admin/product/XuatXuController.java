@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -26,8 +27,8 @@ public class XuatXuController {
     }
     @GetMapping("/list")
     @ResponseBody
-    public ResponseEntity<?> getXuatXu(@RequestParam String search) {
-        List<XuatXuDTO> lst = xuatXuService.findAllXuatXu(search);
+    public ResponseEntity<?> getXuatXu(@RequestParam String search, @RequestParam String status) {
+        List<XuatXuDTO> lst = xuatXuService.findAllXuatXu(search, status);
         return new ResponseEntity<>(ResponseObject.builder().data(lst).build(), HttpStatus.OK);
     }
     @GetMapping("/create")
@@ -39,8 +40,9 @@ public class XuatXuController {
         return "admin/main";
     }
     @PostMapping("/create")
-    public String create(@Valid @ModelAttribute XuatXuDTO req) {
+    public String create(@Valid @ModelAttribute XuatXuDTO req,  RedirectAttributes redirectAttributes) {
         xuatXuService.createXuatXu(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm xuất xứ thành công!");
         return "redirect:/admin/origin";
     }
     @GetMapping("/update/{id}")
@@ -56,8 +58,9 @@ public class XuatXuController {
         return "admin/main";
     }
     @PostMapping("/update")
-    public String update(@ModelAttribute XuatXuDTO req) {
+    public String update(@ModelAttribute XuatXuDTO req,  RedirectAttributes redirectAttributes) {
         xuatXuService.updateXuatXu(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật xuất xứ thành công!");
         return "redirect:/admin/origin";
     }
 

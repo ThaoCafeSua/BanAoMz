@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -28,8 +29,8 @@ public class ThuongHieuController {
     }
     @GetMapping("/list")
     @ResponseBody
-    public ResponseEntity<?> getThuongHieu(@RequestParam String search) {
-        List<ThuongHieuDTO> lst = thuongHieuService.findAllThuongHieu(search);
+    public ResponseEntity<?> getThuongHieu(@RequestParam String search,@RequestParam String status) {
+        List<ThuongHieuDTO> lst = thuongHieuService.findAllThuongHieu(search,status);
         return new ResponseEntity<>(ResponseObject.builder().data(lst).build(), HttpStatus.OK);
     }
 
@@ -45,8 +46,9 @@ public class ThuongHieuController {
 
     // Xử lý thêm thương hiệu
     @PostMapping("/create")
-    public String create(@ModelAttribute ThuongHieuDTO req) {
+    public String create(@ModelAttribute ThuongHieuDTO req, RedirectAttributes redirectAttributes) {
         thuongHieuService.createThuongHieu(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm thương hiệu thành công!");
         return "redirect:/admin/brand";
     }
 
@@ -66,8 +68,9 @@ public class ThuongHieuController {
 
     // Xử lý cập nhật thương hiệu
     @PostMapping("/update")
-    public String update(@ModelAttribute ThuongHieuDTO req) {
+    public String update(@ModelAttribute ThuongHieuDTO req, RedirectAttributes redirectAttributes) {
         thuongHieuService.updateThuongHieu(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thương hiệu thành công!");
         return "redirect:/admin/brand"; // Điều hướng lại trang danh sách
     }
 

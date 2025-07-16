@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -24,8 +25,8 @@ public class MauSacController {
     }
     @GetMapping("/list")
     @ResponseBody
-    public ResponseEntity<?> getMauSac(@RequestParam String search) {
-        List<MauSacDTO> lst = mauSacService.findAllMauSac(search);
+    public ResponseEntity<?> getMauSac(@RequestParam String search, @RequestParam String status) {
+        List<MauSacDTO> lst = mauSacService.findAllMauSac(search,status);
         return new ResponseEntity<>(ResponseObject.builder().data(lst).build(), HttpStatus.OK);
     }
     @GetMapping("/create")
@@ -37,8 +38,9 @@ public class MauSacController {
         return "admin/main";
     }
     @PostMapping("/create")
-    public String create(@ModelAttribute MauSacDTO req) {
+    public String create(@ModelAttribute MauSacDTO req, RedirectAttributes redirectAttributes) {
         mauSacService.createMauSac(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm màu sắc thành công!");
         return "redirect:/admin/color";
     }
     @GetMapping("/update/{id}")
@@ -54,8 +56,9 @@ public class MauSacController {
         return "admin/main";
     }
     @PostMapping("/update")
-    public String update(@ModelAttribute MauSacDTO req) {
+    public String update(@ModelAttribute MauSacDTO req, RedirectAttributes redirectAttributes) {
         mauSacService.updateMauSac(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật màu sắc thành công!");
         return "redirect:/admin/color";
     }
 

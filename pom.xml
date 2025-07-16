@@ -133,6 +133,7 @@
             <version>3.0.1</version>
         </dependency>
 
+
         <!-- iText 7 PDF (Free modules from Maven Central) -->
         <dependency>
             <groupId>com.itextpdf</groupId>
