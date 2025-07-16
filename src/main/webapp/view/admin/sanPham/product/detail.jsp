@@ -97,6 +97,7 @@
                     <th>Size</th>
                     <th>Số Lượng</th>
                     <th>Giá Bán</th>
+                    <th>Trạng Thái</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -235,21 +236,21 @@
                 url: '/admin/color/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: {
+                    search: '',
+                    status: 'HOAT_DONG'  // 👈 thêm dòng này
+                },
                 success: function (response) {
-                    colorData = response.data
-                    response.data.forEach(function (item) {
+                    colorData = response.data;
+                    response.data.forEach(item => {
                         $('#colorSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenMauSac)
+                            $('<option>').val(item.id).text(item.tenMauSac)
                         );
                     });
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
                 }
             });
         }
-        getDataMauSac()
+        getDataMauSac();
 
         function getDataSize() {
             $('#massSelect').empty();
@@ -257,17 +258,17 @@
                 url: '/admin/size/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: {
+                    search: '',
+                    status: 'HOAT_DONG'  // 👈 thêm dòng này
+                },
                 success: function (response) {
                     massData = response.data;
-                    response.data.forEach(function (item) {
+                    response.data.forEach(item => {
                         $('#massSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenSize)
+                            $('<option>').val(item.id).text(item.tenSize)
                         );
                     });
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON);
                 }
             });
         }
@@ -320,7 +321,7 @@
             $('#thuongHieuSelect').val(data.thuongHieu.id); // Gán giá trị ID của thương hiệu
             $('#tenSanPham').val(data.tenSanPham); // Gán tên sản phẩm
             $("input[name='status_product'][value='" + data.trangThai + "']").prop('checked', true); // Gán trạng thái
-            $('#imagePreview').attr('src', data.urlAnh); // Gán URL ảnh
+            $('#imagePreview').attr('src', data.urlAnh).show();
             // let lstMauSac = data.lstChiTietSanPham.map(item => item.mauSac.id); // Lấy danh sách ID màu sắc
             // $('#colorSelect').val(lstMauSac).trigger('change'); // Gán giá trị vào select và kích hoạt sự kiện change (nếu dùng thư viện)
             //
@@ -338,7 +339,10 @@
                     item.mauSac?.tenMauSac || '',
                     item.size?.tenSize || '',
                     item.soLuong,
-                    item.giaBan?.toLocaleString('vi-VN') + ' ₫'
+                    item.giaBan?.toLocaleString('vi-VN') + ' ₫',
+                    (item.trangThai === 'HOAT_DONG'
+                        ? 'Hoạt Động'
+                        : 'Ngừng hoạt động')
                 ]);
             });
             productTable.draw();

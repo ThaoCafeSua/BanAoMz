@@ -184,11 +184,11 @@ public class BanHangServiceImpl implements IBanHangService {
             PhieuGiamGia phieu = phieuGiamGiaRepo.findById(idPhieuGiamGia).orElseThrow();
             hoaDon.setPhieuGiamGia(phieu);
 
-            if (tongTien.compareTo(phieu.getDieuKienApDung()) >= 0) {
-                tienGiam = (phieu.getGiaTriGiam().compareTo(BigDecimal.valueOf(100)) <= 0)
-                        ? tongTien.multiply(phieu.getGiaTriGiam()).divide(BigDecimal.valueOf(100))
-                        : phieu.getGiaTriGiam();
-            }
+//            if (tongTien.compareTo(phieu.getDieuKienApDung()) >= 0) {
+//                tienGiam = (phieu.getGiaTriGiam().compareTo(BigDecimal.valueOf(100)) <= 0)
+//                        ? tongTien.multiply(phieu.getGiaTriGiam()).divide(BigDecimal.valueOf(100))
+//                        : phieu.getGiaTriGiam();
+//            }
         }
 
         hoaDon.setTongTien(tongTien);

@@ -449,6 +449,7 @@
             }
             let lstChiTiet = productDetailArr.map(item =>{
                 return {
+                    id:        item.id,
                     sizeId: item.size.id,
                     mauSacId: item.mauSac.id,
                     soLuong: item.soLuong,

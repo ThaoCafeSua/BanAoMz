@@ -1,35 +1,35 @@
 package com.example.banaomz.entity.admin;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.example.banaomz.entity.common.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
-import java.util.Date;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Set;
 
-@Entity
-@Table(name = "nhan_vien")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NhanVien {
+@DynamicUpdate
+@Entity
+@Builder
+@Table(name = "nhan_vien")
+public class NhanVien extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_chuc_vu")
     private ChucVu chucVu;
 
@@ -37,7 +37,7 @@ public class NhanVien {
     private String tenNhanVien;
 
     @Column(name = "sdt")
-    private String sdt;
+    private String soDienThoai;
 
     @Column(name = "dia_chi")
     private String diaChi;
@@ -46,7 +46,8 @@ public class NhanVien {
     private String email;
 
     @Column(name = "ngay_sinh")
-    private LocalDate ngaySinh;
+    @Temporal(TemporalType.DATE)
+    private Date ngaySinh;
 
     @Column(name = "gioi_tinh")
     private String gioiTinh;
@@ -54,9 +55,11 @@ public class NhanVien {
     @Column(name = "mat_khau")
     private String matKhau;
 
-    @Column(name = "ngay_tao")
+    @Column(name = "ngay_tao", updatable = false)
+    @CreationTimestamp
     private LocalDateTime ngayTao;
 
     @Column(name = "ngay_sua")
+    @UpdateTimestamp
     private LocalDateTime ngaySua;
 }

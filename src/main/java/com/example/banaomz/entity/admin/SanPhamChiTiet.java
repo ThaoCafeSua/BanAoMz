@@ -43,5 +43,5 @@ public class SanPhamChiTiet extends BaseEntity {
     private BigDecimal giaBan;
 
     @Column(name = "trang_thai")
-    private String trangThai = "HOAT_DONG";
+    private String trangThai;
 }
