@@ -5,6 +5,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <!-- Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- Đặt lên đầu trang JSP, ngay sau các taglib -->
+<script type="text/javascript">
+    const contextPath = '${pageContext.request.contextPath}';
+</script>
+
 <style>
     .card {
         border: 1px solid #006d7f !important;
@@ -138,10 +143,10 @@
                 </div>
             </div>
             <div class="col-5">
-                <label class="form-label required">Hình ảnh</label>
+                <label class="form-label required" >Hình ảnh</label>
                 <input type="file" id="imageInput" class="form-control">
-                <div class="mt-4 text-center">
-                    <img id="imagePreview" src="" class="rounded" style="display:none;max-width:100%;height:auto;padding:20px">
+                <div class="mt-4">
+                    <img id="imagePreview" src="" class="rounded mx-auto d-block" style="display: none; max-width: 100%; height: auto; padding: 20px">
                 </div>
             </div>
         </div>
@@ -418,7 +423,7 @@
             let thuongHieu = $('#thuongHieuSelect').val()
             let tenSanPham = $('#tenSanPham').val()
             let trangThai = $("input[name='status_product']:checked").val();
-            let urlAnh = $('#imagePreview').attr('src');
+            let urlAnh = $('#imagePreview').attr('src') || '';
             if (!tenSanPham) {
                 toastr.error('Tên sản phẩm không được để trống');
                 return;
@@ -524,7 +529,7 @@
             $('#thuongHieuSelect').val(data.thuongHieu.id); // Gán giá trị ID của thương hiệu
             $('#tenSanPham').val(data.tenSanPham); // Gán tên sản phẩm
             $("input[name='status_product'][value='" + data.trangThai + "']").prop('checked', true); // Gán trạng thái
-            $('#imagePreview').attr('src', data.urlAnh).show();
+            $('#imagePreview').attr('src', data.urlAnh);
 
         }
 
@@ -681,20 +686,25 @@
 
         // Lắng nghe sự kiện thay đổi khi người dùng chọn file
         $('#imageInput').on('change', function() {
-            var file = this.files[0]; // Lấy file đầu tiên từ danh sách file đã chọn
+            var file = this.files[0]; // Lấy file đầu tiên
 
             if (file) {
-                var formData = new FormData(); // Khởi tạo FormData
-                formData.append('file', file); // Thêm file vào FormData (key là 'image')
+                var formData = new FormData();
+                formData.append('file', file);
+
                 $.ajax({
-                    url: '/files/upload', // URL API upload ảnh
+                    // Thêm contextPath vào URL
+                    url: contextPath + '/files/upload',
                     type: 'POST',
                     data: formData,
-                    processData: false, // Không xử lý dữ liệu
-                    contentType: false, // Không gửi content-type (FormData sẽ tự động xử lý)
+                    processData: false,
+                    contentType: false,
                     success: function(response) {
                         console.log('Upload thành công:', response);
-                        $('#imagePreview').attr('src', response.data).show(); // Hiển thị ảnh đã upload
+                        // Preview cũng nối contextPath
+                        $('#imagePreview')
+                            .attr('src', contextPath + response.data)
+                            .show();
                     },
                     error: function(xhr, status, error) {
                         console.error('Có lỗi xảy ra:', error);
@@ -702,7 +712,6 @@
                 });
             }
         });
-
     })
 
 

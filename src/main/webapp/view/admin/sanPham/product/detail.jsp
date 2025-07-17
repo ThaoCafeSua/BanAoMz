@@ -1,5 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!-- Đặt lên đầu trang JSP, ngay sau các taglib -->
+<script type="text/javascript">
+    const contextPath = '${pageContext.request.contextPath}';
+</script>
+
+
 <style>
     .card {
         border: 1px solid #006d7f !important;
@@ -321,7 +327,7 @@
             $('#thuongHieuSelect').val(data.thuongHieu.id); // Gán giá trị ID của thương hiệu
             $('#tenSanPham').val(data.tenSanPham); // Gán tên sản phẩm
             $("input[name='status_product'][value='" + data.trangThai + "']").prop('checked', true); // Gán trạng thái
-            $('#imagePreview').attr('src', data.urlAnh).show();
+            $('#imagePreview').attr('src', contextPath + data.urlAnh).show();
             // let lstMauSac = data.lstChiTietSanPham.map(item => item.mauSac.id); // Lấy danh sách ID màu sắc
             // $('#colorSelect').val(lstMauSac).trigger('change'); // Gán giá trị vào select và kích hoạt sự kiện change (nếu dùng thư viện)
             //

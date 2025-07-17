@@ -40,7 +40,7 @@ public interface ISanPhamRepository extends IBaseRepository<SanPham, Long> {
             SELECT sp.id,
                    sp.ma_san_pham AS maSanPham,
                    sp.ten_san_pham AS tenSanPham,
-                   sp.url_anh,
+                   sp.url_anh       AS urlAnh,
                    sp.ngay_tao,
                    MIN(spct.gia_ban) AS giaBanMin,
                    MAX(spct.gia_ban) AS giaBanMax,
