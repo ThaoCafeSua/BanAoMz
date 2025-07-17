@@ -136,7 +136,7 @@
                     <th>#</th>
                     <th>Tên Sản Phẩm</th>
                     <th>Màu Sắc</th>
-                    <th>Khối Lượng</th>
+                    <th>Size</th>
                     <th>Số Lượng</th>
                     <th>Giá Bán</th>
                     <th>Hành Động</th>
