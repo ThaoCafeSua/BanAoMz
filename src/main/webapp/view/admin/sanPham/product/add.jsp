@@ -381,7 +381,7 @@
                             urlAnh: urlAnh,
                             lstChiTietSanPham: lstChiTiet
                         }),
-                        success: function (response) {getDetailProduct
+                        success: function (response) {
                             toastr.success('Thêm sản phẩm thành công');
                             // Chuyển hướng sau khi hiển thị thông báo thành công
                             setTimeout(() => {
