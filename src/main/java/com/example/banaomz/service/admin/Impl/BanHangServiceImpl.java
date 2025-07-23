@@ -40,7 +40,7 @@ public class BanHangServiceImpl implements IBanHangService {
 
     @Override
     public List<SanPhamTaiQuayViewModel> layDanhSachSanPhamGoc() {
-        List<SanPhamChiTiet> danhSachSP = sanPhamChiTietRepo.findByTrangThaiAndSanPhamHoatDong("Còn hàng");
+        List<SanPhamChiTiet> danhSachSP = sanPhamChiTietRepo.findByTrangThaiAndSanPhamHoatDong("HOAT_DONG");
 
         Map<Long, SanPhamTaiQuayViewModel> map = new HashMap<>();
 
@@ -93,11 +93,17 @@ public class BanHangServiceImpl implements IBanHangService {
         HoaDon hoaDon = new HoaDon();
         hoaDon.setNgayTao(LocalDateTime.now());
         hoaDon.setTrangThai("CHO_THANH_TOAN");
+        hoaDon.setLoaiHoaDon("CHO");
         hoaDon.setNhanVien(nhanVienRepo.findById(idNhanVien).orElse(null));
         hoaDon.setKhachHang(khachHangRepo.findById(idKhachHang).orElse(null));
         hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
         return hoaDonRepo.save(hoaDon);
     }
+    @Override
+    public List<HoaDon> layDanhSachHoaDonCho() {
+        return hoaDonRepo.findByTrangThaiAndLoaiHoaDon("CHO_THANH_TOAN", "CHO");
+    }
+
     @Override
     public boolean tonTaiHoaDon(Long id) {
         return hoaDonRepo.existsById(id);
@@ -171,24 +177,60 @@ public class BanHangServiceImpl implements IBanHangService {
 
     @Override
     @Transactional
-    public HoaDon hoanTatHoaDon(Long idHoaDon, Long idPhieuGiamGia, String phuongThucTT) {
-        HoaDon hoaDon = hoaDonRepo.findById(idHoaDon).orElseThrow();
-        List<HoaDonChiTiet> dsCT = hoaDonChiTietRepo.findByHoaDonId(idHoaDon);
+    public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idPhieuGiamGia, String phuongThucTT) {
+        HoaDon hoaDon = new HoaDon();
+        hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
+        hoaDon.setNgayTao(LocalDateTime.now());
+        hoaDon.setTrangThai("DA_THANH_TOAN");
+        hoaDon.setLoaiHoaDon("TAI_QUAY");
+        hoaDon.setNhanVien(nhanVienRepo.findById(1L).orElse(null));
+        hoaDon.setKhachHang(khachHangRepo.findById(1L).orElse(null));
 
-        BigDecimal tongTien = dsCT.stream()
-                .map(ct -> ct.getGiaBan().multiply(BigDecimal.valueOf(ct.getSoLuong())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        hoaDon = hoaDonRepo.save(hoaDon);
+
+        BigDecimal tongTien = BigDecimal.ZERO;
+
+        for (Map<String, Object> item : danhSachSanPham) {
+            Long idSPCT = Long.valueOf(item.get("idSanPhamChiTiet").toString());
+            Integer soLuong = Integer.valueOf(item.get("soLuong").toString());
+
+            SanPhamChiTiet spct = sanPhamChiTietRepo.findById(idSPCT).orElseThrow();
+
+            HoaDonChiTiet ct = new HoaDonChiTiet();
+            ct.setHoaDon(hoaDon);
+            ct.setSanPhamChiTiet(spct);
+            ct.setSoLuong(soLuong);
+            ct.setGiaBan(spct.getGiaBan());
+            ct.setGiaGoc(spct.getGiaBan());
+            ct.setGiaGiam(BigDecimal.ZERO);
+            ct.setNgayTao(LocalDateTime.now());
+
+            hoaDonChiTietRepo.save(ct);
+
+            tongTien = tongTien.add(spct.getGiaBan().multiply(BigDecimal.valueOf(soLuong)));
+
+            int tonKho = spct.getSoLuong() != null ? spct.getSoLuong() : 0;
+            spct.setSoLuong(Math.max(0, tonKho - soLuong));
+            sanPhamChiTietRepo.save(spct);
+        }
 
         BigDecimal tienGiam = BigDecimal.ZERO;
         if (idPhieuGiamGia != null) {
             PhieuGiamGia phieu = phieuGiamGiaRepo.findById(idPhieuGiamGia).orElseThrow();
             hoaDon.setPhieuGiamGia(phieu);
 
-//            if (tongTien.compareTo(phieu.getDieuKienApDung()) >= 0) {
-//                tienGiam = (phieu.getGiaTriGiam().compareTo(BigDecimal.valueOf(100)) <= 0)
-//                        ? tongTien.multiply(phieu.getGiaTriGiam()).divide(BigDecimal.valueOf(100))
-//                        : phieu.getGiaTriGiam();
+//            if (tongTien.compareTo(BigDecimal.valueOf(phieu.getDieuKienApDung())) >= 0) {
+//                BigDecimal giam = BigDecimal.valueOf(phieu.getGiaTriGiam());
+//                if (giam.compareTo(BigDecimal.valueOf(100)) <= 0) {
+//                    tienGiam = tongTien.multiply(giam).divide(BigDecimal.valueOf(100));
+//                } else {
+//                    tienGiam = giam;
+//                }
+//                if (tienGiam.compareTo(tongTien) > 0) {
+//                    tienGiam = tongTien;
+//                }
 //            }
+
         }
 
         hoaDon.setTongTien(tongTien);
@@ -196,15 +238,6 @@ public class BanHangServiceImpl implements IBanHangService {
         hoaDon.setThanhTien(tongTien.subtract(tienGiam));
         hoaDon.setPhuongThucThanhToan(phuongThucTT);
         hoaDon.setNgayHoanThanh(LocalDateTime.now());
-        hoaDon.setTrangThai("DA_THANH_TOAN");
-
-        for (HoaDonChiTiet ct : dsCT) {
-            SanPhamChiTiet spct = ct.getSanPhamChiTiet();
-            int slHienTai = spct.getSoLuong() != null ? spct.getSoLuong() : 0;
-            int slTru = ct.getSoLuong();
-            spct.setSoLuong(Math.max(0, slHienTai - slTru));
-            sanPhamChiTietRepo.save(spct);
-        }
 
         return hoaDonRepo.save(hoaDon);
     }

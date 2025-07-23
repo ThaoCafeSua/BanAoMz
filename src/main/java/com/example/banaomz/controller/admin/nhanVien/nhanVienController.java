@@ -24,7 +24,7 @@
 //@RequestMapping("/admin/employee")
 //public class nhanVienController {
 //    @Autowired
-//        private IChucVuService chucVuService;
+//    private IChucVuService chucVuService;
 //
 //    @Autowired
 //    private INhanVienService nhanVienService;

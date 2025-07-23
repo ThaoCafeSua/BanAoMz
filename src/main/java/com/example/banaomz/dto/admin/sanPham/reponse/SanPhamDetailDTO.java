@@ -29,6 +29,8 @@ public class SanPhamDetailDTO {
 
     private String slDaBan;
 
+    private String urlAnh;
+
     private List<SanPhamChiTietDTO> lstChiTietSanPham;
 
 }

@@ -327,7 +327,12 @@
             $('#thuongHieuSelect').val(data.thuongHieu.id); // Gán giá trị ID của thương hiệu
             $('#tenSanPham').val(data.tenSanPham); // Gán tên sản phẩm
             $("input[name='status_product'][value='" + data.trangThai + "']").prop('checked', true); // Gán trạng thái
+<<<<<<< HEAD
             $('#imagePreview').attr('src', contextPath + data.urlAnh).show();
+=======
+            $('#imagePreview').attr('src', data.urlAnh).show();
+            console.log('URL ảnh:', data.urlAnh);
+>>>>>>> acda269c7b86ece2009806bcabc2ef7d519e8ea6
             // let lstMauSac = data.lstChiTietSanPham.map(item => item.mauSac.id); // Lấy danh sách ID màu sắc
             // $('#colorSelect').val(lstMauSac).trigger('change'); // Gán giá trị vào select và kích hoạt sự kiện change (nếu dùng thư viện)
             //
