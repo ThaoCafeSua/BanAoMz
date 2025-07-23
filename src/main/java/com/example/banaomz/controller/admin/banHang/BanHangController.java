@@ -136,7 +136,7 @@ public class BanHangController {
             @RequestParam Long idSize) {
 
         var spct = sanPhamChiTietRepository
-                .findBySanPham_IdAndMauSac_IdAndSize_IdAndTrangThai(idSanPham, idMauSac, idSize, "Còn Hàng")
+                .findBySanPham_IdAndMauSac_IdAndSize_IdAndTrangThai(idSanPham, idMauSac, idSize, "HOAT_DONG")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy"));
 
         Map<String, Object> res = new HashMap<>();

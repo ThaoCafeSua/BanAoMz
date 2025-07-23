@@ -341,7 +341,7 @@
 
             html += '<tr class="text-center">';
             html += '<td>' + name + '</td>';
-            html += '<td><input type="number" min="1" max="' + tonKho + '" value="' + quantity + '" onchange="capNhatSoLuongLocal(\'' + item.idSPCT + '\', this.value)" class="form-control form-control-sm text-center"/></td>';
+            html += '<td><input type="number" min="1" max="' + tonKho + '" value="' + quantity + '" oninput="capNhatSoLuongLocal(\'' + item.idSPCT + '\', this.value)" class="form-control form-control-sm text-center"/></td>';
             html += '<td>' + thanhTien.toLocaleString('vi-VN') + ' ₫</td>';
             html += '<td><button class="btn btn-danger btn-sm" onclick="xoaSanPhamLocal(\'' + item.idSPCT + '\')">X</button></td>';
             html += '</tr>';
@@ -362,7 +362,7 @@
         const hd = hoaDonList.find(h => h.id === currentHoaDonId);
         if (!hd) return;
 
-        const item = hd.items.find(i => i.idSPCT === idSPCT);
+        const item = hd.items.find(i => String(i.idSPCT) === String(idSPCT));
         if (!item) return;
 
         soLuongMoi = parseInt(soLuongMoi);
