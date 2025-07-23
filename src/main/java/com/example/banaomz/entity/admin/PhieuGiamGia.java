@@ -12,7 +12,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.example.banaomz.entity.common.BaseEntity;
 
 @Entity
 @Table(name = "phieu_giam_gia")
@@ -20,7 +23,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PhieuGiamGia {
+public class PhieuGiamGia extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -42,7 +45,7 @@ public class PhieuGiamGia {
     private LocalDateTime ngayBatDau;
 
     @Column(name = "ngay_ket_thuc")
-    private LocalDateTime ngayKetThuc;
+    private LocalDate ngayKetThuc;
 
     @Column(name = "so_luong")
     private Integer soLuong;
@@ -59,4 +62,3 @@ public class PhieuGiamGia {
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 }
-
