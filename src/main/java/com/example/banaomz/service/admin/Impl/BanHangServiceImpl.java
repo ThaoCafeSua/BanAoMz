@@ -40,7 +40,7 @@ public class BanHangServiceImpl implements IBanHangService {
 
     @Override
     public List<SanPhamTaiQuayViewModel> layDanhSachSanPhamGoc() {
-        List<SanPhamChiTiet> danhSachSP = sanPhamChiTietRepo.findByTrangThaiAndSanPhamHoatDong("Còn hàng");
+        List<SanPhamChiTiet> danhSachSP = sanPhamChiTietRepo.findByTrangThaiAndSanPhamHoatDong("HOAT_DONG");
 
         Map<Long, SanPhamTaiQuayViewModel> map = new HashMap<>();
 
@@ -219,11 +219,18 @@ public class BanHangServiceImpl implements IBanHangService {
             PhieuGiamGia phieu = phieuGiamGiaRepo.findById(idPhieuGiamGia).orElseThrow();
             hoaDon.setPhieuGiamGia(phieu);
 
-//            if (tongTien.compareTo(phieu.getDieuKienApDung()) >= 0) {
-//                tienGiam = (phieu.getGiaTriGiam().compareTo(BigDecimal.valueOf(100)) <= 0)
-//                        ? tongTien.multiply(phieu.getGiaTriGiam()).divide(BigDecimal.valueOf(100))
-//                        : phieu.getGiaTriGiam();
+//            if (tongTien.compareTo(BigDecimal.valueOf(phieu.getDieuKienApDung())) >= 0) {
+//                BigDecimal giam = BigDecimal.valueOf(phieu.getGiaTriGiam());
+//                if (giam.compareTo(BigDecimal.valueOf(100)) <= 0) {
+//                    tienGiam = tongTien.multiply(giam).divide(BigDecimal.valueOf(100));
+//                } else {
+//                    tienGiam = giam;
+//                }
+//                if (tienGiam.compareTo(tongTien) > 0) {
+//                    tienGiam = tongTien;
+//                }
 //            }
+
         }
 
         hoaDon.setTongTien(tongTien);

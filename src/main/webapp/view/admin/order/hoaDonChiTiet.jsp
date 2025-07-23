@@ -144,13 +144,14 @@
                     </c:choose>
                 </h5>
             </div>
-
-            <a href="/admin/hoaDon/xuat-pdf/${hoaDonDetail.id}" class="btn btn-danger mt-3 ms-2">
-                <i class="fa-solid fa-file-pdf"></i> Xuất hóa đơn PDF
-            </a>
-
-
-            <a href="/admin/hoaDon" class="btn btn-secondary mt-3"><i class="fa fa-arrow-left"></i> Quay lại danh sách</a>
+            <div class="mt-4 text-end">
+                <a href="/admin/hoaDon/xuat-pdf/${hoaDonDetail.id}" class="btn btn-outline-danger rounded-pill px-4 py-2 shadow-sm me-2">
+                    <i class="fa-solid fa-file-pdf me-2 fa-lg"></i> Xuất PDF
+                </a>
+                <a href="/admin/hoaDon" class="btn btn-secondary rounded-pill px-4 py-2 shadow-sm">
+                    <i class="fa fa-arrow-left me-2"></i> Quay lại
+                </a>
+            </div>
         </div>
     </div>
 </div>

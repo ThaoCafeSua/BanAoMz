@@ -134,6 +134,7 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
     public SanPhamDetailDTO detailSanpham(Long sanPhamId) {
         SanPham sanPham = findById(sanPhamId).orElseThrow();
         SanPhamDetailDTO data = modelMapper.map(sanPham, SanPhamDetailDTO.class);
+        data.setUrlAnh(sanPham.getUrlAnh());
         return data;
     }
 
