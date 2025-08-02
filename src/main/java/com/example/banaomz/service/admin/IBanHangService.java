@@ -12,13 +12,14 @@ import java.util.Map;
 public interface  IBanHangService {
     HoaDon taoHoaDonMoi(Long idNhanVien, Long idKhachHang);
 
-    HoaDonChiTiet themSanPhamVaoHoaDon(Long idHoaDon, Long idSPCT, int soLuong);
+    HoaDonChiTiet themSanPhamVaoHoaDon(Long idHoaDon, Long idSPCT, int soLuong, Long idKhachHang);
 
     boolean  capNhatSoLuong(Long idHDCT, int soLuongMoi);
 
     void xoaSanPhamKhoiHoaDon(Long idHDCT);
 
-    HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idPhieuGiamGia, String phuongThucTT);
+    public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idKhachHang, Long idPhieuGiamGia, String phuongThucTT);
+
 
     List<HoaDonChiTiet> layDanhSachSanPhamTrongHoaDon(Long idHoaDon);
 

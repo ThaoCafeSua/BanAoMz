@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class BanHangServiceImpl implements IBanHangService {
@@ -95,7 +96,9 @@ public class BanHangServiceImpl implements IBanHangService {
         hoaDon.setTrangThai("CHO_THANH_TOAN");
         hoaDon.setLoaiHoaDon("CHO");
         hoaDon.setNhanVien(nhanVienRepo.findById(idNhanVien).orElse(null));
-        hoaDon.setKhachHang(khachHangRepo.findById(idKhachHang).orElse(null));
+        if (idKhachHang != null) {
+            hoaDon.setKhachHang(khachHangRepo.findById(idKhachHang).orElse(null));
+        }
         hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
         return hoaDonRepo.save(hoaDon);
     }
@@ -110,14 +113,15 @@ public class BanHangServiceImpl implements IBanHangService {
     }
 
     @Override
-    public HoaDonChiTiet themSanPhamVaoHoaDon(Long idHoaDon, Long idSPCT, int soLuong) {
+    public HoaDonChiTiet themSanPhamVaoHoaDon(Long idHoaDon, Long idSPCT, int soLuong, Long idKhachHang) {
         HoaDon hoaDon;
 
         if (idHoaDon == null || !hoaDonRepo.existsById(idHoaDon)) {
-            Long idNhanVienMacDinh = 1L; // mặc định nhân viên
-            Long idKhachHangMacDinh = 1L;//mặc định khách hàng
-
-            hoaDon = taoHoaDonMoi(idNhanVienMacDinh, idKhachHangMacDinh);
+            Long idNhanVienMacDinh = 1L;
+            if (idKhachHang == null) {
+                idKhachHang = 1L; // khách lẻ
+            }
+            hoaDon = taoHoaDonMoi(idNhanVienMacDinh, idKhachHang);
             idHoaDon = hoaDon.getId().longValue();
         } else {
             hoaDon = hoaDonRepo.findById(idHoaDon).orElseThrow();
@@ -177,14 +181,29 @@ public class BanHangServiceImpl implements IBanHangService {
 
     @Override
     @Transactional
-    public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idPhieuGiamGia, String phuongThucTT) {
+    public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham,
+                                Long idKhachHang,
+                                Long idPhieuGiamGia,
+                                String phuongThucTT) {
         HoaDon hoaDon = new HoaDon();
         hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
         hoaDon.setNgayTao(LocalDateTime.now());
         hoaDon.setTrangThai("DA_THANH_TOAN");
         hoaDon.setLoaiHoaDon("TAI_QUAY");
         hoaDon.setNhanVien(nhanVienRepo.findById(1L).orElse(null));
-        hoaDon.setKhachHang(khachHangRepo.findById(1L).orElse(null));
+        if (idKhachHang != null) {
+            Optional<KhachHang> optionalKH = khachHangRepo.findById(idKhachHang);
+            if (optionalKH.isPresent()) {
+                hoaDon.setKhachHang(optionalKH.get());
+            } else {
+                // Có thể xử lý lỗi tùy yêu cầu:
+                throw new RuntimeException("Không tìm thấy khách hàng với ID: " + idKhachHang);
+            }
+        } else {
+            // Nếu bạn muốn cho phép thanh toán không cần khách hàng (khách lẻ):
+            hoaDon.setKhachHang(null);
+        }
+
 
         hoaDon = hoaDonRepo.save(hoaDon);
 

@@ -121,15 +121,73 @@
         </div>
     </div>
 </div>
-<div class="card mt-3">
-    <div class="card-header text-white" style="background-color: #001f3d;">
-        <h6 class="mb-0">Danh sách hóa đơn chờ</h6>
+<div class="row mt-3">
+    <!-- Cột trái: Danh sách hóa đơn chờ -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header text-white" style="background-color: #001f3d;">
+                <h6 class="mb-0">Danh sách hóa đơn chờ</h6>
+            </div>
+            <div class="card-body p-2" id="hoaDonListContainer">
+                <ul class="list-group" id="hoaDonList">
+                    <!-- Danh sách hóa đơn sẽ hiển thị ở đây -->
+                </ul>
+                <button class="btn btn-sm btn-primary mt-2 w-100" onclick="taoHoaDonMoiVaRender()">+ Tạo hóa đơn mới</button>
+            </div>
+        </div>
     </div>
-    <div class="card-body p-2" id="hoaDonListContainer">
-        <ul class="list-group" id="hoaDonList">
-            <!-- Danh sách hóa đơn sẽ hiển thị ở đây -->
-        </ul>
-        <button class="btn btn-sm btn-primary mt-2 w-100" onclick="taoHoaDonMoiVaRender()">+ Tạo hóa đơn mới</button>
+
+    <!-- Cột phải: Chọn khách hàng -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header text-white" style="background-color: #001f3d;">
+                <h6 class="mb-0">Khách hàng</h6>
+            </div>
+            <div class="card-body p-3">
+                <!-- Tìm số điện thoại -->
+                <input type="text" class="form-control mb-2" id="timKhachHangInput" placeholder="Tìm theo số điện thoại...">
+
+                <!-- Select khách hàng -->
+                <div class="d-flex">
+                    <select class="form-select me-2" id="selectKhachHang">
+                    </select>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemKhachHang">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- Modal Thêm Khách Hàng -->
+        <div class="modal fade" id="modalThemKhachHang" tabindex="-1" aria-labelledby="modalThemKhachHangLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalThemKhachHangLabel">Thêm nhanh khách hàng</h5>
+                        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputTenKH" class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" id="inputTenKH">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputSDT" class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" id="inputSDT">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputGioiTinh" class="form-label">Giới tính</label>
+                            <select class="form-select" id="inputGioiTinh">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="button" class="btn btn-primary" id="btnThemKhachHang">Thêm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -411,9 +469,10 @@
 
         const idPhieuGiamGia = hd.idPhieuGiamGia || null;  // Nếu bạn có chọn mã giảm giá, gán vào hd.idPhieuGiamGia
         const phuongThucThanhToan = $('#phuongThucThanhToan').val() || 'TIEN_MAT';  // Lấy từ select nếu có
-
+        const idKhachHang = $('#selectKhachHang').val();
         const payload = {
             danhSachSanPham: danhSachSanPham,
+            idKhachHang: idKhachHang ? parseInt(idKhachHang) : null,
             idPhieuGiamGia: idPhieuGiamGia,
             phuongThucThanhToan: phuongThucThanhToan
         };
@@ -438,6 +497,105 @@
             }
         });
     });
+
+    let danhSachKhachHang = [];
+
+    $(document).ready(function () {
+        loadKhachHangSelect();
+
+        $('#timKhachHangInput').on('input', function () {
+            const keyword = $(this).val().toLowerCase().trim();
+
+            const filtered = danhSachKhachHang.filter(kh => {
+                const sdt = kh.soDienThoai?.replaceAll(' ', '') ?? '';
+                const ten = kh.hoVaTen?.toLowerCase() ?? '';
+                return sdt.includes(keyword) || ten.includes(keyword);
+            });
+
+            renderKhachHangSelect(filtered);
+        });
+
+    });
+
+    function loadKhachHangSelect() {
+        $.get("/admin/banHang/danh-sach-khach-hang", function (data) {
+            console.log("Dữ liệu KH:", data);
+            danhSachKhachHang = data || [];
+            renderKhachHangSelect(danhSachKhachHang);
+        });
+    }
+
+    function renderKhachHangSelect(list) {
+        const $select = $('#selectKhachHang');
+        $select.empty();
+
+        list.forEach(kh => {
+            const id = kh.id ?? '';
+            const ten = kh.hoVaTen ?? '';
+            const rawSdt = kh.soDienThoai ?? '';
+            const sdt = rawSdt.toString().replaceAll(' ', '').trim();
+            const hienThi = [ten, sdt && sdt.trim()].filter(Boolean).join(' - ');
+
+            console.log('KH:', { id, ten, rawSdt, sdt, hienThi });
+
+            const $option = $('<option>').val(id).text(hienThi);
+            $select.append($option);
+        });
+    }
+
+    $(document).ready(function () {
+        $('#btnThemKhachHang').click(function () {
+            const hoVaTen = $('#inputTenKH').val().trim();
+            const soDienThoai = $('#inputSDT').val().trim();
+            const gioiTinh = $('#inputGioiTinh').val();
+
+            if (!hoVaTen || !soDienThoai || !gioiTinh) {
+                toastr.warning("Vui lòng nhập đầy đủ thông tin khách hàng.");
+                return;
+            }
+
+            $.ajax({
+                url: '/admin/banHang/khach-hang/them-nhanh',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    hoVaTen: hoVaTen,
+                    soDienThoai: soDienThoai,
+                    gioiTinh: gioiTinh
+                }),
+                success: function (res) {
+                    toastr.success("Đã thêm khách hàng mới thành công.");
+
+                    // Đóng modal
+                    $('#modalThemKhachHang').modal('hide');
+
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open').css('padding-right', '');
+
+                    // Làm sạch form
+                    $('#inputTenKH').val('');
+                    $('#inputSDT').val('');
+                    $('#inputGioiTinh').val('Nam');
+
+                    // Reload lại danh sách KH để có khách mới
+                    loadKhachHangSelect();
+
+                    // Gán sẵn khách mới vào select
+                    $('#selectKhachHang').val(res.id);
+                },
+                error: function (xhr) {
+                    if (xhr.status === 400 || xhr.status === 409) {
+                        toastr.error(xhr.responseText);
+                    } else {
+                        toastr.error("Đã xảy ra lỗi khi thêm khách hàng.");
+                    }
+                }
+            });
+        });
+    });
+
+
+
 
 </script>
 
