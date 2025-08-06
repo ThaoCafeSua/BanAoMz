@@ -25,4 +25,9 @@ public interface IKhachHangRepository extends IBaseRepository<KhachHang,Long> {
         WHERE kh.id = :idCustomer
     """)
     Optional<KhachHang> findCustomerAddressById(@Param("idCustomer") Long idCustomer);
+
+    @Query("SELECT k FROM KhachHang k WHERE k.hoVaTen LIKE %:keyword% OR k.soDienThoai LIKE %:keyword%")
+    List<KhachHang> timKiemKhachHang(@Param("keyword") String keyword);
+
+    boolean existsBySoDienThoai(String soDienThoai);
 }
