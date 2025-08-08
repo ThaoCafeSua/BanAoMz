@@ -80,11 +80,11 @@
                     <div class="col d-flex">
                         <div class="form-check">
                             <input class="form-check-input" id="status_type_on" type="radio" name="status_product" value="HOAT_DONG" checked>
-                            <label class="form-check-label" for="status_type_on">Đang bán</label>
+                            <label class="form-check-label" for="status_type_on">Hoạt động</label>
                         </div>
                         <div class="form-check ml-2">
                             <input class="form-check-input" id="status_type_off" type="radio" name="status_product" value="NGUNG_HOAT_DONG">
-                            <label class="form-check-label" for="status_type_off">Ngừng bán</label>
+                            <label class="form-check-label" for="status_type_off">Ngừng hoạt động</label>
                         </div>
                     </div>
                 </div>
@@ -427,7 +427,7 @@
                     item.color.tenMauSac,
                     item.mass.tenSize,
                     '<input class="form-control quantity-input" type="number" min="1" value="' + item.quantity + '" data-index="' + index + '" />',
-                    '<input class="form-control price-input" type="number" min="1" value="' + item.price + '" data-index="' + index + '" />',
+                    '<input class="form-control price-input" type="number" min="5000" value="' + item.price + '" data-index="' + index + '" />',
                     '<button class="btn btn-danger deleteProduct" data-index="' + index + '"><i class="fa-solid fa-trash"></i></button>'
                 ]);
             });
@@ -521,9 +521,9 @@
             var newPrice = $(this).val(); // Lấy giá trị mới của giá
 
             // Kiểm tra xem giá trị nhập vào có phải là số và không phải số âm
-            if (isNaN(newPrice) || newPrice < 0) {
-                $(this).val(1); // Đặt lại giá trị trong input thành 100000
-                newPrice = 1; // Cập nhật số lượng trong mảng dữ liệu
+            if (isNaN(newPrice) || newPrice < 5000) {
+                $(this).val(5000); // Đặt lại giá trị trong input thành 100000
+                newPrice = 5000; // Cập nhật số lượng trong mảng dữ liệu
             }
             // Cập nhật giá trong mảng dữ liệu
             productDetailArr[indexToUpdate].price = newPrice;

@@ -215,7 +215,7 @@
     <nav class="navbar navbar-expand-lg shadow-sm">
         <div class="container">
             <!-- Logo -->
-            <a class="navbar-brand logo" href="#">
+            <a class="navbar-brand logo" href="/">
                 <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
             </a>
 
