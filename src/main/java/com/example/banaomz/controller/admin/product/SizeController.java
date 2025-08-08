@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -24,8 +25,8 @@ public class SizeController {
     }
     @GetMapping("/list")
     @ResponseBody
-    public ResponseEntity<?> getSize(@RequestParam String search) {
-        List<SizeDTO> lst = sizeService.findAllSize(search);
+    public ResponseEntity<?> getSize(@RequestParam String search,  @RequestParam String status) {
+        List<SizeDTO> lst = sizeService.findAllSize(search,status);
         return new ResponseEntity<>(ResponseObject.builder().data(lst).build(), HttpStatus.OK);
     }
     @GetMapping("/create")
@@ -37,8 +38,9 @@ public class SizeController {
         return "admin/main";
     }
     @PostMapping("/create")
-    public String create(@ModelAttribute SizeDTO req) {
+    public String create(@ModelAttribute SizeDTO req, RedirectAttributes redirectAttributes) {
         sizeService.createSize(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm size thành công!");
         return "redirect:/admin/size";
     }
     @GetMapping("/update/{id}")
@@ -54,8 +56,9 @@ public class SizeController {
         return "admin/main";
     }
     @PostMapping("/update")
-    public String update(@ModelAttribute SizeDTO req) {
+    public String update(@ModelAttribute SizeDTO req, RedirectAttributes redirectAttributes) {
         sizeService.updateSize(req);
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật size thành công!");
         return "redirect:/admin/size";
     }
     @GetMapping("/detail/{id}")

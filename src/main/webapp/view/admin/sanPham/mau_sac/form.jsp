@@ -3,8 +3,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Viết CSS riêng -->
 <style>
     .title-primary {
         color: #001f3d;
@@ -30,11 +30,30 @@
     <div class="card">
         <div class="card-body">
             <form id="mauSacForm" action="${action}" method="post" onsubmit="validateForm(event)">
-                <input type="hidden" class="form-control" name="id" id="idKhoiLuong" value="${mauSac.id}">
+                <input type="hidden" class="form-control" name="id" value="${mauSac.id}">
 
+                <!-- Tên màu sắc -->
                 <div class="mb-3">
                     <label for="inputName" class="form-label label-primary">Tên Màu Sắc</label>
                     <input type="text" class="form-control" name="tenMauSac" id="inputName" placeholder="Nhập tên màu sắc" value="${mauSac.tenMauSac}">
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <div>
+                        <label>
+                            <input type="radio" name="trangThai" value="HOAT_DONG"
+                                   <c:if test="${empty mauSac.trangThai || mauSac.trangThai eq 'HOAT_DONG'}">checked</c:if>>
+                            Hoạt Động
+                        </label>
+                        &nbsp;&nbsp;
+                        <label>
+                            <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                                   <c:if test="${mauSac.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if>>
+                            Ngừng hoạt động
+                        </label>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">
@@ -47,18 +66,16 @@
 
 <script>
     function validateForm(event) {
-        event.preventDefault(); // Ngăn hành động gửi form mặc định
+        event.preventDefault();
 
-        // Kiểm tra tên màu sắc
         var name = $("#inputName").val().trim();
         if (name === "") {
-            toastr.error("Màu sắc không được để trống");
+            toastr.error("Tên màu sắc không được để trống");
             return false;
         }
 
-        // Hiển thị xác nhận trước khi gửi form
         Swal.fire({
-            title: 'Bạn chắc chắn muốn ${btnText} màu sắc này?',
+            title: 'Bạn chắc chắn muốn ${btnText} này?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#001f3d',
@@ -67,12 +84,11 @@
             cancelButtonText: 'Hủy bỏ'
         }).then((result) => {
             if (result.isConfirmed) {
-                event.target.submit(); // Gửi form trực tiếp sau khi xác nhận
+                event.target.submit();
             }
         });
     }
 
-    // Gắn sự kiện validateForm vào form khi trang được tải
     $(document).ready(function () {
         $("#mauSacForm").on("submit", validateForm);
     });

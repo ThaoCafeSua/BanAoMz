@@ -22,4 +22,7 @@ public class DanhMuc extends BaseEntity {
 
     @Column(name = "ten_danh_muc")
     private String tenDanhMuc;
+
+    @Column(name = "trang_thai")
+    private String trangThai;
 }

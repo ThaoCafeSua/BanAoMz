@@ -3,6 +3,7 @@ package com.example.banaomz.service.admin.Impl;
 import com.example.banaomz.dto.admin.sanPham.reponse.SanPhamDTO;
 import com.example.banaomz.dto.admin.sanPham.reponse.SanPhamDetailDTO;
 import com.example.banaomz.entity.admin.*;
+import com.example.banaomz.enums.Status;
 import com.example.banaomz.repository.admin.ISanPhamChiTietRepository;
 import com.example.banaomz.repository.admin.ISanPhamRepository;
 import com.example.banaomz.service.admin.*;
@@ -14,12 +15,12 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamRepository>
         implements ISanPhamService {
+
     @Autowired
     IDanhMucService danhMucService;
     @Autowired
@@ -48,25 +49,34 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
         ThuongHieu thuongHieu = thuongHieuService.findById(dto.getThuongHieu()).orElseThrow();
         DanhMuc danhMuc = danhMucService.findById(dto.getDanhMuc()).orElseThrow();
         XuatXu xuatXu = xuatXuService.findById(dto.getXuatXu()).orElseThrow();
-        SanPham sanPham = SanPham.builder().tenSanPham(dto.getTenSanPham()).danhMuc(danhMuc)
+        SanPham sanPham = SanPham.builder()
+                .tenSanPham(dto.getTenSanPham())
+                .danhMuc(danhMuc)
                 .maSanPham(genMaSanPham())
-                .xuatXu(xuatXu).thuongHieu(thuongHieu)
+                .xuatXu(xuatXu)
+                .thuongHieu(thuongHieu)
                 .trangThai(dto.getTrangThai())
                 .urlAnh(dto.getUrlAnh())
                 .build();
         SanPham sanPhamEntity = createNew(sanPham);
-        List<SanPhamChiTiet> listSanPhamChiTiet = dto.getLstChiTietSanPham().stream().map(item -> {
-            MauSac mauSac = mauSacService.findById(item.getMauSacId()).orElseThrow();
-            Size size = sizeService.findById(item.getSizeId()).orElseThrow();
-            SanPhamChiTiet entity = SanPhamChiTiet.builder()
-                    .size(size)
-                    .mauSac(mauSac)
-                    .sanPham(sanPhamEntity)
-                    .soLuong(Integer.valueOf(item.getSoLuong()))
-                    .giaBan(BigDecimal.valueOf(Double.valueOf(item.getGiaBan())))
-                    .build();
-            return entity;
-        }).toList();
+
+        List<SanPhamChiTiet> listSanPhamChiTiet = dto.getLstChiTietSanPham().stream()
+                .map(item -> {
+                    MauSac mauSac = mauSacService.findById(item.getMauSacId()).orElseThrow();
+                    Size size = sizeService.findById(item.getSizeId()).orElseThrow();
+                    int qty = Integer.parseInt(item.getSoLuong());
+                    BigDecimal price = BigDecimal.valueOf(Double.parseDouble(item.getGiaBan()));
+                    SanPhamChiTiet entity = SanPhamChiTiet.builder()
+                            .size(size)
+                            .mauSac(mauSac)
+                            .sanPham(sanPhamEntity)
+                            .soLuong(qty)
+                            .giaBan(price)
+                            .trangThai(qty == 0 ? Status.NGUNG_HOAT_DONG.name() : Status.HOAT_DONG.name())
+                            .build();
+                    return entity;
+                })
+                .collect(Collectors.toList());
         sanPhamChiTietRepository.saveAll(listSanPhamChiTiet);
         return dto;
     }
@@ -84,27 +94,36 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
         sanPham.setTrangThai(dto.getTrangThai());
         sanPham.setUrlAnh(dto.getUrlAnh());
 
-        List<SanPhamChiTiet> listSanPhamChiTiet = dto.getLstChiTietSanPham().stream().map(item -> {
-            item.setSanPhamId(dto.getId());  // Lỗi vì item là DTO, phải thay đổi
-            Optional<SanPhamChiTiet> otp = sanPhamChiTietRepository.findSanPhamChiTietBySanPham(item);
-            if (otp.isPresent()) {
-                SanPhamChiTiet entity = otp.get();
-                entity.setSoLuong(Integer.valueOf(item.getSoLuong()));
-                entity.setGiaBan(BigDecimal.valueOf(Double.valueOf(item.getGiaBan())));
-                return entity;
-            } else {
-                MauSac mauSac = mauSacService.findById(item.getMauSacId()).orElseThrow();
-                Size size = sizeService.findById(item.getSizeId()).orElseThrow();
-                SanPhamChiTiet entity = SanPhamChiTiet.builder()
-                        .size(size)
-                        .mauSac(mauSac)
-                        .sanPham(sanPham) // Thay vì item.setSanPhamId(dto.getId())
-                        .soLuong(Integer.valueOf(item.getSoLuong()))
-                        .giaBan(BigDecimal.valueOf(Double.valueOf(item.getGiaBan())))
-                        .build();
-                return entity;
-            }
-        }).toList();
+        List<SanPhamChiTiet> listSanPhamChiTiet = dto.getLstChiTietSanPham().stream()
+                .map(item -> {
+                    int qty = Integer.parseInt(item.getSoLuong());
+                    BigDecimal price = BigDecimal.valueOf(Double.parseDouble(item.getGiaBan()));
+                    Optional<SanPhamChiTiet> otp = sanPhamChiTietRepository
+                            .findSanPhamChiTietBySanPham(
+                                    dto.getId(),
+                                    item.getSizeId(),
+                                    item.getMauSacId()
+                            );
+                    if (otp.isPresent()) {
+                        SanPhamChiTiet entity = otp.get();
+                        entity.setSoLuong(qty);
+                        entity.setGiaBan(price);
+                        entity.setTrangThai(item.getTrangThai());
+                        return entity;
+                    } else {
+                        MauSac mauSac = mauSacService.findById(item.getMauSacId()).orElseThrow();
+                        Size size = sizeService.findById(item.getSizeId()).orElseThrow();
+                        return SanPhamChiTiet.builder()
+                                .size(size)
+                                .mauSac(mauSac)
+                                .sanPham(sanPham)
+                                .soLuong(qty)
+                                .giaBan(price)
+                                .trangThai(qty == 0 ? Status.NGUNG_HOAT_DONG.name() : Status.HOAT_DONG.name())
+                                .build();
+                    }
+                })
+                .collect(Collectors.toList());
 
         sanPhamChiTietRepository.saveAll(listSanPhamChiTiet);
         update(sanPham);
@@ -115,14 +134,13 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
     public SanPhamDetailDTO detailSanpham(Long sanPhamId) {
         SanPham sanPham = findById(sanPhamId).orElseThrow();
         SanPhamDetailDTO data = modelMapper.map(sanPham, SanPhamDetailDTO.class);
+        data.setUrlAnh(sanPham.getUrlAnh());
         return data;
     }
+
     private String genMaSanPham() {
-        long count = repository.count(); // tổng số sản phẩm đã có
-        String stt = String.format("%04d", count + 1); // VD: 0001, 0002
-        return "SP" + stt; // --> SP0001, SP0002...
+        long count = repository.count();
+        String stt = String.format("%02d", count + 1);
+        return "SP" + stt;
     }
-
-
-
 }

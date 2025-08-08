@@ -7,7 +7,7 @@ import com.example.banaomz.service.common.IBaseService;
 import java.util.List;
 
 public interface IMauSacService extends IBaseService<MauSac,Long> {
-    List<MauSacDTO> findAllMauSac(String value);
+    List<MauSacDTO> findAllMauSac(String value, String status);
     MauSacDTO createMauSac(MauSacDTO dto);
     MauSacDTO updateMauSac(MauSacDTO dto);
     MauSacDTO detailMauSac(Long id);

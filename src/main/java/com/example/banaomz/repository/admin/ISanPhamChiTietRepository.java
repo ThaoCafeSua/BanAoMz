@@ -1,7 +1,8 @@
 package com.example.banaomz.repository.admin;
 
-import com.example.banaomz.dto.admin.sanPham.request.SanPhamChiTietDTO;
+import com.example.banaomz.entity.admin.MauSac;
 import com.example.banaomz.entity.admin.SanPhamChiTiet;
+import com.example.banaomz.entity.admin.Size;
 import com.example.banaomz.repository.common.IBaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,21 +14,53 @@ import java.util.Optional;
 @Repository
 public interface ISanPhamChiTietRepository extends IBaseRepository<SanPhamChiTiet, Long> {
     @Query("""
-            select spct from SanPhamChiTiet spct
-            where spct.soLuong > 0 
-            and spct.sanPham.trangThai LIKE :sts%
-            and (spct.sanPham.tenSanPham LIKE %:search% OR spct.maVach LIKE %:search%)
-            order by spct.sanPham.ngayTao desc 
-            """)
-    List<SanPhamChiTiet> findLstSanPhamChiTiet(@Param("search") String value, @Param("sts") String sts);
+        select spct
+        from SanPhamChiTiet spct
+        where spct.soLuong > 0
+          and spct.trangThai = :status
+          and spct.sanPham.tenSanPham like concat('%', :search, '%')
+        order by spct.sanPham.ngayTao desc
+    """)
+    List<SanPhamChiTiet> findLstSanPhamChiTiet(
+            @Param("search") String search,
+            @Param("status") String status
+    );
 
     @Query("""
-            select spct from SanPhamChiTiet spct 
-            where spct.sanPham.id = :#{#dto.sanPhamId}
-            and spct.size.id = :#{#dto.sizeId}
-            and spct.mauSac.id = :#{#dto.mauSacId}
-            """)
-    Optional<SanPhamChiTiet> findSanPhamChiTietBySanPham(@Param("dto") SanPhamChiTietDTO dto);
+        select spct
+        from SanPhamChiTiet spct
+        where spct.sanPham.id = :sanPhamId
+          and spct.size.id     = :sizeId
+          and spct.mauSac.id   = :mauSacId
+    """)
+    Optional<SanPhamChiTiet> findSanPhamChiTietBySanPham(
+            @Param("sanPhamId") Long sanPhamId,
+            @Param("sizeId") Long sizeId,
+            @Param("mauSacId") Long mauSacId
+    );
 
+    List<SanPhamChiTiet> findBySanPham_Id(Long idSanPham);
 
+    Optional<SanPhamChiTiet> findBySanPham_IdAndMauSac_IdAndSize_IdAndTrangThai(
+            Long idSanPham,
+            Long idMauSac,
+            Long idSize,
+            String trangThai
+    );
+
+    @Query("SELECT DISTINCT s.mauSac FROM SanPhamChiTiet s WHERE s.sanPham.id = :idSanPham")
+    List<MauSac> findDistinctMauSacBySanPhamId(@Param("idSanPham") Long idSanPham);
+
+    @Query("SELECT DISTINCT s.size FROM SanPhamChiTiet s WHERE s.sanPham.id = :idSanPham")
+    List<Size> findDistinctSizeBySanPhamId(@Param("idSanPham") Long idSanPham);
+
+    @Query("""
+        select spct
+        from SanPhamChiTiet spct
+        where spct.trangThai          = :trangThai
+          and spct.sanPham.trangThai = 'HOAT_DONG'
+    """)
+    List<SanPhamChiTiet> findByTrangThaiAndSanPhamHoatDong(
+            @Param("trangThai") String trangThai
+    );
 }

@@ -28,6 +28,24 @@
                 <label class="form-label label-primary">Tên Xuất Xứ:</label>
                 <input type="text" class="form-control" name="tenXuatXu" readonly value="${xuatXu.tenXuatXu}">
             </div>
+
+            <div class="mb-3">
+                <label class="form-label label-primary">Trạng Thái:</label>
+                <div>
+                    <label>
+                        <input type="radio" name="trangThai" value="HOAT_DONG"
+                               <c:if test="${xuatXu.trangThai eq 'HOAT_DONG'}">checked</c:if> disabled>
+                        Hoạt Động
+                    </label>
+                    &nbsp;&nbsp;
+                    <label>
+                        <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                               <c:if test="${xuatXu.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if> disabled>
+                        Ngừng Hoạt Động
+                    </label>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

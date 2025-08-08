@@ -19,4 +19,6 @@ public class SanPhamChiTietDTO {
 
     private Integer giaBan;
 
+    private String trangThai;
+
 }

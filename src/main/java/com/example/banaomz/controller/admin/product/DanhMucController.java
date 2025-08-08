@@ -15,6 +15,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 import java.util.List;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/admin/category")
 public class DanhMucController {
@@ -30,11 +32,10 @@ public class DanhMucController {
 
     @GetMapping("/list")
     @ResponseBody
-    public ResponseEntity<?> getDanhMuc(@RequestParam String search) {
-        List<DanhMucDTO> lst = danhMucService.findAllDanhMuc(search);
+    public ResponseEntity<?> getDanhMuc(@RequestParam String search,  @RequestParam String status) {
+        List<DanhMucDTO> lst = danhMucService.findAllDanhMuc(search, status);
         return new ResponseEntity<>(ResponseObject.builder().data(lst).build(), HttpStatus.OK);
     }
-
     @GetMapping("/create")
     public String formCreate(Model model) {
         model.addAttribute("danhMuc", new DanhMucDTO());
@@ -43,16 +44,12 @@ public class DanhMucController {
         model.addAttribute("page", "sanPham/danh_muc/form");
         return "admin/main";
     }
-
     @PostMapping("/create")
     public String create(@Valid @ModelAttribute DanhMucDTO req, RedirectAttributes redirectAttributes) {
         danhMucService.createDanhMuc(req);
-
-        // Thêm thông báo vào flash attribute
-        redirectAttributes.addFlashAttribute("message", "Thêm danh mục thành công!");
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm danh mục thành công!");
         return "redirect:/admin/category";
     }
-
     @GetMapping("/update/{id}")
     public String formUpdate(@PathVariable Long id, Model model) {
         DanhMucDTO danhMuc = danhMucService.detailDanhMuc(id);
@@ -65,16 +62,12 @@ public class DanhMucController {
         model.addAttribute("page", "sanPham/danh_muc/form");
         return "admin/main";
     }
-
     @PostMapping("/update")
     public String update(@ModelAttribute DanhMucDTO req, RedirectAttributes redirectAttributes) {
         danhMucService.updateDanhMuc(req);
-
-        // Thêm thông báo vào flash attribute
-        redirectAttributes.addFlashAttribute("message", "Cập nhật danh mục thành công!");
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật danh mục thành công!");
         return "redirect:/admin/category";
     }
-
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Long id, Model model) {
         DanhMucDTO danhMuc = danhMucService.detailDanhMuc(id);
@@ -85,4 +78,6 @@ public class DanhMucController {
         model.addAttribute("page", "sanPham/danh_muc/detail");
         return "admin/main";
     }
+
+
 }

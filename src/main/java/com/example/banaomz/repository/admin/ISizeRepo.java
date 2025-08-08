@@ -11,6 +11,12 @@ import java.util.List;
 
 @Repository
 public interface ISizeRepo extends IBaseRepository<Size,Long> {
-    @Query(value = "SELECT sz FROM Size sz WHERE sz.tenSize LIKE %:value% order by sz.ngayTao desc ")
-    List<Size> findAllStaff(@Param("value") String value);
+    @Query("""
+        SELECT sz FROM Size sz 
+        WHERE sz.tenSize LIKE %:value% 
+          AND (:status IS NULL OR :status = '' OR sz.trangThai = :status)
+        ORDER BY sz.ngayTao DESC
+    """)
+    List<Size> findAllSize(@Param("value") String value, @Param("status") String status);
+
 }

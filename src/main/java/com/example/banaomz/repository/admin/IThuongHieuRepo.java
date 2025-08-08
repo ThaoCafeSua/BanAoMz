@@ -11,6 +11,15 @@ import java.util.List;
 @Repository
 public interface IThuongHieuRepo extends IBaseRepository<ThuongHieu,Long> {
 
-    @Query(value = "SELECT th FROM ThuongHieu th WHERE th.tenThuongHieu LIKE %:value% order by th.ngayTao desc ")
-    List<ThuongHieu> findAllThuongHieu(@Param("value") String value);
+    @Query("""
+        SELECT th 
+        FROM ThuongHieu th 
+        WHERE th.tenThuongHieu LIKE %:value% 
+          AND (:status IS NULL OR :status = '' OR th.trangThai = :status)
+        ORDER BY th.ngayTao DESC
+    """)
+    List<ThuongHieu> findAllThuongHieu(
+            @Param("value") String value,
+            @Param("status") String status
+    );
 }

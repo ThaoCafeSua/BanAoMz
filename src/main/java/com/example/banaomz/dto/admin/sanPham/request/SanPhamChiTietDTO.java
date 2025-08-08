@@ -11,4 +11,6 @@ public class SanPhamChiTietDTO {
     private Long mauSacId;
     private String soLuong;
     private String giaBan;
+    private String trangThai;
+
 }

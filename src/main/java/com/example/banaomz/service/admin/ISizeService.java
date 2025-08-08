@@ -7,7 +7,7 @@ import com.example.banaomz.service.common.IBaseService;
 import java.util.List;
 
 public interface ISizeService extends IBaseService<Size, Long> {
-    List<SizeDTO> findAllSize(String value);
+    List<SizeDTO> findAllSize(String value, String status);
     SizeDTO createSize(SizeDTO dto);
     SizeDTO updateSize(SizeDTO dto);
     SizeDTO detailSize(Long id);

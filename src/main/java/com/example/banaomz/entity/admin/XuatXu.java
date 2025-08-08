@@ -22,4 +22,7 @@ public class XuatXu extends BaseEntity {
 
     @Column(name = "ten_xuat_xu")
     private String tenXuatXu;
+
+    @Column(name = "trang_thai")
+    private String trangThai;
 }

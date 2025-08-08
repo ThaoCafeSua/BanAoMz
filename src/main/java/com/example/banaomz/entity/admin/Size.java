@@ -22,4 +22,7 @@ public class Size extends BaseEntity {
     @Column(name = "ten_size")
     private String tenSize;
 
+    @Column(name = "trang_thai")
+    private String trangThai;
+
 }

@@ -3,6 +3,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <!-- Viết CSS riêng -->
 <style>
@@ -36,6 +38,24 @@
                 <div class="mb-3">
                     <label for="danhMucName" class="form-label">Tên Danh Mục</label>
                     <input type="text" class="form-control" name="tenDanhMuc" id="danhMucName" placeholder="Nhập tên danh mục" value="${danhMuc.tenDanhMuc}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <div>
+                        <label>
+                            <input type="radio" name="trangThai" value="HOAT_DONG"
+                                   <c:if test="${empty danhMuc.trangThai || danhMuc.trangThai eq 'HOAT_DONG'}">checked</c:if>>
+                            Hoạt Động
+
+                        </label>
+                        &nbsp;&nbsp;
+                        <label>
+                            <input type="radio" name="trangThai" value="NGUNG_HOAT_DONG"
+                                   <c:if test="${danhMuc.trangThai eq 'NGUNG_HOAT_DONG'}">checked</c:if>>
+                            Ngừng hoạt động
+                        </label>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">

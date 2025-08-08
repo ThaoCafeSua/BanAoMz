@@ -33,9 +33,6 @@ public class SanPhamChiTiet extends BaseEntity {
     @JoinColumn(name = "id_san_pham")
     private SanPham sanPham;
 
-    @Column(name = "url_anh")
-    private String urlAnh;
-
     @Column(name = "so_luong")
     private Integer soLuong;
 

@@ -7,7 +7,7 @@ import com.example.banaomz.service.common.IBaseService;
 import java.util.List;
 
 public interface IThuongHieuService extends IBaseService<ThuongHieu,Long> {
-    List<ThuongHieuDTO> findAllThuongHieu(String value);
+    List<ThuongHieuDTO> findAllThuongHieu(String value, String status);
     ThuongHieuDTO createThuongHieu(ThuongHieuDTO dto);
     ThuongHieuDTO updateThuongHieu(ThuongHieuDTO dto);
     ThuongHieuDTO detailThuongHieu(Long id);

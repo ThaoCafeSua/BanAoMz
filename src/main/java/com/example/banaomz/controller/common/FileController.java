@@ -53,19 +53,26 @@ public class FileController {
         }
     }
 
-    @GetMapping ("/images/{filename}")
+    @GetMapping("/images/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
             Path filePath = Paths.get(uploadPaths).resolve(filename).normalize();
             Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // Đổi loại media nếu cần
-                        .body(resource);
-            } else {
+            if (!resource.exists()) {
                 return ResponseEntity.notFound().build();
             }
-        } catch (MalformedURLException e) {
+
+            // Tự động xác định content type theo phần mở rộng
+            String contentType = Files.probeContentType(filePath);
+            MediaType mediaType = (contentType != null)
+                    ? MediaType.parseMediaType(contentType)
+                    : MediaType.APPLICATION_OCTET_STREAM;
+
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .body(resource);
+
+        } catch (IOException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

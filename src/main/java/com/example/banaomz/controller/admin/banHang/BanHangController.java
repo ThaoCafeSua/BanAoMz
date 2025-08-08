@@ -1,0 +1,267 @@
+package com.example.banaomz.controller.admin.banHang;
+
+import com.example.banaomz.dto.admin.GioHang.GioHangDTO;
+import com.example.banaomz.dto.admin.sanPham.reponse.SanPhamTaiQuayViewModel;
+import com.example.banaomz.entity.admin.HoaDon;
+import com.example.banaomz.entity.admin.HoaDonChiTiet;
+import com.example.banaomz.entity.admin.KhachHang;
+import com.example.banaomz.repository.admin.IHoaDonRepository;
+import com.example.banaomz.repository.admin.IKhachHangRepository;
+import com.example.banaomz.repository.admin.ISanPhamChiTietRepository;
+import com.example.banaomz.service.admin.IBanHangService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/admin/banHang")
+public class BanHangController {
+
+    @Autowired
+    private IBanHangService banHangService;
+
+    @Autowired
+    private ISanPhamChiTietRepository sanPhamChiTietRepository;
+
+    @Autowired
+    private IHoaDonRepository hoaDonRepo;
+
+    @Autowired
+    private IKhachHangRepository khachHangRepo;
+
+    @GetMapping
+    public String hienThiTrangBanHang(Model model) {
+        // Dùng ViewModel để hiển thị ảnh, màu, size theo từng sản phẩm
+        List<SanPhamTaiQuayViewModel> danhSach = banHangService.layDanhSachSanPhamGoc();
+        model.addAttribute("sanPhamList", danhSach);
+        model.addAttribute("page", "banHang/banHang");
+        return "/admin/header";
+    }
+
+    @PostMapping("/tao-hoa-don")
+    @ResponseBody
+    public HoaDon taoHoaDonMoi(@RequestParam(value = "idKhachHang", required = false) Long idKhachHang) {
+        Long idNhanVienMacDinh = 1L; // lấy từ session nếu cần
+
+        if (idKhachHang == null) {
+            idKhachHang = 1L; // khách lẻ
+        }
+
+        return banHangService.taoHoaDonMoi(idNhanVienMacDinh, idKhachHang);
+    }
+
+
+    @PostMapping("/them-san-pham")
+    @ResponseBody
+    public ResponseEntity<?> themSanPham(@RequestParam(required = false) Long idHoaDon,
+                                         @RequestParam Long idSanPhamChiTiet,
+                                         @RequestParam int soLuong,
+                                         @RequestParam(required = false) Long idKhachHang) { // ✅ Cho phép null
+        try {
+            HoaDon hoaDon;
+
+            if (idHoaDon == null || !banHangService.tonTaiHoaDon(idHoaDon)) {
+                Long khachHangId = (idKhachHang != null) ? idKhachHang : 1L; // ✅ nếu null thì mặc định khách lẻ
+                hoaDon = banHangService.taoHoaDonMoi(1L, khachHangId);
+                idHoaDon = hoaDon.getId().longValue();
+            } else {
+                hoaDon = hoaDonRepo.findById(idHoaDon).orElseThrow();
+            }
+
+            HoaDonChiTiet hdct = banHangService.themSanPhamVaoHoaDon(idHoaDon, idSanPhamChiTiet, soLuong, idKhachHang);
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("hdct", hdct);
+            res.put("hoaDon", hoaDon);
+
+            return ResponseEntity.ok(res);
+
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi hệ thống");
+        }
+    }
+
+
+    @PostMapping("/xoa-san-pham")
+    @ResponseBody
+    public void xoaSanPhamKhoiHoaDon(@RequestParam Long idHoaDonChiTiet) {
+        banHangService.xoaSanPhamKhoiHoaDon(idHoaDonChiTiet);
+    }
+
+    @PostMapping("/thanh-toan")
+    public ResponseEntity<?> thanhToan(@RequestBody Map<String, Object> requestData) {
+        List<Map<String, Object>> dsSP = (List<Map<String, Object>>) requestData.get("danhSachSanPham");
+        Long idKhachHang = requestData.get("idKhachHang") != null ? Long.valueOf(requestData.get("idKhachHang").toString()) : null;
+        Long idPhieuGiamGia = requestData.get("idPhieuGiamGia") != null ? Long.valueOf(requestData.get("idPhieuGiamGia").toString()) : null;
+        String phuongThucTT = (String) requestData.get("phuongThucThanhToan");
+
+        HoaDon hoaDon = banHangService.hoanTatHoaDon(dsSP, idKhachHang, idPhieuGiamGia, phuongThucTT);
+        return ResponseEntity.ok(hoaDon);
+    }
+
+
+
+    // ✅ Lấy danh sách sản phẩm trong hóa đơn (giỏ hàng)
+    @GetMapping("/danh-sach-san-pham")
+    @ResponseBody
+    public List<GioHangDTO> layDanhSachSanPham(@RequestParam Long idHoaDon) {
+        List<HoaDonChiTiet> chiTietList = banHangService.layDanhSachSanPhamTrongHoaDon(idHoaDon);
+        List<GioHangDTO> result = new ArrayList<>();
+
+        for (HoaDonChiTiet hdct : chiTietList) {
+            var spct = hdct.getSanPhamChiTiet();
+
+            GioHangDTO dto = new GioHangDTO();
+            dto.setId(hdct.getId());
+            dto.setIdSanPhamChiTiet(spct.getId());
+            dto.setTenSanPham(spct.getSanPham().getTenSanPham());
+            dto.setTenMauSac(spct.getMauSac().getTenMauSac());
+            dto.setTenSize(spct.getSize().getTenSize());
+            dto.setGiaBan(hdct.getGiaBan());
+            dto.setSoLuong(hdct.getSoLuong());
+
+            BigDecimal thanhTien = hdct.getGiaBan().multiply(BigDecimal.valueOf(hdct.getSoLuong()));
+            dto.setTongTien(thanhTien);
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
+    @GetMapping("/tim-san-pham-chi-tiet")
+    @ResponseBody
+    public Map<String, Object> timSanPhamChiTiet(
+            @RequestParam Long idSanPham,
+            @RequestParam Long idMauSac,
+            @RequestParam Long idSize) {
+
+        var spct = sanPhamChiTietRepository
+                .findBySanPham_IdAndMauSac_IdAndSize_IdAndTrangThai(idSanPham, idMauSac, idSize, "HOAT_DONG")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy"));
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("id", spct.getId());
+        res.put("tenSanPham", spct.getSanPham().getTenSanPham());
+        res.put("tenMauSac", spct.getMauSac().getTenMauSac());
+        res.put("tenSize", spct.getSize().getTenSize());
+        res.put("giaBan", spct.getGiaBan());
+        res.put("soLuongTon", spct.getSoLuong());
+        return res;
+    }
+
+    @GetMapping("/lay-thuoc-tinh")
+    @ResponseBody
+    public Map<String, Object> layThuocTinh(@RequestParam Long idSanPham) {
+        Map<String, Object> result = new HashMap<>();
+
+        List<Map<String, Object>> mauSacList = new ArrayList<>();
+        List<Map<String, Object>> sizeList = new ArrayList<>();
+        List<Map<String, Object>> spctList = new ArrayList<>();
+
+        // Lấy màu
+        banHangService.getMauSacBySanPham(idSanPham).forEach(mau -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", mau.getId());
+            item.put("ten", mau.getTenMauSac());
+            mauSacList.add(item);
+        });
+
+        // Lấy size
+        banHangService.getSizeBySanPham(idSanPham).forEach(size -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", size.getId());
+            item.put("ten", size.getTenSize());
+            sizeList.add(item);
+        });
+
+        // ✅ Lấy tất cả các SPCT có idSanPham này (để xử lý combo màu-size)
+        sanPhamChiTietRepository.findBySanPham_Id(idSanPham).forEach(spct -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", spct.getId());
+            item.put("idMauSac", spct.getMauSac().getId());
+            item.put("idSize", spct.getSize().getId());
+            spctList.add(item);
+        });
+
+        result.put("mauSacList", mauSacList);
+        result.put("sizeList", sizeList);
+        result.put("sanPhamChiTietList", spctList); // ✅ Bổ sung dòng này
+
+        return result;
+    }
+    @PostMapping("/cap-nhat-so-luong")
+    public ResponseEntity<?> capNhatSoLuong(
+            @RequestParam Long idHoaDonChiTiet,
+            @RequestParam int soLuongMoi) {
+        boolean ok = banHangService.capNhatSoLuong(idHoaDonChiTiet, soLuongMoi);
+        if (!ok) {
+            return ResponseEntity.badRequest().body("Số lượng vượt quá tồn kho");
+        }
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/danh-sach-hoa-don-cho")
+    @ResponseBody
+    public ResponseEntity<List<HoaDon>> getHoaDonCho() {
+        return ResponseEntity.ok(banHangService.layDanhSachHoaDonCho());
+    }
+
+    @GetMapping("/danh-sach-khach-hang")
+    @ResponseBody
+    public ResponseEntity<?> getDanhSachKhachHang() {
+        List<KhachHang> danhSach = khachHangRepo.findAll();
+        return ResponseEntity.ok(danhSach);
+    }
+
+    @GetMapping("/tim-kiem-khach-hang")
+    @ResponseBody
+    public ResponseEntity<?> timKiemKhachHang(@RequestParam("keyword") String keyword) {
+        String pattern = "%" + keyword + "%";
+        List<KhachHang> ketQua = khachHangRepo.timKiemKhachHang(pattern);
+        return ResponseEntity.ok(ketQua);
+    }
+
+
+    @PostMapping("/khach-hang/them-nhanh")
+    @ResponseBody
+    public ResponseEntity<?> themNhanhKhachHang(@RequestBody Map<String, String> data) {
+        try {
+            String hoVaTen = data.get("hoVaTen");
+            String soDienThoai = data.get("soDienThoai");
+            String gioiTinh = data.get("gioiTinh");
+
+            if (hoVaTen == null || soDienThoai == null || gioiTinh == null) {
+                return ResponseEntity.badRequest().body("Thiếu thông tin bắt buộc");
+            }
+            if (khachHangRepo.existsBySoDienThoai(soDienThoai)) {
+                return ResponseEntity.badRequest().body("Số điện thoại đã tồn tại");
+            }
+
+            KhachHang kh = new KhachHang();
+            kh.setHoVaTen(hoVaTen);
+            kh.setSoDienThoai(soDienThoai);
+            kh.setGioiTinh(gioiTinh);
+
+            KhachHang saved = khachHangRepo.save(kh);
+            return ResponseEntity.ok(saved);
+
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi thêm khách hàng");
+        }
+    }
+
+
+}

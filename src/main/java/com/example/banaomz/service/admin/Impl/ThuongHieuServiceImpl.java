@@ -23,8 +23,8 @@ public class ThuongHieuServiceImpl extends BaseServiceImpl<ThuongHieu, Long, ITh
     private ModelMapper modelMapper;
 
     @Override
-    public List<ThuongHieuDTO> findAllThuongHieu(String value) {
-        return repository.findAllThuongHieu(value).stream()
+    public List<ThuongHieuDTO> findAllThuongHieu(String value, String status) {
+        return repository.findAllThuongHieu(value, status).stream()
                 .map(item -> modelMapper.map(item, ThuongHieuDTO.class))
                 .toList();
     }

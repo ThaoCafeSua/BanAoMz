@@ -1,5 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!-- Đặt lên đầu trang JSP, ngay sau các taglib -->
+<script type="text/javascript">
+    const contextPath = '${pageContext.request.contextPath}';
+</script>
+
+
 <style>
     .card {
         border: 1px solid #006d7f !important;
@@ -58,13 +64,13 @@
                         <div class="form-check">
                             <input disabled class="form-check-input" id="status_type_on" type="radio" name="status_product"  value="HOAT_DONG" checked>
                             <label class="form-check-label" for="status_type_on">
-                                Đang bán
+                                Hoạt động
                             </label>
                         </div>
                         <div class="form-check ml-2">
                             <input disabled class="form-check-input" id="status_type_off" type="radio" name="status_product" value="NGUNG_HOAT_DONG">
                             <label class="form-check-label" for="status_type_off">
-                                Ngừng bán
+                                Ngừng hoạt động
                             </label>
                         </div>
                     </div>
@@ -97,6 +103,7 @@
                     <th>Size</th>
                     <th>Số Lượng</th>
                     <th>Giá Bán</th>
+                    <th>Trạng Thái</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -116,67 +123,114 @@
         $('#colorSelect').select2();
         $('#massSelect').select2();
 
-        function getDataDanhMuc() {
+        function getDataDanhMuc(currentDanhMucId, currentDanhMucName) {
             $('#danhMucSelect').empty();
-            $('#danhMucSelect').append('<option value="" selected disabled>Chọn danh mục</option>');
+            $('#danhMucSelect').append('<option value="" disabled>Chọn danh mục</option>');
+
             $.ajax({
                 url: '/admin/category/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: {
+                    search: '',
+                    status: 'HOAT_DONG'  // chỉ lấy danh mục hoạt động
+                },
                 success: function (response) {
+                    let exists = false;
+
                     response.data.forEach(function (item) {
-                        $('#danhMucSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenDanhMuc)
-                        );
+                        const option = $('<option></option>').val(item.id).text(item.tenDanhMuc);
+                        $('#danhMucSelect').append(option);
+
+                        if (item.id == currentDanhMucId) {
+                            exists = true;
+                        }
                     });
+
+                    // Nếu danh mục hiện tại không có trong danh sách (vì nó ngừng hoạt động)
+                    if (!exists) {
+                        $('#danhMucSelect').append(
+                            $('<option></option>')
+                                .val(currentDanhMucId)
+                                .text(currentDanhMucName)
+                        );
+                    }
+
+                    $('#danhMucSelect').val(currentDanhMucId);
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
         getDataDanhMuc()
 
-        function getDataThuongHieu() {
+        function getDataThuongHieu(currentThuongHieuId, currentThuongHieuName) {
             $('#thuongHieuSelect').empty();
-            $('#thuongHieuSelect').append('<option value="" selected disabled>Chọn thương hiệu</option>');
+            $('#thuongHieuSelect').append('<option value="" disabled>Chọn thương hiệu</option>');
+
             $.ajax({
                 url: '/admin/brand/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' },
                 success: function (response) {
+                    let exists = false;
+
                     response.data.forEach(function (item) {
-                        $('#thuongHieuSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenThuongHieu)
-                        );
+                        const option = $('<option></option>').val(item.id).text(item.tenThuongHieu);
+                        $('#thuongHieuSelect').append(option);
+
+                        if (item.id == currentThuongHieuId) {
+                            exists = true;
+                        }
                     });
+
+                    if (!exists && currentThuongHieuId) {
+                        $('#thuongHieuSelect').append(
+                            $('<option></option>').val(currentThuongHieuId).text(currentThuongHieuName)
+                        );
+                    }
+
+                    $('#thuongHieuSelect').val(currentThuongHieuId);
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
         getDataThuongHieu()
-
-        function getDataXuatXu() {
+        function getDataXuatXu(currentXuatXuId, currentXuatXuName) {
             $('#xuatXuSelect').empty();
-            $('#xuatXuSelect').append('<option value="" selected disabled>Chọn xuất xứ</option>');
+            $('#xuatXuSelect').append('<option value="" disabled>Chọn xuất xứ</option>');
+
             $.ajax({
                 url: '/admin/origin/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: { search: '', status: 'HOAT_DONG' },
                 success: function (response) {
+                    let exists = false;
+
                     response.data.forEach(function (item) {
-                        $('#xuatXuSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenXuatXu)
-                        );
+                        const option = $('<option></option>').val(item.id).text(item.tenXuatXu);
+                        $('#xuatXuSelect').append(option);
+
+                        if (item.id == currentXuatXuId) {
+                            exists = true;
+                        }
                     });
+
+                    if (!exists && currentXuatXuId) {
+                        $('#xuatXuSelect').append(
+                            $('<option></option>').val(currentXuatXuId).text(currentXuatXuName)
+                        );
+                    }
+
+                    $('#xuatXuSelect').val(currentXuatXuId);
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
+                    console.log(xhr.responseJSON);
                 }
             });
         }
@@ -188,21 +242,21 @@
                 url: '/admin/color/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: {
+                    search: '',
+                    status: 'HOAT_DONG'  // 👈 thêm dòng này
+                },
                 success: function (response) {
-                    colorData = response.data
-                    response.data.forEach(function (item) {
+                    colorData = response.data;
+                    response.data.forEach(item => {
                         $('#colorSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenMauSac)
+                            $('<option>').val(item.id).text(item.tenMauSac)
                         );
                     });
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON); // In ra thông báo lỗi
                 }
             });
         }
-        getDataMauSac()
+        getDataMauSac();
 
         function getDataSize() {
             $('#massSelect').empty();
@@ -210,17 +264,17 @@
                 url: '/admin/size/list',
                 method: 'GET',
                 dataType: 'json',
-                data: {search: ''},
+                data: {
+                    search: '',
+                    status: 'HOAT_DONG'  // 👈 thêm dòng này
+                },
                 success: function (response) {
                     massData = response.data;
-                    response.data.forEach(function (item) {
+                    response.data.forEach(item => {
                         $('#massSelect').append(
-                            $('<option></option>').val(item.id).text(item.tenSize)
+                            $('<option>').val(item.id).text(item.tenSize)
                         );
                     });
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseJSON);
                 }
             });
         }
@@ -236,6 +290,7 @@
                     let data = response.data;
 
                     loadDataProdcutDetail(data)
+                    getDataDanhMuc(data.danhMuc.id, data.danhMuc.tenDanhMuc);
                     productDetailArr = response.data.lstChiTietSanPham.map(item => {
                         return {
                             tenSanPham: data.tenSanPham, // Gán giá trị cho thuộc tính tenSanPham
@@ -272,7 +327,8 @@
             $('#thuongHieuSelect').val(data.thuongHieu.id); // Gán giá trị ID của thương hiệu
             $('#tenSanPham').val(data.tenSanPham); // Gán tên sản phẩm
             $("input[name='status_product'][value='" + data.trangThai + "']").prop('checked', true); // Gán trạng thái
-            $('#imagePreview').attr('src', data.urlAnh); // Gán URL ảnh
+            $('#imagePreview').attr('src', data.urlAnh).show();
+            console.log('URL ảnh:', data.urlAnh);
             // let lstMauSac = data.lstChiTietSanPham.map(item => item.mauSac.id); // Lấy danh sách ID màu sắc
             // $('#colorSelect').val(lstMauSac).trigger('change'); // Gán giá trị vào select và kích hoạt sự kiện change (nếu dùng thư viện)
             //
@@ -290,7 +346,10 @@
                     item.mauSac?.tenMauSac || '',
                     item.size?.tenSize || '',
                     item.soLuong,
-                    item.giaBan?.toLocaleString('vi-VN') + ' ₫'
+                    item.giaBan?.toLocaleString('vi-VN') + ' ₫',
+                    (item.trangThai === 'HOAT_DONG'
+                        ? 'Hoạt Động'
+                        : 'Ngừng hoạt động')
                 ]);
             });
             productTable.draw();
