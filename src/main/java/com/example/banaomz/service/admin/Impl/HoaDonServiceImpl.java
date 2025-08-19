@@ -84,8 +84,8 @@ public class HoaDonServiceImpl implements IHoaDonService {
                 hd.getKhachHang() != null ? hd.getKhachHang().getHoVaTen() : "Khách lẻ",
                 hd.getNhanVien() != null ? hd.getNhanVien().getTenNhanVien() : "Không rõ",
 
-                hd.getKhachHang() != null ? hd.getKhachHang().getHoVaTen() : "Khách lẻ", // tenNguoiNhan
-                hd.getKhachHang() != null ? hd.getKhachHang().getSoDienThoai() : "Không có", // soDienThoaiNguoiNhan
+                hd.getTenNguoiNhan(),
+                hd.getSoDienThoaiNguoiNhan() ,
                 hd.getDiaChiNguoiNhan(),
 
                 hd.getTongTien(),

@@ -107,8 +107,15 @@ public class BanHangController {
         Long idKhachHang = requestData.get("idKhachHang") != null ? Long.valueOf(requestData.get("idKhachHang").toString()) : null;
         Long idPhieuGiamGia = requestData.get("idPhieuGiamGia") != null ? Long.valueOf(requestData.get("idPhieuGiamGia").toString()) : null;
         String phuongThucTT = (String) requestData.get("phuongThucThanhToan");
+        String tenNguoiNhan = requestData.get("tenNguoiNhan") != null
+                ? requestData.get("tenNguoiNhan").toString()
+                : null;
+        String sdtNguoiNhan = requestData.get("sdtNguoiNhan") != null
+                ? requestData.get("sdtNguoiNhan").toString()
+                : null;
 
-        HoaDon hoaDon = banHangService.hoanTatHoaDon(dsSP, idKhachHang, idPhieuGiamGia, phuongThucTT);
+        HoaDon hoaDon = banHangService.hoanTatHoaDon(dsSP, idKhachHang, idPhieuGiamGia, phuongThucTT, tenNguoiNhan,
+                sdtNguoiNhan);
         return ResponseEntity.ok(hoaDon);
     }
 

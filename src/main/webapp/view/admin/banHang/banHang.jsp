@@ -14,9 +14,26 @@
 
 <div class="container-fluid mt-4">
     <div class="row">
-        <!-- DANH SÁCH SẢN PHẨM -->
+
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header text-white py-2" style="background-color: #001f3d;">
+                <h6 class="mb-0">Danh sách hóa đơn chờ</h6>
+            </div>
+            <div class="card-body p-2" id="hoaDonListContainer">
+
+                <!-- Thanh tab ngang -->
+                <ul class="nav nav-pills mb-2" id="hoaDonTabs" role="tablist">
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-success fw-bold" onclick="taoHoaDonMoiVaRender()">+ </button>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <!-- Cột trái: Danh sách sản phẩm -->
         <div class="col-md-7">
-            <div class="card">
+            <div class="card mb-3">
                 <div class="card-header text-white" style="background-color: #001f3d;">
                     <h5 class="mb-0">Danh sách sản phẩm</h5>
                 </div>
@@ -49,8 +66,7 @@
                                     </c:choose>
                                 </td>
                                 <td>
-                                    <button
-                                            class="btn btn-sm btn-primary rounded-circle"
+                                    <button class="btn btn-sm btn-primary rounded-circle"
                                             style="width: 36px; height: 36px; padding: 0;"
                                             data-id="${sp.idSanPham}"
                                             data-ten="${fn:escapeXml(sp.tenSanPham)}"
@@ -65,17 +81,44 @@
                 </div>
             </div>
         </div>
-
-        <!-- GIỎ HÀNG -->
+        <!-- Cột phải: Hóa đơn chờ → Khách hàng → Giỏ hàng → Thanh toán -->
         <div class="col-md-5">
-            <div class="card">
-                <div class="card-header text-white" style="background-color: #001f3d;">
+
+            <!-- Danh sách hóa đơn chờ dạng tab -->
+
+
+            <!-- Khách hàng -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header text-white py-2" style="background-color: #001f3d;">
+                    <h6 class="mb-0">Khách hàng</h6>
+                </div>
+                <div class="card-body p-2">
+                    <!-- Tìm kiếm + chọn khách -->
+                    <div class="mb-2 d-flex gap-2">
+                        <input type="text" class="form-control form-control-sm" id="timKhachHangInput" placeholder="Tìm SĐT...">
+                        <select class="form-select form-select-sm" id="selectKhachHang"></select>
+                    </div>
+                    <!-- Người nhận & SĐT -->
+                    <div class="row g-2">
+                        <div class="col">
+                            <input type="text" id="nguoiNhan" class="form-control form-control-sm" placeholder="Người nhận">
+                        </div>
+                        <div class="col">
+                            <input type="text" id="sdtNguoiNhan" class="form-control form-control-sm" placeholder="SĐT người nhận">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giỏ hàng -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header text-white py-2" style="background-color: #001f3d;">
                     <h5 class="mb-0">Giỏ hàng</h5>
                 </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr class="text-center">
+                <div class="card-body p-2">
+                    <table class="table table-bordered table-sm mb-3 align-middle text-center">
+                        <thead class="table-light">
+                        <tr>
                             <th>Tên</th>
                             <th>SL</th>
                             <th>Giá</th>
@@ -84,18 +127,27 @@
                         </thead>
                         <tbody id="cartItems"></tbody>
                     </table>
-                    <div class="d-flex justify-content-between mt-3">
+
+                    <!-- Tổng tiền -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 p-2 bg-light rounded">
                         <strong>Tổng tiền:</strong>
-                        <strong id="totalAmount">0 ₫</strong>
+                        <strong id="totalAmount" class="text-danger">0 ₫</strong>
                     </div>
-                    <button class="btn btn-success w-100 mt-3" id="btnCheckout">Thanh Toán</button>
+
+                    <!-- Thanh toán -->
+                    <button class="btn btn-success w-100 mt-2" id="btnCheckout">
+                        💳 Thanh Toán
+                    </button>
                 </div>
             </div>
+
         </div>
+
+
     </div>
 </div>
 
-<!-- MODAL CHỌN MÀU & SIZE -->
+<!-- Modal chọn màu & size -->
 <div class="modal fade" id="variantModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -121,78 +173,24 @@
         </div>
     </div>
 </div>
-<div class="row mt-3">
-    <!-- Cột trái: Danh sách hóa đơn chờ -->
-    <div class="col-md-7">
-        <div class="card">
-            <div class="card-header text-white" style="background-color: #001f3d;">
-                <h6 class="mb-0">Danh sách hóa đơn chờ</h6>
-            </div>
-            <div class="card-body p-2" id="hoaDonListContainer">
-                <ul class="list-group" id="hoaDonList">
-                    <!-- Danh sách hóa đơn sẽ hiển thị ở đây -->
-                </ul>
-                <button class="btn btn-sm btn-primary mt-2 w-100" onclick="taoHoaDonMoiVaRender()">+ Tạo hóa đơn mới</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cột phải: Chọn khách hàng -->
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header text-white" style="background-color: #001f3d;">
-                <h6 class="mb-0">Khách hàng</h6>
-            </div>
-            <div class="card-body p-3">
-                <!-- Tìm số điện thoại -->
-                <input type="text" class="form-control mb-2" id="timKhachHangInput" placeholder="Tìm theo số điện thoại...">
-
-                <!-- Select khách hàng -->
-                <div class="d-flex">
-                    <select class="form-select me-2" id="selectKhachHang">
-                    </select>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemKhachHang">+</button>
-                </div>
-            </div>
-        </div>
-    </div>
-        <!-- Modal Thêm Khách Hàng -->
-        <div class="modal fade" id="modalThemKhachHang" tabindex="-1" aria-labelledby="modalThemKhachHangLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="modalThemKhachHangLabel">Thêm nhanh khách hàng</h5>
-                        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="inputTenKH" class="form-label">Họ và tên</label>
-                            <input type="text" class="form-control" id="inputTenKH">
-                        </div>
-                        <div class="mb-3">
-                            <label for="inputSDT" class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" id="inputSDT">
-                        </div>
-                        <div class="mb-3">
-                            <label for="inputGioiTinh" class="form-label">Giới tính</label>
-                            <select class="form-select" id="inputGioiTinh">
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" class="btn btn-primary" id="btnThemKhachHang">Thêm</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 
 <style>
+
+    #timKhachHangInput,
+    #selectKhachHang,
+    #nguoiNhan,
+    #sdtNguoiNhan {
+        width: 100%;
+        max-width: 180px;
+    }
+
+    .form-control-sm,
+    .form-select-sm {
+        padding: 4px 6px;
+        font-size: 0.875rem;
+        border-radius: 6px;
+    }
+
     .table th, .table td {
         border: 1px solid #dcdcdc !important;
         vertical-align: middle !important;
@@ -215,28 +213,118 @@
     .btn-primary:hover {
         background-color: #004080;
     }
+
+    /* Bỏ viền cũ của Bootstrap */
+    #hoaDonTabs .nav-link {
+        border: none;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-right: 6px;
+        padding: 6px 12px;
+        font-weight: 500;
+        color: #333;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Hover nhẹ */
+    /* Style cho tab hóa đơn */
+    #hoaDonTabs .nav-link {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    #hoaDonTabs .nav-link:hover {
+        background-color: #f1f1f1;
+    }
+
+
+    .delete-badge {
+        display: inline-block;
+        background-color: #dc3545;
+        color: white;
+        font-weight: bold;
+        width: 18px;
+        height: 18px;
+        line-height: 16px;
+        text-align: center;
+        border-radius: 50%;
+        font-size: 12px;
+        margin-left: 6px;
+        transition: 0.2s;
+    }
+
+    .delete-badge:hover {
+        background-color: #bb2d3b;
+        transform: scale(1.1);
+    }
+
+    /* Chỉ hiện nút xóa khi hover vào tab */
+    #hoaDonTabs .nav-link .delete-badge {
+        opacity: 0;
+    }
+
+    #hoaDonTabs .nav-link:hover .delete-badge {
+        opacity: 1;
+    }
+
+    /* Nút thêm hóa đơn */
+    #hoaDonTabs .nav-link.text-success {
+        background: #d4edda;
+        color: #155724;
+        font-size: 18px;
+        padding: 4px 12px;
+        border-radius: 8px;
+    }
+
+    #hoaDonTabs .nav-link.text-success:hover {
+        background: #c3e6cb;
+    }
+    .custom-active {
+        background-color: #001f3d !important;
+        color: white !important;
+        border-radius: 5px; /* bo góc cho đẹp */
+    }
+
+
 </style>
 
 
 <script>
     const modal = new bootstrap.Modal(document.getElementById('variantModal'));
 
-    let hoaDonList = JSON.parse(localStorage.getItem('hoaDonList')) || [];
+    let hoaDonList = [];
+    try {
+        hoaDonList = JSON.parse(localStorage.getItem('hoaDonList')) || [];
+        if (!Array.isArray(hoaDonList)) hoaDonList = [];
+    } catch (e) {
+        hoaDonList = [];
+    }
+
     let currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
 
     renderHoaDonList();
     loadCart();
 
     function taoHoaDonMoiVaRender() {
-        const id = 'HD' + Date.now();
+        // Lấy counter từ localStorage, nếu chưa có thì bắt đầu từ 1
+        let counter = parseInt(localStorage.getItem('hoaDonCounter')) || 1;
+
+        // Giới hạn từ 1 đến 1000
+        if (counter > 1000) counter = 1;
+        const id = 'HD' + counter;
         hoaDonList.push({ id: id, items: [] });
         currentHoaDonId = id;
+        counter++;
+        localStorage.setItem('hoaDonCounter', counter);
         saveHoaDonList();
         renderHoaDonList();
         loadCart();
     }
 
     function chonHoaDon(id) {
+        console.log("Chọn hóa đơn:", id);
         currentHoaDonId = id;
         renderHoaDonList();
         loadCart();
@@ -257,24 +345,49 @@
     }
 
     function renderHoaDonList() {
-        const ul = $('#hoaDonList');
+        const ul = $('#hoaDonTabs');
         ul.empty();
 
         hoaDonList.forEach(hd => {
-            const li = $('<li class="list-group-item d-flex justify-content-between align-items-center"></li>');
-            const text = $('<span></span>').text(hd.id);
-            const removeBtn = $('<button class="btn btn-sm btn-danger ms-2"><i class="fa fa-trash"></i></button>').click(e => {
+            const isActive = hd.id === currentHoaDonId ? 'active custom-active' : '';
+            const li = $('<li>', { class: 'nav-item', role: 'presentation' });
+            const btn = $('<button>', {
+                class: `nav-link ${isActive}`,
+                'data-id': hd.id,
+                type: 'button',
+                'aria-selected': isActive ? 'true' : 'false'
+            }).text(hd.id + ' ');
+
+            const span = $('<span>', {
+                class: 'delete-badge ms-1',
+                style: 'cursor:pointer;',
+                html: '&times;'
+            });
+
+            btn.append(span);
+            li.append(btn);
+
+            li.find('button').click(() => chonHoaDon(hd.id));
+            li.find('span').click(e => {
                 e.stopPropagation();
                 if (confirm('Xóa hóa đơn này?')) {
                     xoaHoaDon(hd.id);
                 }
             });
-            li.append(text).append(removeBtn);
-            li.click(() => chonHoaDon(hd.id));
-            if (hd.id === currentHoaDonId) li.addClass('active');
+
             ul.append(li);
         });
+
+        // Nút thêm hóa đơn mới
+        const addLi = $(`
+        <li class="nav-item" role="presentation">
+            <button class="nav-link text-success fw-bold" type="button">+</button>
+        </li>
+    `);
+        addLi.find('button').click(() => taoHoaDonMoiVaRender());
+        ul.append(addLi);
     }
+
 
     function openModalFromBtn(button) {
         const id = $(button).data('id');
@@ -470,11 +583,15 @@
         const idPhieuGiamGia = hd.idPhieuGiamGia || null;  // Nếu bạn có chọn mã giảm giá, gán vào hd.idPhieuGiamGia
         const phuongThucThanhToan = $('#phuongThucThanhToan').val() || 'TIEN_MAT';  // Lấy từ select nếu có
         const idKhachHang = $('#selectKhachHang').val();
+        const tenNguoiNhan = $('#nguoiNhan').val().trim();
+        const sdtNguoiNhan = $('#sdtNguoiNhan').val().trim();
         const payload = {
             danhSachSanPham: danhSachSanPham,
             idKhachHang: idKhachHang ? parseInt(idKhachHang) : null,
             idPhieuGiamGia: idPhieuGiamGia,
-            phuongThucThanhToan: phuongThucThanhToan
+            phuongThucThanhToan: phuongThucThanhToan,
+            tenNguoiNhan: tenNguoiNhan,
+            sdtNguoiNhan: sdtNguoiNhan
         };
 
         $.ajax({
@@ -484,6 +601,9 @@
             data: JSON.stringify(payload),
             success: function (hoaDon) {
                 alert('Thanh toán thành công!\nMã hóa đơn: ' + hoaDon.maHoaDon);
+
+                $('#nguoiNhan').val('');
+                $('#sdtNguoiNhan').val('');
 
                 hoaDonList = hoaDonList.filter(h => h.id !== currentHoaDonId);
                 currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
