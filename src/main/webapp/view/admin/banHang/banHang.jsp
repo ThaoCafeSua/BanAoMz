@@ -23,10 +23,6 @@
 
                 <!-- Thanh tab ngang -->
                 <ul class="nav nav-pills mb-2" id="hoaDonTabs" role="tablist">
-
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link text-success fw-bold" onclick="taoHoaDonMoiVaRender()">+ </button>
-                    </li>
                 </ul>
 
             </div>
@@ -239,27 +235,6 @@
         background-color: #f1f1f1;
     }
 
-
-    .delete-badge {
-        display: inline-block;
-        background-color: #dc3545;
-        color: white;
-        font-weight: bold;
-        width: 18px;
-        height: 18px;
-        line-height: 16px;
-        text-align: center;
-        border-radius: 50%;
-        font-size: 12px;
-        margin-left: 6px;
-        transition: 0.2s;
-    }
-
-    .delete-badge:hover {
-        background-color: #bb2d3b;
-        transform: scale(1.1);
-    }
-
     /* Chỉ hiện nút xóa khi hover vào tab */
     #hoaDonTabs .nav-link .delete-badge {
         opacity: 0;
@@ -281,11 +256,51 @@
     #hoaDonTabs .nav-link.text-success:hover {
         background: #c3e6cb;
     }
-    .custom-active {
+    .nav-pills .nav-link.active {
         background-color: #001f3d !important;
-        color: white !important;
-        border-radius: 5px; /* bo góc cho đẹp */
+        color: #fff !important;
+        font-weight: bold;
+        border: 2px solid #ffc107; /* viền vàng nổi bật */
+        border-radius: 6px;
     }
+    #hoaDonTabs .btn-outline-danger {
+        border-radius: 50%;
+        line-height: 1;
+        font-size: 14px;
+    }
+    /* Nút hóa đơn */
+    #hoaDonTabs .nav-link {
+        border-radius: 20px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        transition: all 0.2s ease-in-out;
+    }
+
+    #hoaDonTabs .nav-link.active {
+        background-color: #001f3d;
+        color: white;
+        font-weight: bold;
+    }
+
+    /* Nút xóa hóa đơn */
+    #hoaDonTabs .btn-remove {
+        border: none;
+        background: transparent;
+        color: #dc3545;
+        font-size: 14px;
+        margin-left: 3px;
+        padding: 0 4px;
+        line-height: 1;
+        cursor: pointer;
+        transition: color 0.2s ease-in-out;
+    }
+
+    #hoaDonTabs .btn-remove:hover {
+        color: #fff;
+        background-color: #dc3545;
+        border-radius: 50%;
+    }
+
 
 
 </style>
@@ -343,49 +358,81 @@
     function saveHoaDonList() {
         localStorage.setItem('hoaDonList', JSON.stringify(hoaDonList));
     }
-
     function renderHoaDonList() {
-        const ul = $('#hoaDonTabs');
-        ul.empty();
+        const container = document.getElementById("hoaDonListContainer");
+        const tabList = document.createElement("ul");
+        tabList.className = "nav nav-pills mb-2";
+        tabList.id = "hoaDonTabs";
+        tabList.setAttribute("role", "tablist");
 
         hoaDonList.forEach(hd => {
-            const isActive = hd.id === currentHoaDonId ? 'active custom-active' : '';
-            const li = $('<li>', { class: 'nav-item', role: 'presentation' });
-            const btn = $('<button>', {
-                class: `nav-link ${isActive}`,
-                'data-id': hd.id,
-                type: 'button',
-                'aria-selected': isActive ? 'true' : 'false'
-            }).text(hd.id + ' ');
+            const li = document.createElement("li");
+            li.className = "nav-item me-1";
+            li.setAttribute("role", "presentation");
 
-            const span = $('<span>', {
-                class: 'delete-badge ms-1',
-                style: 'cursor:pointer;',
-                html: '&times;'
-            });
+            // nút chọn hóa đơn (bao gồm luôn nút xóa ở trong)
+            const btn = document.createElement("button");
+            btn.className = "nav-link d-flex align-items-center" + (hd.id === currentHoaDonId ? " active" : "");
+            btn.onclick = function () {
+                currentHoaDonId = hd.id;
+                saveHoaDonList();
+                renderHoaDonList();
+                loadCart();
+            };
 
-            btn.append(span);
-            li.append(btn);
+            // text hiển thị id hóa đơn
+            const spanText = document.createElement("span");
+            spanText.textContent = hd.id;
 
-            li.find('button').click(() => chonHoaDon(hd.id));
-            li.find('span').click(e => {
-                e.stopPropagation();
-                if (confirm('Xóa hóa đơn này?')) {
-                    xoaHoaDon(hd.id);
+            // nút xoá nhỏ nằm trong tab
+            const btnRemove = document.createElement("span");
+            btnRemove.innerHTML = "&times;";
+            btnRemove.className = "ms-2 text-danger fw-bold";
+            btnRemove.style.cursor = "pointer";
+            btnRemove.onclick = function (e) {
+                e.stopPropagation(); // không kích hoạt nút chọn
+
+                if (confirm("Bạn có chắc chắn muốn xóa hóa đơn " + hd.id + " không?")) {
+                    hoaDonList = hoaDonList.filter(item => item.id !== hd.id);
+
+                    if (currentHoaDonId === hd.id) {
+                        currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
+                    }
+
+                    saveHoaDonList();
+                    renderHoaDonList();
+                    loadCart();
+
+                    // Hiển thị thông báo
+                    if (typeof toastr !== "undefined") {
+                        toastr.success("Đã xóa hóa đơn " + hd.id);
+                    }
                 }
-            });
+            };
+            btn.appendChild(spanText);
+            btn.appendChild(btnRemove);
 
-            ul.append(li);
+            li.appendChild(btn);
+            tabList.appendChild(li);
         });
 
-        // Nút thêm hóa đơn mới
-        const addLi = $(`
-        <li class="nav-item" role="presentation">
-            <button class="nav-link text-success fw-bold" type="button">+</button>
-        </li>
-    `);
-        addLi.find('button').click(() => taoHoaDonMoiVaRender());
-        ul.append(addLi);
+        // Thêm nút tạo mới
+        const liAdd = document.createElement("li");
+        liAdd.className = "nav-item";
+        liAdd.setAttribute("role", "presentation");
+
+        const btnAdd = document.createElement("button");
+        btnAdd.className = "nav-link text-success fw-bold";
+        btnAdd.textContent = "+";
+        btnAdd.onclick = function () {
+            taoHoaDonMoiVaRender();
+        };
+
+        liAdd.appendChild(btnAdd);
+        tabList.appendChild(liAdd);
+
+        container.innerHTML = "";
+        container.appendChild(tabList);
     }
 
 
