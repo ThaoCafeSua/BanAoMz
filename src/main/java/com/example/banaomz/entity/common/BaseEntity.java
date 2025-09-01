@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-
 public class BaseEntity extends AbstractAuditingEntity {
     @CreatedDate
     @Column(name = "ngay_tao", updatable = false)

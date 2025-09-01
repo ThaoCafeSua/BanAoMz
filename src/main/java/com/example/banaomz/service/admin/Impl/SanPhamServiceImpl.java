@@ -140,7 +140,7 @@ public class SanPhamServiceImpl extends BaseServiceImpl<SanPham, Long, ISanPhamR
 
     private String genMaSanPham() {
         long count = repository.count();
-        String stt = String.format("%01d", count + 1);
+        String stt = String.format("%02d", count + 1);
         return "SP" + stt;
     }
 }

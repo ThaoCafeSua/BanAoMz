@@ -5,6 +5,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <!-- Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- Đặt lên đầu trang JSP, ngay sau các taglib -->
+<script type="text/javascript">
+    const contextPath = '${pageContext.request.contextPath}';
+</script>
+
 <style>
     .btn-teal {
         background-color: #001f3d;
@@ -75,11 +80,11 @@
                     <div class="col d-flex">
                         <div class="form-check">
                             <input class="form-check-input" id="status_type_on" type="radio" name="status_product" value="HOAT_DONG" checked>
-                            <label class="form-check-label" for="status_type_on">Đang bán</label>
+                            <label class="form-check-label" for="status_type_on">Hoạt động</label>
                         </div>
                         <div class="form-check ml-2">
                             <input class="form-check-input" id="status_type_off" type="radio" name="status_product" value="NGUNG_HOAT_DONG">
-                            <label class="form-check-label" for="status_type_off">Ngừng bán</label>
+                            <label class="form-check-label" for="status_type_off">Ngừng hoạt động</label>
                         </div>
                     </div>
                 </div>
@@ -131,7 +136,7 @@
                     <th>#</th>
                     <th>Tên Sản Phẩm</th>
                     <th>Màu Sắc</th>
-                    <th>Khối Lượng</th>
+                    <th>Size</th>
                     <th>Số Lượng</th>
                     <th>Giá Bán</th>
                     <th>Hành Động</th>
@@ -190,7 +195,7 @@
                 url: '/admin/brand/list',
                 method: 'GET',
                 dataType: 'json',
-                data: { search: '', status: 'HOAT_DONG' }, // 👈 lấy HOAT_DONG
+                data: { search: '', status: 'HOAT_DONG' },
                 success: function (response) {
                     if (!response.data || response.data.length === 0) {
                         toastr.warning('Không có thương hiệu hoạt động nào.');
@@ -422,7 +427,7 @@
                     item.color.tenMauSac,
                     item.mass.tenSize,
                     '<input class="form-control quantity-input" type="number" min="1" value="' + item.quantity + '" data-index="' + index + '" />',
-                    '<input class="form-control price-input" type="number" min="1" value="' + item.price + '" data-index="' + index + '" />',
+                    '<input class="form-control price-input" type="number" min="5000" value="' + item.price + '" data-index="' + index + '" />',
                     '<button class="btn btn-danger deleteProduct" data-index="' + index + '"><i class="fa-solid fa-trash"></i></button>'
                 ]);
             });
@@ -516,9 +521,9 @@
             var newPrice = $(this).val(); // Lấy giá trị mới của giá
 
             // Kiểm tra xem giá trị nhập vào có phải là số và không phải số âm
-            if (isNaN(newPrice) || newPrice < 0) {
-                $(this).val(1); // Đặt lại giá trị trong input thành 100000
-                newPrice = 1; // Cập nhật số lượng trong mảng dữ liệu
+            if (isNaN(newPrice) || newPrice < 5000) {
+                $(this).val(5000); // Đặt lại giá trị trong input thành 100000
+                newPrice = 5000; // Cập nhật số lượng trong mảng dữ liệu
             }
             // Cập nhật giá trong mảng dữ liệu
             productDetailArr[indexToUpdate].price = newPrice;
@@ -528,28 +533,30 @@
             loadTableProductDetail(productDetailArr);
         });
 
-        // Lắng nghe sự kiện thay đổi khi người dùng chọn file
         $('#imageInput').on('change', function() {
-            var file = this.files[0]; // Lấy file đầu tiên từ danh sách file đã chọn
+            const file = this.files[0];
+            if (!file) return;
 
-            if (file) {
-                var formData = new FormData(); // Khởi tạo FormData
-                formData.append('file', file); // Thêm file vào FormData (key là 'image')
-                $.ajax({
-                    url: '/files/upload', // URL API upload ảnh
-                    type: 'POST',
-                    data: formData,
-                    processData: false, // Không xử lý dữ liệu
-                    contentType: false, // Không gửi content-type (FormData sẽ tự động xử lý)
-                    success: function(response) {
-                        console.log('Upload thành công:', response);
-                        $('#imagePreview').attr('src', response.data).show(); // Hiển thị ảnh đã upload
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Có lỗi xảy ra:', error);
-                    }
-                });
-            }
+            const formData = new FormData();
+            formData.append('file', file);
+
+            $.ajax({
+                url: contextPath + '/files/upload',   // <-- thêm contextPath
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('Upload thành công:', response);
+                    // preview cũng nối contextPath để browser fetch đúng
+                    $('#imagePreview')
+                        .attr('src', contextPath + response.data)
+                        .show();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Có lỗi xảy ra:', error);
+                }
+            });
         });
 
     })

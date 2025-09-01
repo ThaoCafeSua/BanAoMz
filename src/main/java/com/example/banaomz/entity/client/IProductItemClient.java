@@ -1,13 +1,31 @@
 package com.example.banaomz.entity.client;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 public interface IProductItemClient {
-    String getId();
+    Long getId();
+
+    String getMaSanPham();
 
     String getTenSanPham();
 
+    String getThuongHieu();
+
+    String getXuatXu();
+
+    String getDanhMuc();
+
+    Integer getSoLuong();
+
     String getUrlAnh();
 
-    String getGiaBanMin();
+    String getTrangThai();
 
-    String getGiaBanMax();
+    LocalDateTime getNgayTao();
+
+    BigDecimal getGiaBan();
+
+    String getSoLuongDaBan();
+
 }

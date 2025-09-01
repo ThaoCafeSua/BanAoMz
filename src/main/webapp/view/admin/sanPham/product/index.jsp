@@ -39,11 +39,11 @@
                 </div>
                 <div class="form-check me-3">
                     <input class="form-check-input" id="status_type_online" type="radio" name="status_type" value="HOAT_DONG">
-                    <label class="form-check-label" for="status_type_online">Đang bán</label>
+                    <label class="form-check-label" for="status_type_online">Hoạt động</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" id="status_type_offline" type="radio" name="status_type" value="NGUNG_HOAT_DONG">
-                    <label class="form-check-label" for="status_type_offline">Ngừng bán</label>
+                    <label class="form-check-label" for="status_type_offline">Ngừng hoạt động</label>
                 </div>
             </div>
         </div>
@@ -161,8 +161,8 @@
     });
 
     function convertStatusProduct(status) {
-        if (status === 'HOAT_DONG') return 'Đang bán';
-        if (status === 'NGUNG_HOAT_DONG') return 'Ngừng bán';
+        if (status === 'HOAT_DONG') return 'Hoạt động';
+        if (status === 'NGUNG_HOAT_DONG') return 'Ngừng hoạt động';
         return 'Không xác định';
     }
 </script>

@@ -48,7 +48,6 @@ public class SanPham extends BaseEntity {
     @Column(name = "url_anh")
     private String urlAnh;
 
-
     @OneToMany(mappedBy = "sanPham")
     @JsonIgnore
     private Set<SanPhamChiTiet> lstChiTietSanPham;

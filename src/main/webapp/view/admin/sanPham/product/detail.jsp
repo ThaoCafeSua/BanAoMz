@@ -1,5 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!-- Đặt lên đầu trang JSP, ngay sau các taglib -->
+<script type="text/javascript">
+    const contextPath = '${pageContext.request.contextPath}';
+</script>
+
+
 <style>
     .card {
         border: 1px solid #006d7f !important;
@@ -58,13 +64,13 @@
                         <div class="form-check">
                             <input disabled class="form-check-input" id="status_type_on" type="radio" name="status_product"  value="HOAT_DONG" checked>
                             <label class="form-check-label" for="status_type_on">
-                                Đang bán
+                                Hoạt động
                             </label>
                         </div>
                         <div class="form-check ml-2">
                             <input disabled class="form-check-input" id="status_type_off" type="radio" name="status_product" value="NGUNG_HOAT_DONG">
                             <label class="form-check-label" for="status_type_off">
-                                Ngừng bán
+                                Ngừng hoạt động
                             </label>
                         </div>
                     </div>
