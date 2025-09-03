@@ -17,7 +17,7 @@
             <form id="employeeForm" action="${action}" method="post">
                 <input type="hidden" name="id" value="${employee.id}">
 
-                <!-- Chức vụ -->
+<%--                chuc vu--%>
                 <div class="mb-3">
                     <label class="form-label">Chức vụ</label>
                     <select class="form-select" name="chucVuId">
@@ -29,6 +29,7 @@
                         </c:forEach>
                     </select>
                 </div>
+
 
                 <!-- Tên nhân viên -->
                 <div class="mb-3">

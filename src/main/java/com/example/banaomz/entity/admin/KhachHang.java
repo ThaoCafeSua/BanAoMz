@@ -41,7 +41,6 @@ public class KhachHang extends BaseEntity {
     @Column(name = "mat_khau")
     private String matKhau;
 
-
     @OneToMany(mappedBy = "khachHang")
     @JsonIgnore
     private Set<DiaChi> lstDiaChi;

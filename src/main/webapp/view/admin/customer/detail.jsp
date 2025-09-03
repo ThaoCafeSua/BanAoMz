@@ -41,6 +41,10 @@
                     <label class="form-label fw-bold text-primary">Email:</label>
                     <div id="emailKh" class="text-dark"></div>
                 </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-primary">Mật khẩu:</label>
+                    <div class="text-dark">${khachHang.matKhau}</div>
+                </div>
             </div>
         </div>
     </div>

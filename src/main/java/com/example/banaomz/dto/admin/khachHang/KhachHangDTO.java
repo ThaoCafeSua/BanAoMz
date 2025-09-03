@@ -15,5 +15,6 @@ public class KhachHangDTO {
     private String gioiTinh;
     private String email;
     private String soDienThoai;
+    private String matKhau;
     private List<DiaChiDTO> lstDiaChi;
 }
