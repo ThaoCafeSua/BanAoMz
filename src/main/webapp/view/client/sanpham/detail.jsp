@@ -415,63 +415,63 @@
 </script>
 
 
-<%--<script>--%>
-<%--    // Xây map: { [mauId]: Set(sizeId) có hàng }--%>
-<%--    const variantMap = {};--%>
-<%--    <c:forEach var="c" items="${combos}">--%>
-<%--    (function() {--%>
-<%--        const m = ${c.mauId};--%>
-<%--        const s = ${c.sizeId};--%>
-<%--        const q = ${c.soLuong};--%>
-<%--        if (!variantMap[m]) variantMap[m] = {};--%>
-<%--        if (q > 0) variantMap[m][s] = true; // chỉ đánh dấu size có hàng--%>
-<%--    })();--%>
-<%--    </c:forEach>--%>
+<script>
+    // Xây map: { [mauId]: Set(sizeId) có hàng }
+    const variantMap = {};
+    <c:forEach var="c" items="${combos}">
+    (function() {
+        const m = ${c.mauId};
+        const s = ${c.sizeId};
+        const q = ${c.soLuong};
+        if (!variantMap[m]) variantMap[m] = {};
+        if (q > 0) variantMap[m][s] = true; // chỉ đánh dấu size có hàng
+    })();
+    </c:forEach>
 
-<%--    function getSelected(selectorName) {--%>
-<%--        const el = document.querySelector(`input[name="${selectorName}"]:checked`);--%>
-<%--        return el ? el.value : null;--%>
-<%--    }--%>
+    function getSelected(selectorName) {
+        const el = document.querySelector(`input[name="${selectorName}"]:checked`);
+        return el ? el.value : null;
+    }
 
-<%--    function refreshSizesByColor() {--%>
-<%--        const mauId = getSelected('mauSac');--%>
-<%--        const allSizeInputs = document.querySelectorAll('input[name="size"]');--%>
-<%--        const allowed = variantMap[mauId] || {};--%>
-<%--        let hasEnabled = false;--%>
+    function refreshSizesByColor() {
+        const mauId = getSelected('mauSac');
+        const allSizeInputs = document.querySelectorAll('input[name="size"]');
+        const allowed = variantMap[mauId] || {};
+        let hasEnabled = false;
 
-<%--        allSizeInputs.forEach(input => {--%>
-<%--            const ok = !!allowed[input.value];--%>
-<%--            input.disabled = !ok;--%>
-<%--            const lbl = document.querySelector(`label[for="${input.id}"]`);--%>
-<%--            if (lbl) lbl.classList.toggle('disabled-option', !ok);--%>
-<%--            if (ok && !hasEnabled) { input.checked = true; hasEnabled = true; }--%>
-<%--        });--%>
-<%--    }--%>
+        allSizeInputs.forEach(input => {
+            const ok = !!allowed[input.value];
+            input.disabled = !ok;
+            const lbl = document.querySelector(`label[for="${input.id}"]`);
+            if (lbl) lbl.classList.toggle('disabled-option', !ok);
+            if (ok && !hasEnabled) { input.checked = true; hasEnabled = true; }
+        });
+    }
 
-<%--    // Gọi khi đổi màu--%>
-<%--    document.addEventListener('DOMContentLoaded', function() {--%>
-<%--        document.querySelectorAll('input[name="mauSac"]').forEach(r => {--%>
-<%--            r.addEventListener('change', refreshSizesByColor);--%>
-<%--        });--%>
-<%--        // chạy lần đầu--%>
-<%--        refreshSizesByColor();--%>
-<%--    });--%>
+    // Gọi khi đổi màu
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('input[name="mauSac"]').forEach(r => {
+            r.addEventListener('change', refreshSizesByColor);
+        });
+        // chạy lần đầu
+        refreshSizesByColor();
+    });
 
-<%--    // Validate khi addToCart / buyNow--%>
-<%--    function addToCart(productId) {--%>
-<%--        const mauSac = getSelected('mauSac');--%>
-<%--        const sizeId = getSelected('size');--%>
-<%--        if (!mauSac) { alert('Vui lòng chọn màu'); return; }--%>
-<%--        if (!sizeId) { alert('Vui lòng chọn size'); return; }--%>
-<%--        alert('Thêm giỏ: ' + productId + ' | màu: ' + mauSac + ' | size: ' + sizeId);--%>
-<%--        // TODO: fetch POST /cart { productId, mauSacId: mauSac, sizeId }--%>
-<%--    }--%>
-<%--    function buyNow(productId) {--%>
-<%--        const mauSac = getSelected('mauSac');--%>
-<%--        const sizeId = getSelected('size');--%>
-<%--        if (!mauSac) { alert('Vui lòng chọn màu'); return; }--%>
-<%--        if (!sizeId) { alert('Vui lòng chọn size'); return; }--%>
-<%--        alert('Mua ngay: ' + productId + ' | màu: ' + mauSac + ' | size: ' + sizeId);--%>
-<%--        // TODO: redirect /checkout?productId=...&mauSacId=...&sizeId=...--%>
-<%--    }--%>
-<%--</script>--%>
+    // Validate khi addToCart / buyNow
+    function addToCart(productId) {
+        const mauSac = getSelected('mauSac');
+        const sizeId = getSelected('size');
+        if (!mauSac) { alert('Vui lòng chọn màu'); return; }
+        if (!sizeId) { alert('Vui lòng chọn size'); return; }
+        alert('Thêm giỏ: ' + productId + ' | màu: ' + mauSac + ' | size: ' + sizeId);
+        // TODO: fetch POST /cart { productId, mauSacId: mauSac, sizeId }
+    }
+    function buyNow(productId) {
+        const mauSac = getSelected('mauSac');
+        const sizeId = getSelected('size');
+        if (!mauSac) { alert('Vui lòng chọn màu'); return; }
+        if (!sizeId) { alert('Vui lòng chọn size'); return; }
+        alert('Mua ngay: ' + productId + ' | màu: ' + mauSac + ' | size: ' + sizeId);
+        // TODO: redirect /checkout?productId=...&mauSacId=...&sizeId=...
+    }
+</script>

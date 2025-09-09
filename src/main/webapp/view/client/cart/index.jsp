@@ -74,3 +74,81 @@
         <button class="btn btn-primary" id="check-out">Thanh toán</button>
     </div>
 </div>
+<script>
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Render giỏ hàng
+    function renderCart() {
+        let container = document.getElementById("cart-items-container");
+        if (cart.length === 0) {
+            container.innerHTML = "<p class='text-center text-muted'>Giỏ hàng trống</p>";
+            document.getElementById("total-amount").innerText = "0₫";
+            return;
+        }
+
+        let html = `
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th>Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        let total = 0;
+        cart.forEach((item, idx) => {
+            let thanhTien = item.gia * item.soLuong;
+            total += thanhTien;
+            html += `
+                <tr>
+                    <td><img src="${item.anh}" width="60"></td>
+                    <td>${item.ten}</td>
+                    <td>${item.gia.toLocaleString()}₫</td>
+                    <td>
+                        <input type="number" min="1" value="${item.soLuong}"
+                            onchange="updateQuantity(${idx}, this.value)"
+                            class="form-control w-50 mx-auto">
+                    </td>
+                    <td>${thanhTien.toLocaleString()}₫</td>
+                    <td><button class="btn btn-sm btn-danger" onclick="removeItem(${idx})">Xóa</button></td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+        document.getElementById("total-amount").innerText = total.toLocaleString() + "₫";
+    }
+
+    // Cập nhật số lượng
+    function updateQuantity(index, soLuong) {
+        cart[index].soLuong = parseInt(soLuong);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+    }
+
+    // Xóa sản phẩm
+    function removeItem(index) {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+    }
+
+    // Chuyển sang trang thanh toán
+    document.getElementById("check-out").addEventListener("click", function() {
+        if (cart.length === 0) {
+            alert("Giỏ hàng trống, không thể thanh toán!");
+            return;
+        }
+        window.location.href = "/checkout"; // sang trang checkout.jsp
+    });
+
+    renderCart();
+</script>
+
