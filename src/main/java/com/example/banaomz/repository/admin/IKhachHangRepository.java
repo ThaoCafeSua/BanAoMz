@@ -29,5 +29,6 @@ public interface IKhachHangRepository extends IBaseRepository<KhachHang,Long> {
     @Query("SELECT k FROM KhachHang k WHERE k.hoVaTen LIKE %:keyword% OR k.soDienThoai LIKE %:keyword%")
     List<KhachHang> timKiemKhachHang(@Param("keyword") String keyword);
 
+    KhachHang findByEmail(String email);
     boolean existsBySoDienThoai(String soDienThoai);
 }

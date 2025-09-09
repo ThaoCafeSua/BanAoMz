@@ -22,11 +22,6 @@ public class ChucVu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "ten_chuc_vu")
+    @Column(name = "ten_chuc_vu", nullable = false)
     private String tenChucVu;
-
-    @OneToMany(mappedBy = "chucVu")
-    @JsonIgnore
-    private Set<NhanVien> nhanVien;
-
 }

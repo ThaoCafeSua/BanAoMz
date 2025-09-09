@@ -7,6 +7,7 @@ package com.example.banaomz.controller.admin.nhanVien;
         import com.example.banaomz.service.admin.IChucVuService;
         import com.example.banaomz.service.admin.INhanVienService;
 
+        import jakarta.servlet.http.HttpSession;
         import org.modelmapper.ModelMapper;
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.http.HttpStatus;
@@ -93,14 +94,26 @@ public class nhanVienController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute NhanVienDTO req) {
-        nhanVienService.createCustomer(req);
-        return "redirect:/admin/employee";
+    public String create(@ModelAttribute NhanVienDTO req, HttpSession session) {
+        try {
+            nhanVienService.createCustomer(req);
+            session.setAttribute("success", "Thêm nhân viên thành công!");
+            return "redirect:/admin/employee";
+        } catch (RuntimeException e) {
+            session.setAttribute("error", e.getMessage());
+            return "redirect:/admin/employee/create";
+        }
     }
 
     @PostMapping("/update")
-    public String update(@ModelAttribute NhanVienDTO req) {
-        nhanVienService.updateCustomer(req);
-        return "redirect:/admin/employee";
+    public String update(@ModelAttribute NhanVienDTO req, HttpSession session) {
+        try {
+            nhanVienService.updateCustomer(req);
+            session.setAttribute("success", "Cập nhật nhân viên thành công!");
+            return "redirect:/admin/employee";
+        } catch (RuntimeException e) {
+            session.setAttribute("error", e.getMessage());
+            return "redirect:/admin/employee/update/" + req.getId();
+        }
     }
 }

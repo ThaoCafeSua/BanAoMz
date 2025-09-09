@@ -51,6 +51,11 @@
                     <input type="email" class="form-control" name="email" id="emailKh" value="${customer.email}" placeholder="Nhập email khách hàng">
                 </div>
 
+                <div class="mb-3">
+                    <label for="matKhau" class="form-label">Mật khẩu</label>
+                    <input type="matKhau" class="form-control" name="matKhau" id="matKhau" value="${customer.matKhau}" placeholder="Nhập mật khẩu khách hàng">
+                </div>
+
                 <div class="d-flex justify-content-end mt-4">
                     <button type="submit" class="btn btn-teal">${btnText}</button>
                 </div>
