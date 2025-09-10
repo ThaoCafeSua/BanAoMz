@@ -1,5 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    <!DOCTYPE html>
+    <html lang="en">
+=======
+>>>>>>> 7dc03d2ec4e33ed62ae2b7cd5a30e47ed4d385b4
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<<<<<<< HEAD
+=======
+>>>>>>> dung
+>>>>>>> 7dc03d2ec4e33ed62ae2b7cd5a30e47ed4d385b4
 
     <style>
         .navbar{
@@ -225,6 +236,60 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-lg shadow-sm">
+                <div class="container" style="max-width: 95%;">
+                    <!-- Logo -->
+                    <a class="navbar-brand logo" href="/">
+                        <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
+                    </a>
+
+                    <!-- Toggler for Mobile -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <!-- Menu Items -->
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/">TRANG CHỦ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/sanpham">SẢN PHẨM</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/gioithieu">GIỚI THIỆU</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/tintuc">TIN TỨC</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/lienhe">LIÊN HỆ</a>
+                            </li>
+                        </ul>
+                        <!-- Thanh tìm kiếm -->
+                        <form class="d-flex search-bar me-4" action="/sanpham/timkiem" method="get">
+                            <div class="input-group search-box">
+                                <input class="form-control" type="search" name="query"
+                                    placeholder="Tìm kiếm sản phẩm..." aria-label="Search">
+                                <button class="btn btn-search" type="submit">Tìm kiếm</button>
+                            </div>
+                        </form>
+
+                        <!-- Icons -->
+                        <div class="icons d-flex align-items-center">
+                            <a href="/cart" class="me-3"><i class="fas fa-shopping-cart"></i></a>
+                            <a href="/auth/login" class="text-white fw-bold"><i class="fas fa-user"></i></a>
+                        </div>
+                    </div>
+=======
+>>>>>>> 7dc03d2ec4e33ed62ae2b7cd5a30e47ed4d385b4
             <!-- Menu Items -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -249,6 +314,10 @@
                     <a href="/cart" class="me-3"><i class="fas fa-shopping-cart"></i></a>
                     <a href="${pageContext.request.contextPath}/khachhang/detail/${khachHang.id}" class="text-white fw-bold"><i class="fas fa-user"></i></a>
                     <a href="/khachhang/dangnhap" class="text-white fw-bold"><i class="bi bi-power"></i></a>
+<<<<<<< HEAD
+=======
+>>>>>>> dung
+>>>>>>> 7dc03d2ec4e33ed62ae2b7cd5a30e47ed4d385b4
                 </div>
             </div>
         </div>
