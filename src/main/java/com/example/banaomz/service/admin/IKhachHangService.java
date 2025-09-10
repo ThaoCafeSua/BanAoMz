@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface IKhachHangService extends IBaseService<KhachHang,Long> {
 
+    KhachHang login(String email, String matKhau);
+
     List<KhachHangDTO> findAllCustomer(String value);
 
     KhachHangDTO createCustomer(KhachHangDTO khachHangDTO);
@@ -18,7 +20,6 @@ public interface IKhachHangService extends IBaseService<KhachHang,Long> {
     KhachHangDTO detailCustomer(Long customerId);
 
     DiaChiDTO addressCustomer(DiaChiDTO req);
-
 
 
 }

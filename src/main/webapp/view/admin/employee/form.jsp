@@ -17,7 +17,7 @@
             <form id="employeeForm" action="${action}" method="post">
                 <input type="hidden" name="id" value="${employee.id}">
 
-                <!-- Chức vụ -->
+<%--                chuc vu--%>
                 <div class="mb-3">
                     <label class="form-label">Chức vụ</label>
                     <select class="form-select" name="chucVuId">
@@ -29,6 +29,7 @@
                         </c:forEach>
                     </select>
                 </div>
+
 
                 <!-- Tên nhân viên -->
                 <div class="mb-3">
@@ -173,6 +174,18 @@
         $("#employeeForm").on("submit", validateForm);
     });
 
-
 // (Optional: Thêm kiểm tra form bằng JS nếu muốn)
 </script>
+<c:if test="${not empty sessionScope.error}">
+    <script>
+        toastr.error('${sessionScope.error}');
+    </script>
+    <c:remove var="error" scope="session"/>
+</c:if>
+
+<c:if test="${not empty sessionScope.success}">
+    <script>
+        toastr.success('${sessionScope.success}');
+    </script>
+    <c:remove var="success" scope="session"/>
+</c:if>

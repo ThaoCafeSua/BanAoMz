@@ -30,16 +30,26 @@ public class KhachHangServiceImpl extends BaseServiceImpl<KhachHang, Long, IKhac
     ModelMapper modelMapper;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    RandomStringGenerator randomStringGenerator;
 
     @Autowired
-    RandomStringGenerator randomStringGenerator;
+    IKhachHangRepository khachHangRepository;
 
     @Autowired
     IDiaChiService diaChiService;
 
     @Autowired
     private IMailService mailService;
+
+    @Override
+    public KhachHang login(String email, String matKhau) {
+        KhachHang khachHang = khachHangRepository.findByEmail(email);
+        if (khachHang != null && khachHang.getMatKhau().equals(matKhau)) {
+            return khachHang;
+        }
+        return null;
+    }
+
     @Override
     public List<KhachHangDTO> findAllCustomer(String value) {
         List<KhachHangDTO> lst = repository.findAllCustomer(value).stream()
@@ -52,7 +62,7 @@ public class KhachHangServiceImpl extends BaseServiceImpl<KhachHang, Long, IKhac
         String password = randomStringGenerator.generateRandomString(8);
         CompletableFuture<KhachHangDTO> saveTask = CompletableFuture.supplyAsync(() -> {
             KhachHang entity = modelMapper.map(khachHangDTO, KhachHang.class);
-            entity.setMatKhau(passwordEncoder.encode(password));
+            entity.setMatKhau(khachHangDTO.getMatKhau());
             createNew(entity);
             return khachHangDTO;
         });
