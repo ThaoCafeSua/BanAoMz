@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GioHangClientRepository extends JpaRepository<GioHang, Integer> {
-    List<GioHang> findByKhachHang(KhachHang khachHang);
+    List<GioHang> findAllByKhachHang(KhachHang khachHang);
+    List<GioHang> findAllByKhachHangId(Integer khachHangId);
 
     Optional<GioHang> findByKhachHangAndSanPhamChiTiet(KhachHang khachHang, SanPhamChiTiet spct);
 
-    void deleteByKhachHangAndSanPhamChiTiet(KhachHang khachHang, SanPhamChiTiet spct);
+    void deleteByKhachHang(KhachHang khachHang);
+    void deleteByKhachHangId(Integer khachHangId);
+    void deleteByKhachHangAndSanPhamChiTiet_Id(KhachHang khachHang, Long spctId);
 
-    List<GioHang> findByKhachHangId(Long idKhachHang);
-
-    void deleteByKhachHangId(Long idKhachHang);
 }

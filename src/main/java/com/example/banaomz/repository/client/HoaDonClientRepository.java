@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface HoaDonClientRepository extends JpaRepository<HoaDon, UUID> {
+public interface HoaDonClientRepository extends JpaRepository<HoaDon, Integer> {
 
     // Lấy danh sách hóa đơn theo khách hàng (dùng cho user login)
     List<HoaDon> findByKhachHang_Id(Long id);

@@ -90,5 +90,9 @@ public class SanphamController {
         return "client/main";
     }
 
-
+    @GetMapping("/api/variants/{id}")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public java.util.List<com.example.banaomz.entity.client.IVariantItem> variants(@PathVariable Long id) {
+        return sanPhamClientService.getVariantItems(id);
+    }
 }

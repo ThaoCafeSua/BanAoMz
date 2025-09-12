@@ -30,16 +30,10 @@ public class dangKyController {
 
     @PostMapping("/dangky")
     public String dangKy(@ModelAttribute("khachHang") KhachHangDTO khachHangDTO,
-                         HttpSession session,
-                         Model model) {
+                         HttpSession session, Model model) {
         try {
-            // Gọi service để lưu khách hàng
-            KhachHangDTO savedCustomer = khachHangService.createCustomer(khachHangDTO);
-
-            // Lưu vào session (để coi như đăng nhập ngay sau khi đăng ký)
-            session.setAttribute("khachHang", savedCustomer);
-
-            // Chuyển hướng sang trang chủ
+            KhachHangDTO saved = khachHangService.createCustomer(khachHangDTO);
+            session.setAttribute("KH_ID", saved.getId()); // ✅ chỉ lưu ID
             return "redirect:/home";
         } catch (Exception e) {
             model.addAttribute("error", "Đăng ký thất bại: " + e.getMessage());
@@ -63,16 +57,14 @@ public class dangKyController {
     @PostMapping("/dangnhap")
     public String dangNhap(@RequestParam("email") String email,
                            @RequestParam("matKhau") String matKhau,
-                           HttpSession session,
-                           Model model) {
-
-        KhachHang khachHang = khachHangService.login(email, matKhau);
-        if (khachHang != null) {
-            session.setAttribute("khachHang", khachHang);
-            return "redirect:/home"; // về trang chủ sau khi login
+                           HttpSession session, Model model) {
+        KhachHang kh = khachHangService.login(email, matKhau);
+        if (kh != null) {
+            session.setAttribute("KH_ID", kh.getId());   // ✅ chỉ lưu ID
+            return "redirect:/home";
         } else {
             model.addAttribute("error", "Sai email hoặc mật khẩu!");
-            return "client/khachhang/dangnhap"; // load lại trang login
+            return "client/khachhang/dangnhap";
         }
     }
 }

@@ -1,28 +1,22 @@
 package com.example.banaomz.dto.admin.HoaDon.Reponse;
 
-import com.example.banaomz.dto.admin.HoaDonChiTiet.Reponse.HoaDonChiTietResponseDTO;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.List;
-@Getter
+import java.time.LocalDateTime;
+
 @Setter
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class HoaDonDetailResponseDTO {
     private Long id;
     private String maHoaDon;
-    private String loaiHoaDon;
-    private String hinhThucHoaDon;
-    private String phuongThucThanhToan;
+    private LocalDateTime ngayDat;
     private String trangThai;
-    private String moTa;
-    private String tenKhachHang;
-    private String tenNhanVien;
 
+    private String khachHangTen;
     private String tenNguoiNhan;
     private String soDienThoaiNguoiNhan;
     private String diaChiNguoiNhan;
@@ -32,9 +26,37 @@ public class HoaDonDetailResponseDTO {
     private BigDecimal phiVanChuyen;
     private BigDecimal thanhTien;
 
-    private String ngayDat;
-    private String ngayGiao;
-    private String ngayHoanThanh;
+    private String loaiHoaDon;
+    private String phuongThucThanhToan;
 
-    private List<HoaDonChiTietResponseDTO> chiTietSanPhamList;
+    // Constructor JPQL sẽ gọi
+    public HoaDonDetailResponseDTO(Number id,
+                                   String maHoaDon,
+                                   LocalDateTime ngayDat,
+                                   String trangThai,
+                                   String khachHangTen,
+                                   String tenNguoiNhan,
+                                   String soDienThoaiNguoiNhan,
+                                   String diaChiNguoiNhan,
+                                   BigDecimal tongTien,
+                                   BigDecimal tienGiam,
+                                   BigDecimal phiVanChuyen,
+                                   BigDecimal thanhTien,
+                                   String loaiHoaDon,
+                                   String phuongThucThanhToan) {
+        this.id = (id == null) ? null : id.longValue();
+        this.maHoaDon = maHoaDon;
+        this.ngayDat = ngayDat;
+        this.trangThai = trangThai;
+        this.khachHangTen = khachHangTen;
+        this.tenNguoiNhan = tenNguoiNhan;
+        this.soDienThoaiNguoiNhan = soDienThoaiNguoiNhan;
+        this.diaChiNguoiNhan = diaChiNguoiNhan;
+        this.tongTien = tongTien;
+        this.tienGiam = tienGiam;
+        this.phiVanChuyen = phiVanChuyen;
+        this.thanhTien = thanhTien;
+        this.loaiHoaDon = loaiHoaDon;
+        this.phuongThucThanhToan = phuongThucThanhToan;
+    }
 }

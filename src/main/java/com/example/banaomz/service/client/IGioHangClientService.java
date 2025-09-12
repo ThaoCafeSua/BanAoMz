@@ -9,15 +9,15 @@ import java.util.List;
 public interface IGioHangClientService {
     List<GioHang> layGioHang(KhachHang khachHang);
 
-    GioHang themSanPham(KhachHang khachHang, SanPhamChiTiet spct, int soLuong);
+    GioHang themSanPham(KhachHang khachHang, SanPhamChiTiet spctInput, Integer soLuong);
 
-    GioHang capNhatSoLuong(KhachHang khachHang, SanPhamChiTiet spct, int soLuong);
+    GioHang capNhatSoLuong(KhachHang khachHang, SanPhamChiTiet spctInput, Integer soLuong);
 
-    void xoaSanPham(KhachHang khachHang, SanPhamChiTiet spct);
+    void xoaSanPham(KhachHang khachHang, SanPhamChiTiet spctInput);
 
     void xoaToanBo(KhachHang khachHang);
 
-    List<GioHang> getCartByKhachHang(Long idKhachHang);
+    List<GioHang> getCartByKhachHang(Integer khachHangId);
 
-    void clearCartByKhachHang(Long idKhachHang);
+    void clearCartByKhachHang(Integer khachHangId);
 }

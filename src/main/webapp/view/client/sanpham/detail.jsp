@@ -387,91 +387,119 @@
     .btn-check:checked + .size-option:hover { background-color:#3399ff; }
 </style>
 
+<meta name="_csrf" content="${_csrf != null ? _csrf.token : ''}"/>
+<meta name="_csrf_header" content="${_csrf != null ? _csrf.headerName : ''}"/>
+
 <script>
-    function getSelectedMauSac() {
-        const el = document.querySelector('input[name="mauSac"]:checked');
+    // ====== Config & helpers ======
+    const PRODUCT_ID = ${sanPham.id};
+    const VAR_URL = '/sanpham/api/variants/' + PRODUCT_ID;   // trả về [{spctId,mauId,sizeId,soLuong,giaBan}]
+    const CART_ADD = '/cart/add';
+
+    function csrfHeaders() {
+        const t = document.querySelector('meta[name="_csrf"]')?.content;
+        const h = document.querySelector('meta[name="_csrf_header"]')?.content;
+        return (t && h) ? { [h]: t } : {};
+    }
+    function getSelected(name) {
+        const el = document.querySelector('input[name="'+name+'"]:checked');
         return el ? el.value : null;
     }
 
-    function addToCart(productId) {
-        const mauSac = getSelectedMauSac();
-        if (!mauSac) {
-            alert('Vui lòng chọn màu');
-            return;
-        }
-        alert('Thêm giỏ: ' + productId + ' | màu: ' + mauSac);
-        // TODO: gọi API POST /cart: { productId, mauSacId: mauSac }
-    }
-
-    function buyNow(productId) {
-        const mauSac = getSelectedMauSac();
-        if (!mauSac) {
-            alert('Vui lòng chọn màu');
-            return;
-        }
-        alert('Mua ngay: ' + productId + ' | màu: ' + mauSac);
-        // TODO: redirect tới /checkout?productId=...&mauSacId=...
-    }
-</script>
-
-
-<script>
-    // Xây map: { [mauId]: Set(sizeId) có hàng }
     const variantMap = {};
-    <c:forEach var="c" items="${combos}">
-    (function() {
-        const m = ${c.mauId};
-        const s = ${c.sizeId};
-        const q = ${c.soLuong};
-        if (!variantMap[m]) variantMap[m] = {};
-        if (q > 0) variantMap[m][s] = true; // chỉ đánh dấu size có hàng
-    })();
-    </c:forEach>
+    let VARIANTS = [];
 
-    function getSelected(selectorName) {
-        const el = document.querySelector(`input[name="${selectorName}"]:checked`);
-        return el ? el.value : null;
+    (function buildVariantMapFromServerCombos(){
+        <c:forEach var="c" items="${combos}">
+        (function(){
+            var m = '${c.mauId}';
+            var s = '${c.sizeId}';
+            var q = '${c.soLuong}';
+            if (!variantMap[m]) variantMap[m] = {};
+            if (Number(q) > 0) variantMap[m][s] = true;
+        })();
+        </c:forEach>
+    })();
+
+    async function loadVariants() {
+        try {
+            const res = await fetch(VAR_URL, { credentials: 'same-origin' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            VARIANTS = await res.json();
+        } catch (e) {
+            console.error('Không load được biến thể:', e);
+            VARIANTS = []; // fallback rỗng
+        }
     }
 
+    // ====== UI: bật/tắt size theo màu ======
     function refreshSizesByColor() {
         const mauId = getSelected('mauSac');
-        const allSizeInputs = document.querySelectorAll('input[name="size"]');
         const allowed = variantMap[mauId] || {};
+        const allSizeInputs = document.querySelectorAll('input[name="size"]');
         let hasEnabled = false;
-
         allSizeInputs.forEach(input => {
             const ok = !!allowed[input.value];
             input.disabled = !ok;
-            const lbl = document.querySelector(`label[for="${input.id}"]`);
+            const lbl = document.querySelector('label[for="'+input.id+'"]');
             if (lbl) lbl.classList.toggle('disabled-option', !ok);
             if (ok && !hasEnabled) { input.checked = true; hasEnabled = true; }
         });
     }
 
-    // Gọi khi đổi màu
     document.addEventListener('DOMContentLoaded', function() {
+        // đổi màu -> làm tươi size
         document.querySelectorAll('input[name="mauSac"]').forEach(r => {
             r.addEventListener('change', refreshSizesByColor);
         });
-        // chạy lần đầu
         refreshSizesByColor();
+        loadVariants();
     });
 
-    // Validate khi addToCart / buyNow
-    function addToCart(productId) {
-        const mauSac = getSelected('mauSac');
-        const sizeId = getSelected('size');
-        if (!mauSac) { alert('Vui lòng chọn màu'); return; }
-        if (!sizeId) { alert('Vui lòng chọn size'); return; }
-        alert('Thêm giỏ: ' + productId + ' | màu: ' + mauSac + ' | size: ' + sizeId);
-        // TODO: fetch POST /cart { productId, mauSacId: mauSac, sizeId }
+    function findSpctIdLocal(mauId, sizeId) {
+        mauId = String(mauId); sizeId = String(sizeId);
+        const v = VARIANTS.find(it => String(it.mauId) === mauId && String(it.sizeId) === sizeId);
+        return v ? v.spctId : null;
     }
-    function buyNow(productId) {
-        const mauSac = getSelected('mauSac');
-        const sizeId = getSelected('size');
-        if (!mauSac) { alert('Vui lòng chọn màu'); return; }
-        if (!sizeId) { alert('Vui lòng chọn size'); return; }
-        alert('Mua ngay: ' + productId + ' | màu: ' + mauSac + ' | size: ' + sizeId);
-        // TODO: redirect /checkout?productId=...&mauSacId=...&sizeId=...
+
+    async function resolveSpctIdRemote(mauId, sizeId) {
+        const url = '/sanpham/api/spct-id?spId=' + encodeURIComponent(PRODUCT_ID) +
+            '&mauId=' + encodeURIComponent(mauId) +
+            '&sizeId=' + encodeURIComponent(sizeId);
+        const res = await fetch(url, { credentials: 'same-origin' });
+        if (!res.ok) return null;
+        const txt = await res.text();
+        const id = Number(txt);
+        return Number.isFinite(id) ? id : null;
     }
+
+    // ====== Thêm vào giỏ / Mua ngay ======
+    async function addToCart(productId) {
+        const mauId = getSelected('mauSac');
+        const sizeId = getSelected('size');
+        if (!mauId) { alert('Vui lòng chọn màu'); return; }
+        if (!sizeId) { alert('Vui lòng chọn size'); return; }
+
+        let spctId = findSpctIdLocal(mauId, sizeId);
+        if (!spctId) spctId = await resolveSpctIdRemote(mauId, sizeId);
+        if (!spctId) { alert('Không xác định được biến thể (spctId).'); return; }
+
+        // Gọi /cart/add
+        const body = new URLSearchParams({ spctId: String(spctId), soLuong: '1' });
+        const res = await fetch(CART_ADD, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8', ...csrfHeaders() },
+            body, credentials: 'same-origin'
+        });
+        if (!res.ok) { alert('Thêm giỏ thất bại'); return; }
+        alert('Đã thêm vào giỏ!');
+    }
+
+    async function buyNow(productId) {
+        await addToCart(productId);
+        window.location.href = '/cart';
+    }
+
+    window.addToCart = addToCart;
+    window.buyNow    = buyNow;
 </script>

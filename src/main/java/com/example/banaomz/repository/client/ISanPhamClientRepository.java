@@ -134,5 +134,17 @@ public interface ISanPhamClientRepository extends IBaseRepository<SanPham, Long>
             """, nativeQuery = true)
     List<IVariantCombo> getVariantCombos(@Param("id") Long id);
 
+    @Query(value = """
+  SELECT 
+    spct.id         AS spctId,
+    spct.id_mau_sac AS mauId,
+    spct.id_size    AS sizeId,
+    spct.so_luong   AS soLuong,
+    spct.gia_ban    AS giaBan
+  FROM san_pham_chi_tiet spct
+  WHERE spct.id_san_pham = :id
+  ORDER BY spct.id_mau_sac, spct.id_size
+""", nativeQuery = true)
+    List<com.example.banaomz.entity.client.IVariantItem> getVariantItems(@Param("id") Long id);
 
 }

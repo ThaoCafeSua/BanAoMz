@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface HoaDonChiTietClientRepository extends JpaRepository<HoaDonChiTiet, UUID> {
+public interface HoaDonChiTietClientRepository extends JpaRepository<HoaDonChiTiet, Integer> {
 
     // Lấy chi tiết hóa đơn theo hóa đơn
     List<HoaDonChiTiet> findByHoaDon(HoaDon hoaDon);

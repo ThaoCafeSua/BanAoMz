@@ -7,6 +7,7 @@ import com.example.banaomz.entity.client.IVariantCombo;
 import com.example.banaomz.service.common.IBaseService;
 import com.example.banaomz.dto.admin.sanPham.reponse.SanPhamDTO;
 import com.example.banaomz.entity.admin.SanPham;
+import com.example.banaomz.entity.client.IVariantItem;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,5 +25,9 @@ public interface ISanPhamClientService extends IBaseService<SanPham, Long> {
     List<ISizeOption> getSizesBySanPhamId(Long id);
 
     List<IVariantCombo> getVariantCombos(Long id);
+
+    List<IVariantItem> getVariantItems(Long spId);
+
+    Optional<Long> resolveSpctId(Long spId, Long mauId, Long sizeId);
 
 }
