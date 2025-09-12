@@ -233,12 +233,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/admin/staff" aria-label="Nhân viên">
+                    <a class="nav-link text-white h5" href="/admin/employee" aria-label="Nhân viên">
                         <i class="fas fa-user-tie me-2"></i> Nhân viên
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/admin/logout" aria-label="Đăng xuất" id="logoutBtn">
+                    <a class="nav-link text-white h5" href="/auth/login" aria-label="Đăng xuất" id="logoutBtn">
                         <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
                     </a>
                 </li>
