@@ -147,28 +147,35 @@
             <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
             <h3>MzShop</h3>
         </div>
-        <!-- ✅ Hiển thị quyền người dùng -->
-        <c:if test="${not empty sessionScope.userRole}">
-            <div id="user-role-alert" class="text-white bg-success px-3 py-1 rounded shadow" style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 10px">
+        <!-- ✅ Thông báo phân quyền: chỉ hiển thị 1 lần sau đăng nhập -->
+        <c:if test="${sessionScope.showRoleAlert}">
+            <div id="user-role-alert"
+                 class="text-white bg-success px-3 py-1 rounded shadow"
+                 style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 10px">
                 <i class="fas fa-user-shield me-1"></i>
-                Đang đăng nhập với quyền: <strong>${sessionScope.userRole}</strong>
+                Đang đăng nhập với quyền:
+                <strong>${sessionScope.userRole}</strong>
             </div>
+
+            <!-- 🔑 Xóa cờ để các lần load tiếp theo KHÔNG hiển thị -->
+            <c:remove var="showRoleAlert" scope="session"/>
         </c:if>
     </div>
 </header>
 
-<!-- ✅ THÔNG BÁO KHÔNG CÓ QUYỀN -->
+<!-- ✅ Thông báo không có quyền -->
 <c:if test="${not empty sessionScope.accessDenied}">
     <div id="access-denied-alert"
          class="text-white bg-danger px-3 py-1 rounded shadow"
-         style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 10px">
+         style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 12px">
             ${sessionScope.accessDenied}
     </div>
-    <%
-        session.removeAttribute("accessDenied");
-    %>
+
+    <!-- 🔑 Xóa khỏi session ngay khi render -->
+    <c:remove var="accessDenied" scope="session"/>
+
     <script>
-        $(document).ready(function () {
+        $(function () {
             setTimeout(function () {
                 $("#access-denied-alert").fadeOut("slow");
             }, 3000);
@@ -176,8 +183,22 @@
     </script>
 </c:if>
 
+<script>
+    // Nút đóng/mở sidebar
+    document.getElementById("toggleSidebar").addEventListener("click", function () {
+        const sidebar = document.querySelector(".sidebar");
+        const content = document.querySelector(".content");
+        sidebar.classList.toggle("collapsed");
+        content.classList.toggle("expanded");
+    });
 
-
+    // ✅ Tự động ẩn thông báo phân quyền sau 2 giây
+    $(function () {
+        setTimeout(function () {
+            $("#user-role-alert").fadeOut("slow");
+        }, 2000);
+    });
+</script>
 
 <!-- Sidebar -->
 <div class="sidebar ">
@@ -188,12 +209,12 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/sales" aria-label="Bán hàng tại quầy">
+            <a class="nav-link text-white h5" href="/admin/banHang" aria-label="Bán hàng tại quầy">
                 <i class="fas fa-cash-register me-2"></i> Bán hàng tại quầy
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/order" aria-label="Quản lý đơn hàng">
+            <a class="nav-link text-white h5" href="/admin/hoaDon" aria-label="Quản lý đơn hàng">
                 <i class="fas fa-shopping-cart me-2"></i> Quản lý đơn hàng
             </a>
         </li>
@@ -238,7 +259,7 @@
             </div>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/voucher" aria-label="Giảm giá">
+            <a class="nav-link text-white h5" href="/admin/phieu-giam-gia" aria-label="Giảm giá">
                 <i class="fas fa-ticket-alt me-2"></i> Giảm giá
             </a>
         </li>
@@ -269,21 +290,5 @@
 <div class="content">
     <jsp:include page="${page}.jsp" /> <!-- Nội dung động -->
 </div>
-
-<script>
-    document.getElementById("toggleSidebar").addEventListener("click", function () {
-        const sidebar = document.querySelector(".sidebar");
-        const content = document.querySelector(".content");
-
-        sidebar.classList.toggle("collapsed");
-        content.classList.toggle("expanded");
-    });
-    $(document).ready(function () {
-        // Ẩn thông báo sau 4 giây (4000 ms)
-        setTimeout(function () {
-            $("#user-role-alert").fadeOut("slow");
-        }, 2000);
-    });
-</script>
 </body>
 </html>

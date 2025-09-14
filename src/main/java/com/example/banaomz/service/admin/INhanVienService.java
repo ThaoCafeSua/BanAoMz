@@ -15,6 +15,5 @@ public interface INhanVienService extends IBaseService<NhanVien, Long> {
 
     NhanVienDTO detailCustomer(Long customerId);
 
-
-
+    void resetPassword(String email);
 }

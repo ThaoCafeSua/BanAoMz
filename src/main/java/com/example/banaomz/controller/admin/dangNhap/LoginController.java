@@ -3,6 +3,7 @@ package com.example.banaomz.controller.admin.dangNhap;
 import com.example.banaomz.dto.admin.nhanVien.NhanVienDTO;
 import com.example.banaomz.entity.admin.NhanVien;
 import com.example.banaomz.repository.admin.INhanVienRepository;
+import com.example.banaomz.service.admin.INhanVienService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,9 @@ public class LoginController {
 
     @Autowired
     private INhanVienRepository nhanVienRepository;
+
+    @Autowired
+    private INhanVienService nhanVienService;
 
     @GetMapping("/login")
     public String showLoginForm(Model model) {
@@ -34,12 +38,23 @@ public class LoginController {
             session.setAttribute("userRole", nv.getChucVu().getTenChucVu());
             redirectAttributes.addFlashAttribute("message",
                     "Đang truy cập với chức vụ " + nv.getChucVu().getTenChucVu());
-
             return "redirect:/admin"; // Trang quản trị
         } else {
             model.addAttribute("error", "Email hoặc mật khẩu không đúng");
             return "auth/login";
         }
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam("email") String email,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            nhanVienService.resetPassword(email);
+            redirectAttributes.addFlashAttribute("success", "Mật khẩu mới đã được gửi vào email!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/auth/login";
     }
 
     @GetMapping("/logout")

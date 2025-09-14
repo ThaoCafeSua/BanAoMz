@@ -1,5 +1,6 @@
 package com.example.banaomz.entity.common;
 
+import com.example.banaomz.entity.admin.NhanVien;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
