@@ -1,3 +1,4 @@
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -40,10 +41,6 @@
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-primary">Email:</label>
                     <div id="emailKh" class="text-dark"></div>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-bold text-primary">Mật khẩu:</label>
-                    <div class="text-dark">${khachHang.matKhau}</div>
                 </div>
             </div>
         </div>
@@ -332,8 +329,6 @@
         }
 
         getDetailCustomer()
-
-
         function fillDataAddress(data) {
             $('#idAddress').val(data.id);
             $('#nameAddress').val(data.tenNguoiNhan);
@@ -500,6 +495,8 @@
             districtId = $(this).val();
             getDataWard()
         })
+
+
         async function getDataWard() {
             $('#wardAddress').empty();
             $('#wardAddress').append('<option value="" selected>Chọn xã</option>');

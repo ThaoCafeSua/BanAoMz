@@ -147,28 +147,35 @@
             <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
             <h3>MzShop</h3>
         </div>
-        <!-- ✅ Hiển thị quyền người dùng -->
-        <c:if test="${not empty sessionScope.userRole}">
-            <div id="user-role-alert" class="text-white bg-success px-3 py-1 rounded shadow" style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 10px">
+        <!-- ✅ Thông báo phân quyền: chỉ hiển thị 1 lần sau đăng nhập -->
+        <c:if test="${sessionScope.showRoleAlert}">
+            <div id="user-role-alert"
+                 class="text-white bg-success px-3 py-1 rounded shadow"
+                 style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 10px">
                 <i class="fas fa-user-shield me-1"></i>
-                Đang đăng nhập với quyền: <strong>${sessionScope.userRole}</strong>
+                Đang đăng nhập với quyền:
+                <strong>${sessionScope.userRole}</strong>
             </div>
+
+            <!-- 🔑 Xóa cờ để các lần load tiếp theo KHÔNG hiển thị -->
+            <c:remove var="showRoleAlert" scope="session"/>
         </c:if>
     </div>
 </header>
 
-<!-- ✅ THÔNG BÁO KHÔNG CÓ QUYỀN -->
+<!-- ✅ Thông báo không có quyền -->
 <c:if test="${not empty sessionScope.accessDenied}">
     <div id="access-denied-alert"
          class="text-white bg-danger px-3 py-1 rounded shadow"
-         style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 10px">
+         style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 12px">
             ${sessionScope.accessDenied}
     </div>
-    <%
-        session.removeAttribute("accessDenied");
-    %>
+
+    <!-- 🔑 Xóa khỏi session ngay khi render -->
+    <c:remove var="accessDenied" scope="session"/>
+
     <script>
-        $(document).ready(function () {
+        $(function () {
             setTimeout(function () {
                 $("#access-denied-alert").fadeOut("slow");
             }, 3000);
@@ -176,91 +183,22 @@
     </script>
 </c:if>
 
+<script>
+    // Nút đóng/mở sidebar
+    document.getElementById("toggleSidebar").addEventListener("click", function () {
+        const sidebar = document.querySelector(".sidebar");
+        const content = document.querySelector(".content");
+        sidebar.classList.toggle("collapsed");
+        content.classList.toggle("expanded");
+    });
 
-<<<<<<< HEAD
-        <!-- Sidebar -->
-        <div class="sidebar ">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active text-white h5" href="/admin" aria-label="Thống kê">
-                        <i class="fas fa-chart-pie me-2"></i> Thống kê
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/admin/banHang" aria-label="Bán hàng tại quầy">
-                        <i class="fas fa-cash-register me-2"></i> Bán hàng tại quầy
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/admin/hoaDon" aria-label="Quản lý đơn hàng">
-                        <i class="fas fa-shopping-cart me-2"></i> Quản lý đơn hàng
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white h5" data-bs-toggle="collapse" href="#productManagement" role="button"
-                        aria-expanded="false" aria-controls="productManagement">
-                        <i class="fas fa-boxes me-2"></i> Quản lý sản phẩm <i class="fas fa-chevron-down float-end"></i>
-                    </a>
-                    <div class="collapse" id="productManagement">
-                        <ul class="nav flex-column ms-3">
-                            <li class="nav-item">
-                                <a class="nav-link text-white h5" href="/admin/product" aria-label="Sản phẩm">
-                                    <i class="fas fa-box-open me-2"></i> Sản phẩm
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white h5" href="/admin/size" aria-label="Size">
-                                    <i class="fas fa-weight-hanging me-2"></i> Size
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white h5" href="/admin/color" aria-label="Màu sắc">
-                                    <i class="fas fa-palette me-2"></i> Màu sắc
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white h5" href="/admin/origin" aria-label="Xuất xứ">
-                                    <i class="fas fa-globe-asia me-2"></i> Xuất xứ
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white h5" href="/admin/brand" aria-label="Thương hiệu">
-                                    <i class="fas fa-tag me-2"></i> Thương hiệu
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white h5" href="/admin/category" aria-label="Danh mục">
-                                    <i class="fas fa-list me-2"></i> Danh mục
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/admin/phieu-giam-gia" aria-label="Giảm giá">
-                        <i class="fas fa-ticket-alt me-2"></i> Giảm giá
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/admin/customer" aria-label="Khách hàng">
-                        <i class="fas fa-users me-2"></i> Khách hàng
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/admin/employee" aria-label="Nhân viên">
-                        <i class="fas fa-user-tie me-2"></i> Nhân viên
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white h5" href="/auth/login" aria-label="Đăng xuất" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
-                    </a>
-                </li>
-            </ul>
-        </div>
-=======
->>>>>>> 5ca2aa855ef1781b150bc937ed9caafb6c9562d8
-
+    // ✅ Tự động ẩn thông báo phân quyền sau 2 giây
+    $(function () {
+        setTimeout(function () {
+            $("#user-role-alert").fadeOut("slow");
+        }, 2000);
+    });
+</script>
 
 <!-- Sidebar -->
 <div class="sidebar ">
@@ -352,21 +290,5 @@
 <div class="content">
     <jsp:include page="${page}.jsp" /> <!-- Nội dung động -->
 </div>
-
-<script>
-    document.getElementById("toggleSidebar").addEventListener("click", function () {
-        const sidebar = document.querySelector(".sidebar");
-        const content = document.querySelector(".content");
-
-        sidebar.classList.toggle("collapsed");
-        content.classList.toggle("expanded");
-    });
-    $(document).ready(function () {
-        // Ẩn thông báo sau 4 giây (4000 ms)
-        setTimeout(function () {
-            $("#user-role-alert").fadeOut("slow");
-        }, 2000);
-    });
-</script>
 </body>
 </html>
