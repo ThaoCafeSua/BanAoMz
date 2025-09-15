@@ -321,7 +321,7 @@
             </div>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white h5" href="/admin/voucher" aria-label="Giảm giá">
+            <a class="nav-link text-white h5" href="/admin/phieu-giam-gia" aria-label="Giảm giá">
                 <i class="fas fa-ticket-alt me-2"></i> Giảm giá
             </a>
         </li>

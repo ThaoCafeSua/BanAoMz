@@ -9,98 +9,100 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
 
 <div class="container-fluid mt-4">
     <div class="row">
 
+        <!-- Tabs hóa đơn chờ -->
         <div class="card mb-3 shadow-sm">
-            <div class="card-header text-white py-2" style="background-color: #001f3d;">
+            <div class="card-header text-white py-2">
                 <h6 class="mb-0">Danh sách hóa đơn chờ</h6>
             </div>
             <div class="card-body p-2" id="hoaDonListContainer">
-
-                <!-- Thanh tab ngang -->
-                <ul class="nav nav-pills mb-2" id="hoaDonTabs" role="tablist">
-                </ul>
-
+                <ul class="nav nav-pills mb-2" id="hoaDonTabs" role="tablist"></ul>
             </div>
         </div>
-        <!-- Cột trái: Danh sách sản phẩm -->
+
+        <!-- LEFT: Danh sách sản phẩm -->
         <div class="col-md-7">
             <div class="card mb-3">
-                <div class="card-header text-white" style="background-color: #001f3d;">
+                <div class="card-header text-white">
                     <h5 class="mb-0">Danh sách sản phẩm</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-hover" id="productTable">
-                        <thead style="background-color: #001f3d; color: white;" class="text-center">
-                        <tr>
-                            <th>Ảnh</th>
-                            <th>Tên</th>
-                            <th>SL</th>
-                            <th>Giá</th>
-                            <th>Thêm</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="sp" items="${sanPhamList}">
-                            <tr class="text-center">
-                                <td>
-                                    <img src="${empty sp.urlAnh ? '/includes/images/default.png' : sp.urlAnh}" width="60" height="60"
-                                         onerror="this.src='/includes/images/default.png'"/>
-                                </td>
-                                <td>${sp.tenSanPham}</td>
-                                <td>${sp.soLuongTon}</td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${sp.giaBan != null}">
-                                            <fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="₫" groupingUsed="true"/>
-                                        </c:when>
-                                        <c:otherwise>0 ₫</c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary rounded-circle"
-                                            style="width: 36px; height: 36px; padding: 0;"
-                                            data-id="${sp.idSanPham}"
-                                            data-ten="${fn:escapeXml(sp.tenSanPham)}"
-                                            onclick="openModalFromBtn(this)">
-                                        <i class="fa fa-plus"></i>
-                                    </button>
-                                </td>
+
+                    <!-- Toolbar lọc nhanh -->
+                    <div class="pos-toolbar">
+                        <input id="filter" class="form-control form-control-sm" placeholder="🔎 Lọc nhanh theo tên sản phẩm…">
+                    </div>
+
+                    <div class="scroll-y">
+                        <table class="table table-hover" id="productTable">
+                            <thead style="background-color:#001f3d;color:white;" class="text-center">
+                            <tr>
+                                <th>Ảnh</th>
+                                <th>Tên</th>
+                                <th>SL</th>
+                                <th>Giá</th>
+                                <th>Thêm</th>
                             </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="sp" items="${sanPhamList}">
+                                <tr class="text-center product-row"
+                                    data-sanpham-id="${sp.idSanPham}"
+                                    data-stock="${sp.soLuongTon}">
+                                    <td>
+                                        <img src="${empty sp.urlAnh ? '/includes/images/default.png' : sp.urlAnh}"
+                                             width="60" height="60"
+                                             loading="lazy" decoding="async"
+                                             onerror="this.src='/includes/images/default.png'"/>
+                                    </td>
+                                    <td><c:out value="${sp.tenSanPham}"/></td>
+                                    <td>
+                                        <span class="stock-badge badge-stock-ok" id="stock-sp-${sp.idSanPham}">${sp.soLuongTon}</span>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${sp.giaBan != null}">
+                                                <fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="₫" groupingUsed="true"/>
+                                            </c:when>
+                                            <c:otherwise>0 ₫</c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"
+                                                data-id="${sp.idSanPham}"
+                                                data-ten="${fn:escapeXml(sp.tenSanPham)}"
+                                                data-bs-toggle="tooltip" data-bs-placement="top" title="Thêm vào giỏ"
+                                                onclick="openModalFromBtn(this)">+</button>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>
-        <!-- Cột phải: Hóa đơn chờ → Khách hàng → Giỏ hàng → Thanh toán -->
+
+        <!-- RIGHT: Khách + Giỏ + Thanh toán -->
         <div class="col-md-5">
-
-            <!-- Danh sách hóa đơn chờ dạng tab -->
-
-
             <!-- Khách hàng -->
             <div class="card mb-3 shadow-sm">
-                <div class="card-header text-white py-2" style="background-color: #001f3d;">
+                <div class="card-header text-white">
                     <h6 class="mb-0">Khách hàng</h6>
                 </div>
                 <div class="card-body p-2">
-                    <!-- Tìm kiếm + chọn khách -->
-                    <div class="mb-2 d-flex gap-2">
-                        <input type="text" class="form-control form-control-sm" id="timKhachHangInput" placeholder="Tìm SĐT...">
-                        <select class="form-select form-select-sm" id="selectKhachHang"></select>
-                    </div>
-                    <!-- Người nhận & SĐT -->
                     <div class="row g-2">
                         <div class="col">
                             <input type="text" id="nguoiNhan" class="form-control form-control-sm" placeholder="Người nhận">
+                            <div class="invalid-feedback">Vui lòng nhập tên người nhận.</div>
                         </div>
                         <div class="col">
                             <input type="text" id="sdtNguoiNhan" class="form-control form-control-sm" placeholder="SĐT người nhận">
+                            <div class="invalid-feedback">Vui lòng nhập SĐT hợp lệ (10–11 số, bắt đầu bằng 0).</div>
                         </div>
                     </div>
                 </div>
@@ -108,7 +110,7 @@
 
             <!-- Giỏ hàng -->
             <div class="card mb-3 shadow-sm">
-                <div class="card-header text-white py-2" style="background-color: #001f3d;">
+                <div class="card-header text-white">
                     <h5 class="mb-0">Giỏ hàng</h5>
                 </div>
                 <div class="card-body p-2">
@@ -124,21 +126,15 @@
                         <tbody id="cartItems"></tbody>
                     </table>
 
-                    <!-- Tổng tiền -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 p-2 bg-light rounded">
+                    <div class="d-flex justify-content-between align-items-center mt-3 p-2 summary-bar">
                         <strong>Tổng tiền:</strong>
                         <strong id="totalAmount" class="text-danger">0 ₫</strong>
                     </div>
 
-                    <!-- Thanh toán -->
-                    <button class="btn btn-success w-100 mt-2" id="btnCheckout">
-                        💳 Thanh Toán
-                    </button>
+                    <button class="btn btn-success w-100 mt-2" id="btnCheckout">💳 Thanh Toán</button>
                 </div>
             </div>
-
         </div>
-
 
     </div>
 </div>
@@ -171,274 +167,259 @@
 </div>
 
 <style>
-
-    #timKhachHangInput,
-    #selectKhachHang,
-    #nguoiNhan,
-    #sdtNguoiNhan {
-        width: 100%;
-        max-width: 180px;
+    :root{
+        --brand:#001f3d;
+        --brand-2:#0d3b66;
+        --accent:#ffc107;
+        --ok:#28a745;
+        --low:#fd7e14;
+        --zero:#dc3545;
+        --surface:#f7f9fc;
+    }
+    body{background:var(--surface);}
+    .card{border:0; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06);}
+    .card-header{
+        border:0; color:#fff; border-top-left-radius:14px; border-top-right-radius:14px;
+        background:linear-gradient(135deg,var(--brand),#01325f);
     }
 
-    .form-control-sm,
-    .form-select-sm {
-        padding: 4px 6px;
-        font-size: 0.875rem;
-        border-radius: 6px;
-    }
+    .form-control-sm,.form-select-sm{padding:6px 10px; font-size:.9rem; border-radius:10px}
+    .table th,.table td{border:1px solid #e9edf3 !important; vertical-align:middle !important}
+    .table-hover tbody tr:hover{background:#f6f9ff}
+    #productTable thead th{position:sticky; top:0; z-index:1}
 
-    .table th, .table td {
-        border: 1px solid #dcdcdc !important;
-        vertical-align: middle !important;
-    }
+    /* Tabs */
+    #hoaDonTabs .nav-link{border-radius:999px; background:#fff; border:1px solid #e6ebf2; transition:all .2s; font-weight:600; padding:6px 12px;}
+    #hoaDonTabs .nav-link:hover{transform:translateY(-1px)}
+    #hoaDonTabs .nav-link.active{background:var(--brand); color:#fff; border:2px solid var(--accent)}
+    #hoaDonTabs .badge{font-weight:700}
+    #hoaDonTabs .tab-title{font-weight:600;}
+    #hoaDonTabs .close-tab{line-height:1;}
 
-    .table thead {
-        background-color: #001f3d;
-        color: white;
-    }
+    /* Tổng tiền nổi bật */
+    #totalAmount{font-size:1.25rem}
+    .summary-bar{background:#fff3cd; border:1px dashed #ffe08a; border-radius:10px}
 
-    .table-striped tbody tr:nth-of-type(odd) {
-        background-color: #f9f9f9;
-    }
+    /* Toolbar + scroll */
+    .pos-toolbar{display:flex; gap:.5rem; align-items:center; margin-bottom:.75rem}
+    .pos-toolbar .form-control{max-width:360px}
+    .scroll-y{max-height:60vh; overflow:auto}
 
-    .btn-primary {
-        background-color: #001f3d;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background-color: #004080;
-    }
-
-    /* Bỏ viền cũ của Bootstrap */
-    #hoaDonTabs .nav-link {
-        border: none;
-        background: #f8f9fa;
-        border-radius: 8px;
-        margin-right: 6px;
-        padding: 6px 12px;
-        font-weight: 500;
-        color: #333;
-        transition: 0.2s;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Hover nhẹ */
-    /* Style cho tab hóa đơn */
-    #hoaDonTabs .nav-link {
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-    }
-    #hoaDonTabs .nav-link:hover {
-        background-color: #f1f1f1;
-    }
-
-    /* Chỉ hiện nút xóa khi hover vào tab */
-    #hoaDonTabs .nav-link .delete-badge {
-        opacity: 0;
-    }
-
-    #hoaDonTabs .nav-link:hover .delete-badge {
-        opacity: 1;
-    }
-
-    /* Nút thêm hóa đơn */
-    #hoaDonTabs .nav-link.text-success {
-        background: #d4edda;
-        color: #155724;
-        font-size: 18px;
-        padding: 4px 12px;
-        border-radius: 8px;
-    }
-
-    #hoaDonTabs .nav-link.text-success:hover {
-        background: #c3e6cb;
-    }
-    .nav-pills .nav-link.active {
-        background-color: #001f3d !important;
-        color: #fff !important;
-        font-weight: bold;
-        border: 2px solid #ffc107; /* viền vàng nổi bật */
-        border-radius: 6px;
-    }
-    #hoaDonTabs .btn-outline-danger {
-        border-radius: 50%;
-        line-height: 1;
-        font-size: 14px;
-    }
-    /* Nút hóa đơn */
-    #hoaDonTabs .nav-link {
-        border-radius: 20px;
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        transition: all 0.2s ease-in-out;
-    }
-
-    #hoaDonTabs .nav-link.active {
-        background-color: #001f3d;
-        color: white;
-        font-weight: bold;
-    }
-
-    /* Nút xóa hóa đơn */
-    #hoaDonTabs .btn-remove {
-        border: none;
-        background: transparent;
-        color: #dc3545;
-        font-size: 14px;
-        margin-left: 3px;
-        padding: 0 4px;
-        line-height: 1;
-        cursor: pointer;
-        transition: color 0.2s ease-in-out;
-    }
-
-    #hoaDonTabs .btn-remove:hover {
-        color: #fff;
-        background-color: #dc3545;
-        border-radius: 50%;
-    }
-
-
-
+    /* Buttons */
+    .btn{border-radius:10px}
+    .btn-primary{background:var(--brand); border-color:var(--brand)}
+    .btn-primary:hover{background:var(--brand-2); border-color:var(--brand-2)}
+    .btn-success{background:#2eb85c; border-color:#2eb85c}
+    .btn-success:hover{background:#25a24f; border-color:#25a24f}
 </style>
 
-
 <script>
+    /* ===========================
+       Helpers & constants
+    =========================== */
+    const PHUONG_THUC_MAC_DINH = 'TIEN_MAT';
     const modal = new bootstrap.Modal(document.getElementById('variantModal'));
 
+    // Debounce helper
+    const _debounce = (fn, t = 250) => {
+        let h;
+        return function (...args) {
+            const ctx = this;
+            clearTimeout(h);
+            h = setTimeout(() => fn.apply(ctx, args), t);
+        };
+    };
+
+    // Loading helper (jqXHR không có .finally)
+    function withLoading(p) {
+        $('button, input, select').prop('disabled', true);
+        return $.when(p).always(function () {
+            $('button, input, select').prop('disabled', false);
+        });
+    }
+
+    // Phone helpers
+    function normPhone(v) { return (v || '').replace(/\D/g, '').replace(/^0+/, '0'); }
+    function validVNPhone(v) { return /^0\d{9,10}$/.test(v); }
+
+    // Highlight input lỗi
+    function setInvalid($el, msg) {
+        $el.addClass('is-invalid');
+        const $fb = $el.next('.invalid-feedback');
+        if ($fb.length) $fb.text(msg || '');
+    }
+    function clearInvalid($el) { $el.removeClass('is-invalid'); }
+
+    // Validate KH trước khi thanh toán
+    function validateCustomer() {
+        let ok = true;
+        const $name = $('#nguoiNhan');
+        const $phone = $('#sdtNguoiNhan');
+
+        const name = ($name.val() || '').trim();
+        let phone = normPhone($phone.val());
+        $phone.val(phone);
+
+        if (!name) { setInvalid($name, 'Vui lòng nhập tên người nhận.'); ok = false; }
+        else { clearInvalid($name); }
+
+        if (!phone) { setInvalid($phone, 'Vui lòng nhập số điện thoại.'); ok = false; }
+        else if (!validVNPhone(phone)) { setInvalid($phone, 'SĐT chưa hợp lệ (10–11 số, bắt đầu bằng 0).'); ok = false; }
+        else { clearInvalid($phone); }
+
+        if (!ok) alert('Thiếu thông tin khách hàng: vui lòng nhập TÊN và SĐT hợp lệ.');
+        return ok;
+    }
+
+    /* ===========================
+       State + Migration
+    =========================== */
     let hoaDonList = [];
-    try {
-        hoaDonList = JSON.parse(localStorage.getItem('hoaDonList')) || [];
-        if (!Array.isArray(hoaDonList)) hoaDonList = [];
-    } catch (e) {
-        hoaDonList = [];
-    }
+    try { hoaDonList = JSON.parse(localStorage.getItem('hoaDonList')) || []; } catch (e) { hoaDonList = []; }
+    if (!Array.isArray(hoaDonList)) hoaDonList = [];
+    let currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
 
-    let currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
-
-    renderHoaDonList();
-    loadCart();
-
-    function taoHoaDonMoiVaRender() {
-        // Lấy counter từ localStorage, nếu chưa có thì bắt đầu từ 1
+    (function ensureHoaDonIds() {
+        let changed = false;
         let counter = parseInt(localStorage.getItem('hoaDonCounter')) || 1;
-
-        // Giới hạn từ 1 đến 1000
-        if (counter > 1000) counter = 1;
-        const id = 'HD' + counter;
-        hoaDonList.push({ id: id, items: [] });
-        currentHoaDonId = id;
-        counter++;
-        localStorage.setItem('hoaDonCounter', counter);
-        saveHoaDonList();
-        renderHoaDonList();
-        loadCart();
-    }
-
-    function chonHoaDon(id) {
-        console.log("Chọn hóa đơn:", id);
-        currentHoaDonId = id;
-        renderHoaDonList();
-        loadCart();
-    }
-
-    function xoaHoaDon(id) {
-        hoaDonList = hoaDonList.filter(hd => hd.id !== id);
-        if (currentHoaDonId === id) {
-            currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
+        hoaDonList.forEach(h => {
+            if (!h) return;
+            if (!h.id) { h.id = 'HD' + (counter++); changed = true; }
+            if (!Array.isArray(h.items)) { h.items = []; changed = true; }
+        });
+        if (changed) {
+            localStorage.setItem('hoaDonCounter', counter);
+            saveHoaDonList();
+            currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
         }
-        saveHoaDonList();
-        renderHoaDonList();
-        loadCart();
+    })();
+
+    /* ===========================
+       Persistence
+    =========================== */
+    function saveHoaDonList() { localStorage.setItem('hoaDonList', JSON.stringify(hoaDonList)); }
+
+    /* ===========================
+       Cart & stock computation
+    =========================== */
+    function buildQtyBySanPham() {
+        const map = {};
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+        if (!hd || !Array.isArray(hd.items)) return map;
+        hd.items.forEach(it => {
+            const spId = String(it.idSanPham || ''); if (!spId) return;
+            map[spId] = (map[spId] || 0) + (parseInt(it.soLuong || 0, 10) || 0);
+        });
+        return map;
     }
 
-    function saveHoaDonList() {
-        localStorage.setItem('hoaDonList', JSON.stringify(hoaDonList));
+    function recalcAllVisibleStocks() {
+        const qtyMap = buildQtyBySanPham();
+        $('#productTable tbody tr.product-row').each(function () {
+            const $tr = $(this);
+            const spId = String($tr.data('sanpham-id'));
+            const stock = parseInt($tr.data('stock'), 10) || 0;
+            const used = parseInt(qtyMap[spId] || 0, 10) || 0;
+            const avail = Math.max(0, stock - used);
+
+            const $span = $('#stock-sp-' + spId);
+            $span.text(avail);
+
+            $span.removeClass('badge-stock-ok badge-stock-low badge-stock-zero');
+            if (avail === 0) $span.addClass('badge-stock-zero');
+            else if (avail <= 10) $span.addClass('badge-stock-low');
+            else $span.addClass('badge-stock-ok');
+
+            const $btnAdd = $tr.find('button[data-id="' + spId + '"]');
+            $btnAdd.prop('disabled', avail === 0)
+                .toggleClass('btn-secondary', avail === 0)
+                .toggleClass('btn-primary', avail > 0)
+                .attr('title', avail === 0 ? 'Hết hàng' : 'Thêm vào giỏ');
+        });
+
+        // cập nhật badge số món trên tab
+        $('#hoaDonTabs .nav-link[data-hdid]').each(function () {
+            const id = this.dataset.hdid;
+            const hd = hoaDonList.find(h => h.id === id);
+            if (!hd) return;
+            const count = (hd.items || []).reduce((s, i) => s + (parseInt(i.soLuong || 0, 10) || 0), 0);
+            const badge = this.querySelector('.invoice-count');
+            if (badge) badge.textContent = count;
+        });
     }
+
+    /* ===========================
+       Tabs hóa đơn
+    =========================== */
     function renderHoaDonList() {
-        const container = document.getElementById("hoaDonListContainer");
-        const tabList = document.createElement("ul");
-        tabList.className = "nav nav-pills mb-2";
-        tabList.id = "hoaDonTabs";
-        tabList.setAttribute("role", "tablist");
+        const container = document.getElementById('hoaDonListContainer');
+        const tabList = document.createElement('ul');
+        tabList.className = 'nav nav-pills mb-2'; tabList.id = 'hoaDonTabs'; tabList.setAttribute('role', 'tablist');
 
         hoaDonList.forEach(hd => {
-            const li = document.createElement("li");
-            li.className = "nav-item me-1";
-            li.setAttribute("role", "presentation");
+            const li = document.createElement('li'); li.className = 'nav-item me-1'; li.setAttribute('role', 'presentation');
 
-            // nút chọn hóa đơn (bao gồm luôn nút xóa ở trong)
-            const btn = document.createElement("button");
-            btn.className = "nav-link d-flex align-items-center" + (hd.id === currentHoaDonId ? " active" : "");
-            btn.onclick = function () {
-                currentHoaDonId = hd.id;
-                saveHoaDonList();
-                renderHoaDonList();
-                loadCart();
-            };
+            const btn = document.createElement('button');
+            btn.className = 'nav-link d-flex align-items-center gap-1' + (hd.id === currentHoaDonId ? ' active' : '');
+            btn.dataset.hdid = hd.id;
 
-            // text hiển thị id hóa đơn
-            const spanText = document.createElement("span");
-            spanText.textContent = hd.id;
+            const title = document.createElement('span');
+            title.className = 'tab-title';
+            title.textContent = hd.id || 'HD?';
 
-            // nút xoá nhỏ nằm trong tab
-            const btnRemove = document.createElement("span");
-            btnRemove.innerHTML = "&times;";
-            btnRemove.className = "ms-2 text-danger fw-bold";
-            btnRemove.style.cursor = "pointer";
-            btnRemove.onclick = function (e) {
-                e.stopPropagation(); // không kích hoạt nút chọn
+            const count = (hd.items || []).reduce((s, i) => s + (parseInt(i.soLuong || 0, 10) || 0), 0);
+            const badge = document.createElement('span');
+            badge.className = 'invoice-count badge bg-warning text-dark ms-2';
+            badge.textContent = count;
 
-                if (confirm("Bạn có chắc chắn muốn xóa hóa đơn " + hd.id + " không?")) {
-                    hoaDonList = hoaDonList.filter(item => item.id !== hd.id);
+            const close = document.createElement('span');
+            close.className = 'close-tab ms-2 text-danger fw-bold';
+            close.innerHTML = '&times;';
+            close.style.cursor = 'pointer';
+            close.onclick = (e) => { e.stopPropagation(); xoaHoaDon(hd.id); };
 
-                    if (currentHoaDonId === hd.id) {
-                        currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
-                    }
+            btn.onclick = () => { currentHoaDonId = hd.id; saveHoaDonList(); renderHoaDonList(); loadCart(); recalcAllVisibleStocks(); bindCustomerInputs(); };
 
-                    saveHoaDonList();
-                    renderHoaDonList();
-                    loadCart();
-
-                    // Hiển thị thông báo
-                    if (typeof toastr !== "undefined") {
-                        toastr.success("Đã xóa hóa đơn " + hd.id);
-                    }
-                }
-            };
-            btn.appendChild(spanText);
-            btn.appendChild(btnRemove);
-
+            btn.append(title, badge, close);
             li.appendChild(btn);
             tabList.appendChild(li);
         });
 
-        // Thêm nút tạo mới
-        const liAdd = document.createElement("li");
-        liAdd.className = "nav-item";
-        liAdd.setAttribute("role", "presentation");
+        const liAdd = document.createElement('li'); liAdd.className = 'nav-item';
+        const btnAdd = document.createElement('button'); btnAdd.className = 'nav-link text-success fw-bold'; btnAdd.textContent = '+';
+        btnAdd.onclick = () => taoHoaDonMoiVaRender();
+        liAdd.appendChild(btnAdd); tabList.appendChild(liAdd);
 
-        const btnAdd = document.createElement("button");
-        btnAdd.className = "nav-link text-success fw-bold";
-        btnAdd.textContent = "+";
-        btnAdd.onclick = function () {
-            taoHoaDonMoiVaRender();
-        };
-
-        liAdd.appendChild(btnAdd);
-        tabList.appendChild(liAdd);
-
-        container.innerHTML = "";
-        container.appendChild(tabList);
+        container.innerHTML = ''; container.appendChild(tabList);
     }
 
+    function taoHoaDonMoiVaRender() {
+        let counter = parseInt(localStorage.getItem('hoaDonCounter')) || 1;
+        if (counter > 1000) counter = 1;
+        const id = 'HD' + counter++;
+        localStorage.setItem('hoaDonCounter', counter);
+        hoaDonList.push({ id, items: [] });
+        currentHoaDonId = id;
+        saveHoaDonList();
+        renderHoaDonList();
+        loadCart();
+        recalcAllVisibleStocks();
+        bindCustomerInputs();
+    }
 
-    function openModalFromBtn(button) {
-        const id = $(button).data('id');
-        const ten = $(button).data('ten');
+    function xoaHoaDon(id) {
+        hoaDonList = hoaDonList.filter(h => h.id !== id);
+        if (currentHoaDonId === id) currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
+        saveHoaDonList(); renderHoaDonList(); loadCart(); recalcAllVisibleStocks();
+        bindCustomerInputs();
+    }
+
+    /* ===========================
+       Modal chọn thuộc tính
+    =========================== */
+    function openModalFromBtn(btn) {
+        const id = $(btn).data('id');
+        const ten = $(btn).data('ten');
         openModal(id, ten);
     }
 
@@ -446,36 +427,26 @@
         $('#modalSanPhamId').val(idSanPham);
         $('#modalTenSanPham').text(tenSanPham);
 
-        $.get('/admin/banHang/lay-thuoc-tinh', { idSanPham: idSanPham }, function (data) {
+        $.get('/admin/banHang/lay-thuoc-tinh', { idSanPham }, function (data) {
             const mauSacList = data.mauSacList || [];
             const sizeList = data.sizeList || [];
             const chiTietList = data.sanPhamChiTietList || [];
 
             const sizeTheoMau = {};
-            chiTietList.forEach(item => {
-                if (!sizeTheoMau[item.idMauSac]) sizeTheoMau[item.idMauSac] = new Set();
-                sizeTheoMau[item.idMauSac].add(item.idSize);
+            chiTietList.forEach(it => {
+                if (!sizeTheoMau[it.idMauSac]) sizeTheoMau[it.idMauSac] = new Set();
+                sizeTheoMau[it.idMauSac].add(it.idSize);
             });
 
-            $('#selectMauSac').empty();
-            $('#selectSize').empty();
+            const $mau = $('#selectMauSac').empty();
+            const $size = $('#selectSize').empty();
+            mauSacList.forEach(m => $mau.append($('<option>').val(m.id).text(m.ten)));
+            $mau.off('change').on('change', function () {
+                const selected = $(this).val(); $size.empty();
+                const ok = sizeTheoMau[selected] || new Set();
+                sizeList.forEach(s => { if (ok.has(s.id)) $size.append($('<option>').val(s.id).text(s.ten)); });
+            }).trigger('change');
 
-            mauSacList.forEach(mau => {
-                $('#selectMauSac').append($('<option></option>').val(mau.id).text(mau.ten));
-            });
-
-            $('#selectMauSac').off('change').on('change', function () {
-                const selectedMau = $(this).val();
-                $('#selectSize').empty();
-                const sizeIds = sizeTheoMau[selectedMau] || new Set();
-                sizeList.forEach(size => {
-                    if (sizeIds.has(size.id)) {
-                        $('#selectSize').append($('<option></option>').val(size.id).text(size.ten));
-                    }
-                });
-            });
-
-            $('#selectMauSac').trigger('change');
             modal.show();
         });
     }
@@ -484,58 +455,33 @@
         const idSanPham = $('#modalSanPhamId').val();
         const idMau = $('#selectMauSac').val();
         const idSize = $('#selectSize').val();
+        if (!idMau || !idSize || !currentHoaDonId) { alert('Vui lòng chọn đầy đủ và tạo hóa đơn.'); return; }
 
-        if (!idMau || !idSize || !currentHoaDonId) {
-            alert('Vui lòng chọn đầy đủ và tạo hóa đơn trước.');
-            return;
-        }
+        $.get('/admin/banHang/tim-san-pham-chi-tiet', { idSanPham, idMauSac: idMau, idSize }, function (res) {
+            if (!res.id) { alert('Không tìm thấy sản phẩm phù hợp!'); return; }
+            if (res.soLuongTon <= 0) { alert('Sản phẩm đã hết hàng.'); return; }
 
-        $.get('/admin/banHang/tim-san-pham-chi-tiet', {
-            idSanPham: idSanPham,
-            idMauSac: idMau,
-            idSize: idSize
-        }, function (res) {
-            if (!res.id) {
-                alert('Không tìm thấy sản phẩm phù hợp!');
-                return;
-            }
-
-            if (res.soLuongTon <= 0) {
-                alert('Sản phẩm đã hết hàng.');
-                return;
-            }
-
-            const hd = hoaDonList.find(h => h.id === currentHoaDonId);
-            if (!hd) return;
-
+            const hd = hoaDonList.find(h => h.id === currentHoaDonId); if (!hd) return;
             const spct = {
                 idSPCT: res.id,
-                ten: res.tenSanPham,
-                mau: res.tenMauSac,
-                size: res.tenSize,
-                soLuong: 1,
-                giaBan: res.giaBan || 0,
-                soLuongTon: res.soLuongTon
+                idSanPham: parseInt(idSanPham, 10),
+                ten: res.tenSanPham, mau: res.tenMauSac, size: res.tenSize,
+                soLuong: 1, giaBan: res.giaBan || 0, soLuongTon: res.soLuongTon
             };
 
-            const existing = hd.items.find(i => i.idSPCT === spct.idSPCT);
-            if (existing) {
-                if (existing.soLuong < spct.soLuongTon) {
-                    existing.soLuong += 1;
-                } else {
-                    alert('Đã đạt số lượng tối đa trong kho.');
-                }
+            const ex = hd.items.find(i => i.idSPCT === spct.idSPCT);
+            if (ex) {
+                if (ex.soLuong < spct.soLuongTon) ex.soLuong += 1; else return alert('Đã đạt số lượng tối đa trong kho.');
             } else {
                 hd.items.push(spct);
             }
-            console.log('👉 Sản phẩm sau khi thêm:', hd.items);
-            saveHoaDonList();
-            modal.hide();
-            loadCart();
+            saveHoaDonList(); modal.hide(); loadCart(); recalcAllVisibleStocks();
         });
     }
 
-
+    /* ===========================
+       Giỏ hàng
+    =========================== */
     function loadCart() {
         const hd = hoaDonList.find(h => h.id === currentHoaDonId);
         if (!hd) {
@@ -543,226 +489,155 @@
             $('#totalAmount').text('0 ₫');
             return;
         }
-        console.log('🛒 Danh sách sản phẩm trong giỏ:', hd.items);  // LOG KIỂM TRA
         let html = '', total = 0;
-
         hd.items.forEach(item => {
-            const ten = item.ten || 'Không tên';
-            const mau = item.mau || '';
-            const size = item.size || '';
-            const quantity = item.soLuong || 0;
-            const price = item.giaBan || 0;
-            const tonKho = item.soLuongTon || 1000;
-            const thanhTien = price * quantity;
-
-            const name = ten + ' - ' + mau + ' - ' + size;
-
+            const name = (item.ten || 'Không tên') + ' - ' + (item.mau || '') + ' - ' + (item.size || '');
+            const qty = item.soLuong || 0, price = item.giaBan || 0, ton = item.soLuongTon || 0, tt = qty * price;
             html += '<tr class="text-center">';
             html += '<td>' + name + '</td>';
-            html += '<td><input type="number" min="1" max="' + tonKho + '" value="' + quantity + '" oninput="capNhatSoLuongLocal(\'' + item.idSPCT + '\', this.value)" class="form-control form-control-sm text-center"/></td>';
-            html += '<td>' + thanhTien.toLocaleString('vi-VN') + ' ₫</td>';
+            html += '<td><input type="number" class="form-control form-control-sm text-center qty-input" data-idspct="' + item.idSPCT + '" min="1" max="' + ton + '" value="' + qty + '" oninput="capNhatSoLuongLocal(\'' + item.idSPCT + '\', this.value)" /></td>';
+            html += '<td>' + tt.toLocaleString('vi-VN') + ' ₫</td>';
             html += '<td><button class="btn btn-danger btn-sm" onclick="xoaSanPhamLocal(\'' + item.idSPCT + '\')">X</button></td>';
             html += '</tr>';
-
-            total += thanhTien;
+            total += tt;
         });
-
-        if (hd.items.length === 0) {
-            html = '<tr><td colspan="4" class="text-center">Giỏ hàng trống</td></tr>';
-        }
+        if (hd.items.length === 0) html = '<tr><td colspan="4" class="text-center">Giỏ hàng trống</td></tr>';
 
         $('#cartItems').html(html);
         $('#totalAmount').text(total.toLocaleString('vi-VN') + ' ₫');
     }
 
-
+    // cập nhật SL (có cảnh báo và kẹp min/max)
     function capNhatSoLuongLocal(idSPCT, soLuongMoi) {
-        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
-        if (!hd) return;
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId); if (!hd) return;
+        const item = hd.items.find(i => String(i.idSPCT) === String(idSPCT)); if (!item) return;
 
-        const item = hd.items.find(i => String(i.idSPCT) === String(idSPCT));
-        if (!item) return;
+        const max = parseInt(item.soLuongTon || 0, 10);
+        let val = parseInt(soLuongMoi, 10);
 
-        soLuongMoi = parseInt(soLuongMoi);
-        if (isNaN(soLuongMoi) || soLuongMoi <= 0) return;
-
-        if (soLuongMoi > item.soLuongTon) {
-            alert('Vượt quá tồn kho.');
-            return;
+        if (isNaN(val) || val < 1) {
+            alert('Số lượng phải ≥ 1.');
+            val = 1;
+        } else if (val > max) {
+            alert('Vượt quá tồn kho. Tối đa: ' + max);
+            val = max;
         }
 
-        item.soLuong = soLuongMoi;
-        saveHoaDonList();
-        loadCart();
-    }
-
-    function xoaSanPhamLocal(idSPCT) {
-        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
-        if (!hd) return;
-        hd.items = hd.items.filter(i => String(i.idSPCT) !== String(idSPCT));
-        saveHoaDonList();
-        loadCart();
-    }
-
-    function xoaTatCaSanPham() {
-        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
-        if (!hd) return;
-        if (confirm('Xóa toàn bộ sản phẩm trong giỏ?')) {
-            hd.items = [];
+        if (val !== item.soLuong) {
+            item.soLuong = val;
             saveHoaDonList();
-            loadCart();
         }
+        loadCart();
+        recalcAllVisibleStocks();
     }
 
-    $('#btnCheckout').click(function () {
+    // Xoá SP trong giỏ (có confirm)
+    function xoaSanPhamLocal(idSPCT) {
+        if (!confirm('Xoá sản phẩm này khỏi giỏ?')) return;
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId); if (!hd) return;
+        hd.items = hd.items.filter(i => String(i.idSPCT) !== String(idSPCT));
+        saveHoaDonList(); loadCart(); recalcAllVisibleStocks(); bindCustomerInputs();
+    }
+
+    /* ===========================
+       Inputs khách hàng
+    =========================== */
+    function bindCustomerInputs() {
         const hd = hoaDonList.find(h => h.id === currentHoaDonId);
-        if (!hd || hd.items.length === 0) {
-            alert('Giỏ hàng trống.');
-            return;
+        if (!hd) { $('#nguoiNhan').val(''); $('#sdtNguoiNhan').val(''); return; }
+        $('#nguoiNhan').val(hd.nguoiNhan || '');
+        $('#sdtNguoiNhan').val(hd.sdtNguoiNhan || '');
+        $('#nguoiNhan, #sdtNguoiNhan').off('input.bindCustomer').on('input.bindCustomer', function () {
+            clearInvalid($(this));
+            const h = hoaDonList.find(x => x.id === currentHoaDonId); if (!h) return;
+            h.nguoiNhan = ($('#nguoiNhan').val() || '').trim();
+            h.sdtNguoiNhan = ($('#sdtNguoiNhan').val() || '').trim();
+            saveHoaDonList();
+        });
+    }
+
+    // Chuẩn hoá/validate SĐT khi blur
+    $('#sdtNguoiNhan').off('blur.normPhone').on('blur.normPhone', function () {
+        const v = normPhone($(this).val());
+        $(this).val(v);
+        if (v && !validVNPhone(v)) setInvalid($(this), 'Số điện thoại chưa hợp lệ (10–11 số, bắt đầu bằng 0).');
+        else clearInvalid($(this));
+        const h = hoaDonList.find(x => x.id === currentHoaDonId); if (h) { h.sdtNguoiNhan = v; saveHoaDonList(); }
+    });
+
+    /* ===========================
+       Debounce binding (sau khi định nghĩa)
+    =========================== */
+    window.capNhatSoLuongLocal = _debounce(capNhatSoLuongLocal, 250);
+
+    /* ===========================
+       Events khởi tạo
+    =========================== */
+    renderHoaDonList();
+    loadCart();
+    recalcAllVisibleStocks();
+    bindCustomerInputs();
+
+    // Bật tooltip Bootstrap
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    // Enter trong modal = xác nhận
+    document.getElementById('variantModal').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            chonThuocTinh();
         }
+    });
 
-        // Chuẩn bị dữ liệu
-        const danhSachSanPham = hd.items.map(item => ({
-            idSanPhamChiTiet: item.idSPCT,
-            soLuong: item.soLuong
-        }));
+    // Lọc nhanh theo tên
+    $('#filter').on('input', function () {
+        const q = ($(this).val() || '').toLowerCase().trim();
+        $('#productTable tbody tr').each(function () {
+            const name = $(this).find('td:nth-child(2)').text().toLowerCase();
+            $(this).toggle(!q || name.includes(q));
+        });
+    });
 
-        const idPhieuGiamGia = hd.idPhieuGiamGia || null;  // Nếu bạn có chọn mã giảm giá, gán vào hd.idPhieuGiamGia
-        const phuongThucThanhToan = $('#phuongThucThanhToan').val() || 'TIEN_MAT';  // Lấy từ select nếu có
-        const idKhachHang = $('#selectKhachHang').val();
-        const tenNguoiNhan = $('#nguoiNhan').val().trim();
-        const sdtNguoiNhan = $('#sdtNguoiNhan').val().trim();
+    // Chặn ký tự không hợp lệ khi gõ SL
+    $(document).on('keydown', '#cartItems input.qty-input', function (e) {
+        const bad = ['-', '+', 'e', 'E', '.', ' ', '/', ','];
+        if (bad.includes(e.key)) e.preventDefault();
+    });
+
+    // Nếu rời ô hoặc để trống -> kẹp lại & cập nhật
+    $(document).on('blur', '#cartItems input.qty-input', function () {
+        if (this.value === '') this.value = this.min || 1;
+        const id = this.dataset.idspct;
+        window.capNhatSoLuongLocal(id, this.value);
+    });
+
+    // Thanh toán
+    $('#btnCheckout').on('click', function () {
+        const hd = hoaDonList.find(h => h.id === currentHoaDonId);
+        if (!hd || hd.items.length === 0) return alert('Giỏ hàng trống.');
+        if (!validateCustomer()) return; // ✅ bắt buộc tên + SĐT hợp lệ
+
         const payload = {
-            danhSachSanPham: danhSachSanPham,
-            idKhachHang: idKhachHang ? parseInt(idKhachHang) : null,
-            idPhieuGiamGia: idPhieuGiamGia,
-            phuongThucThanhToan: phuongThucThanhToan,
-            tenNguoiNhan: tenNguoiNhan,
-            sdtNguoiNhan: sdtNguoiNhan
+            danhSachSanPham: hd.items.map(it => ({ idSanPhamChiTiet: it.idSPCT, soLuong: it.soLuong })),
+            idKhachHang: null,
+            idPhieuGiamGia: null,
+            phuongThucThanhToan: PHUONG_THUC_MAC_DINH,
+            tenNguoiNhan: ($('#nguoiNhan').val() || '').trim(),
+            sdtNguoiNhan: ($('#sdtNguoiNhan').val() || '').trim()
         };
 
-        $.ajax({
-            url: '/admin/banHang/thanh-toan',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            success: function (hoaDon) {
-                alert('Thanh toán thành công!\nMã hóa đơn: ' + hoaDon.maHoaDon);
-
-                $('#nguoiNhan').val('');
-                $('#sdtNguoiNhan').val('');
-
-                hoaDonList = hoaDonList.filter(h => h.id !== currentHoaDonId);
-                currentHoaDonId = hoaDonList.length > 0 ? hoaDonList[0].id : null;
-                saveHoaDonList();
-                renderHoaDonList();
-                loadCart();
-
-            },
-            error: function (xhr) {
-                alert('Lỗi thanh toán: ' + xhr.responseText);
-            }
+        withLoading(
+            $.ajax({ url: '/admin/banHang/thanh-toan', type: 'POST', contentType: 'application/json', data: JSON.stringify(payload) })
+        ).done(function (hoaDon) {
+            alert('Thanh toán thành công!\nMã HĐ: ' + (hoaDon?.maHoaDon || '—'));
+            hoaDonList = hoaDonList.filter(h => h.id !== currentHoaDonId);
+            currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
+            saveHoaDonList(); renderHoaDonList(); loadCart(); recalcAllVisibleStocks();
+            $('#nguoiNhan,#sdtNguoiNhan').val('');
+            bindCustomerInputs();
+        }).fail(function (xhr) {
+            alert('Lỗi thanh toán: ' + (xhr.responseText || ''));
         });
     });
-
-    let danhSachKhachHang = [];
-
-    $(document).ready(function () {
-        loadKhachHangSelect();
-
-        $('#timKhachHangInput').on('input', function () {
-            const keyword = $(this).val().toLowerCase().trim();
-
-            const filtered = danhSachKhachHang.filter(kh => {
-                const sdt = kh.soDienThoai?.replaceAll(' ', '') ?? '';
-                const ten = kh.hoVaTen?.toLowerCase() ?? '';
-                return sdt.includes(keyword) || ten.includes(keyword);
-            });
-
-            renderKhachHangSelect(filtered);
-        });
-
-    });
-
-    function loadKhachHangSelect() {
-        $.get("/admin/banHang/danh-sach-khach-hang", function (data) {
-            console.log("Dữ liệu KH:", data);
-            danhSachKhachHang = data || [];
-            renderKhachHangSelect(danhSachKhachHang);
-        });
-    }
-
-    function renderKhachHangSelect(list) {
-        const $select = $('#selectKhachHang');
-        $select.empty();
-
-        list.forEach(kh => {
-            const id = kh.id ?? '';
-            const ten = kh.hoVaTen ?? '';
-            const rawSdt = kh.soDienThoai ?? '';
-            const sdt = rawSdt.toString().replaceAll(' ', '').trim();
-            const hienThi = [ten, sdt && sdt.trim()].filter(Boolean).join(' - ');
-
-            console.log('KH:', { id, ten, rawSdt, sdt, hienThi });
-
-            const $option = $('<option>').val(id).text(hienThi);
-            $select.append($option);
-        });
-    }
-
-    $(document).ready(function () {
-        $('#btnThemKhachHang').click(function () {
-            const hoVaTen = $('#inputTenKH').val().trim();
-            const soDienThoai = $('#inputSDT').val().trim();
-            const gioiTinh = $('#inputGioiTinh').val();
-
-            if (!hoVaTen || !soDienThoai || !gioiTinh) {
-                toastr.warning("Vui lòng nhập đầy đủ thông tin khách hàng.");
-                return;
-            }
-
-            $.ajax({
-                url: '/admin/banHang/khach-hang/them-nhanh',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    hoVaTen: hoVaTen,
-                    soDienThoai: soDienThoai,
-                    gioiTinh: gioiTinh
-                }),
-                success: function (res) {
-                    toastr.success("Đã thêm khách hàng mới thành công.");
-
-                    // Đóng modal
-                    $('#modalThemKhachHang').modal('hide');
-
-                    $('.modal-backdrop').remove();
-                    $('body').removeClass('modal-open').css('padding-right', '');
-
-                    // Làm sạch form
-                    $('#inputTenKH').val('');
-                    $('#inputSDT').val('');
-                    $('#inputGioiTinh').val('Nam');
-
-                    // Reload lại danh sách KH để có khách mới
-                    loadKhachHangSelect();
-
-                    // Gán sẵn khách mới vào select
-                    $('#selectKhachHang').val(res.id);
-                },
-                error: function (xhr) {
-                    if (xhr.status === 400 || xhr.status === 409) {
-                        toastr.error(xhr.responseText);
-                    } else {
-                        toastr.error("Đã xảy ra lỗi khi thêm khách hàng.");
-                    }
-                }
-            });
-        });
-    });
-
-
-
-
 </script>
-
