@@ -68,7 +68,7 @@
 <body>
 
 <!-- Chỉ duy nhất 1 container -->
-<div id="mainBox" class="login-container">main
+<div id="mainBox" class="login-container">
     <h2>Đăng nhập hệ thống</h2>
     <div id="messageArea">
         <c:if test="${not empty error}">

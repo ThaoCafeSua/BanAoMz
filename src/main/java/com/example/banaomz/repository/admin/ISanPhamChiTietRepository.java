@@ -63,4 +63,9 @@ public interface ISanPhamChiTietRepository extends IBaseRepository<SanPhamChiTie
     List<SanPhamChiTiet> findByTrangThaiAndSanPhamHoatDong(
             @Param("trangThai") String trangThai
     );
+
+    @Query("SELECT COALESCE(SUM(spct.soLuong), 0) FROM SanPhamChiTiet spct")
+    Long sumAllStock();
+    @Query("select coalesce(sum(coalesce(s.soLuong,0)), 0) from SanPhamChiTiet s")
+    Integer sumSoLuongTon();
 }

@@ -1,15 +1,16 @@
 package com.example.banaomz.dto.admin.thongKe;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+import java.math.BigDecimal;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class DoanhThuDTO {
-    private Integer day;
-    private Integer month;
-    private Integer year;
-    private Integer soLuongTon;
+    private BigDecimal day;
+    private BigDecimal month;
+    private BigDecimal year;
+    private Integer  soLuongTon;
 }
