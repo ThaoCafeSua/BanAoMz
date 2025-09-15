@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -65,4 +66,42 @@ public interface IHoaDonRepository extends JpaRepository<HoaDon, Long> {
 """)
     Optional<HoaDonDetailResponseDTO> findDetail(@Param("id") Long id);
 
+
+    @Query("""
+           SELECT COALESCE(SUM(hd.thanhTien), 0)
+           FROM HoaDon hd
+           WHERE hd.trangThai = 'HOAN_THANH'
+             AND hd.ngayHoanThanh >= :start
+             AND hd.ngayHoanThanh <  :end
+           """)
+    BigDecimal sumRevenueCompletedBetween(@Param("start") LocalDateTime start,
+                                          @Param("end")   LocalDateTime end);
+
+    @Query("""
+           select coalesce(sum(h.thanhTien), 0)
+           from HoaDon h
+           where h.trangThai = :trangThai
+             and h.ngayHoanThanh >= :start and h.ngayHoanThanh < :end
+           """)
+    BigDecimal sumThanhTienByTrangThaiAndNgayHoanThanhBetween(
+            @Param("trangThai") String trangThai,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+           select MONTH(h.ngayHoanThanh) as m,
+                  coalesce(sum(h.thanhTien), 0) as doanhThu,
+                  coalesce(sum(ct.soLuong), 0) as soLuongBan
+           from HoaDon h
+             join HoaDonChiTiet ct on ct.hoaDon = h
+           where h.trangThai = :trangThai
+             and YEAR(h.ngayHoanThanh) = :year
+           group by MONTH(h.ngayHoanThanh)
+           order by m
+           """)
+    List<Object[]> findMonthlyRevenueAndQty(
+            @Param("year") int year,
+            @Param("trangThai") String trangThai
+    );
 }
