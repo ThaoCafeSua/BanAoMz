@@ -1,10 +1,13 @@
 package com.example.banaomz.controller.client.dangky;
 
+import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonDetailResponseDTO;
 import com.example.banaomz.dto.admin.ResponseObject;
 import com.example.banaomz.dto.admin.diaChi.DiaChiDTO;
 import com.example.banaomz.dto.admin.khachHang.KhachHangDTO;
+import com.example.banaomz.entity.admin.HoaDon;
 import com.example.banaomz.entity.admin.KhachHang;
 import com.example.banaomz.service.admin.IDiaChiService;
+import com.example.banaomz.service.admin.IHoaDonService;
 import com.example.banaomz.service.admin.IKhachHangService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -27,6 +30,7 @@ public class dangKyController {
 
     private final IKhachHangService khachHangService;
     private final IDiaChiService diaChiService;
+    private  IHoaDonService hoaDonService;
 
     @Autowired
     public dangKyController(IKhachHangService khachHangService, IDiaChiService diaChiService) {
@@ -108,6 +112,21 @@ public class dangKyController {
             return "client/khachhang/dangnhap";
         }
     }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/khachhang/dangnhap";
+    }
+
+    @PostMapping("/orders")
+    @ResponseBody
+    public ResponseEntity<?> getOrders(@RequestBody Long customerId) {
+        List<HoaDonDetailResponseDTO> orders = (List<HoaDonDetailResponseDTO>) hoaDonService.getDetailById(customerId);
+        return ResponseEntity.ok(Map.of("data", orders));
+    }
+
+
 
     @PostMapping("/forgot-password")
     public String forgotPassword(@RequestParam("email") String email,

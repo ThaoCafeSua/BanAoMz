@@ -64,7 +64,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold text-primary">Mật khẩu:</label>
-                    <input type="password" name="matKhau" value="${khachHang.matKhau}" class="form-control"/>
+                    <input type="text" name="matKhau" value="${khachHang.matKhau}" class="form-control"/>
                 </div>
             </div>
 
@@ -77,37 +77,61 @@
     </div>
 </div>
 
-    <!-- Địa chỉ giao hàng -->
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title">Địa chỉ nhận hàng</h5>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal">
-                    <i class="fa-solid fa-plus"></i> Thêm địa chỉ
-                </button>
-            </div>
-
-            <!-- Bảng danh sách địa chỉ -->
-            <table class="table table-hover" id="addressTable">
-                <thead style="background-color: #001f3d; color: white;">
-                <tr class="text-center">
-                    <th>STT</th>
-                    <th>Mặc định</th>
-                    <th>Người nhận</th>
-                    <th>Điện thoại</th>
-                    <th>Tỉnh/Thành</th>
-                    <th>Quận/Huyện</th>
-                    <th>Phường/Xã</th>
-                    <th>Chi tiết</th>
-                    <th>Hành động</th>
-                </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+<!-- Địa chỉ giao hàng -->
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Địa chỉ nhận hàng</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal">
+                <i class="fa-solid fa-plus"></i> Thêm địa chỉ
+            </button>
         </div>
-    </div>
 
-    <!-- Modal Thêm/Sửa Địa Chỉ -->
+        <!-- Bảng danh sách địa chỉ -->
+        <table class="table table-hover" id="addressTable">
+            <thead style="background-color: #001f3d; color: white;">
+            <tr class="text-center">
+                <th>STT</th>
+                <th>Mặc định</th>
+                <th>Người nhận</th>
+                <th>Điện thoại</th>
+                <th>Tỉnh/Thành</th>
+                <th>Quận/Huyện</th>
+                <th>Phường/Xã</th>
+                <th>Chi tiết</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- THEO DÕI ĐƠN HÀNG -->
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Theo dõi đơn hàng</h5>
+        </div>
+
+        <!-- Bảng danh sách đơn hàng -->
+        <table class="table table-hover" id="orderTable">
+            <thead style="background-color: #001f3d; color: white;">
+            <tr class="text-center">
+                <th>STT</th>
+                <th>Mã đơn</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Thêm/Sửa Địa Chỉ -->
 <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -166,7 +190,6 @@
         </div>
     </div>
 </div>
-
 <script>
 
     let customerId = ${customerId};
@@ -449,5 +472,63 @@
             wardId = $(this).val();
         })
     })
+    // ================== THEO DÕI ĐƠN HÀNG ==================
+    let orderTable = $('#orderTable').DataTable({
+        paging: true,
+        searching: false,
+        ordering: false,
+        info: false,
+        lengthChange: false,
+        pageLength: 5,
+        columnDefs: [{className: "text-center", targets: "_all"}],
+    });
+
+    function getCustomerOrders() {
+        $('#loading').show();
+        $.ajax({
+            url: '${pageContext.request.contextPath}/khachhang/orders',   // <-- API lấy danh sách đơn hàng
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(customerId),
+            success: function (response) {
+                fillTableOrders(response.data);
+                $('#loading').hide();
+            },
+            error: function () {
+                $('#loading').hide();
+                toastr.error('Lỗi khi lấy danh sách đơn hàng');
+            }
+        });
+    }
+
+    function fillTableOrders(data) {
+        orderTable.clear();
+        $.each(data, function (index, order) {
+            orderTable.row.add([
+                index + 1,
+                order.maDonHang,
+                order.ngayDat,  // Format yyyy-MM-dd từ backend
+                order.tongTien.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}),
+                getStatusBadge(order.trangThai),  // hiển thị màu trạng thái
+                `<a href="/admin/order/detail/${order.id}" class="btn btn-info btn-sm">
+                 <i class="fa-solid fa-eye"></i>
+             </a>`
+            ]);
+        });
+        orderTable.draw();
+    }
+
+    function getStatusBadge(status) {
+        switch (status) {
+            case 'CHO_XAC_NHAN': return '<span class="badge bg-warning text-dark">Chờ xác nhận</span>';
+            case 'DANG_GIAO':    return '<span class="badge bg-primary">Đang giao</span>';
+            case 'DA_GIAO':      return '<span class="badge bg-success">Đã giao</span>';
+            case 'DA_HUY':       return '<span class="badge bg-danger">Đã hủy</span>';
+            default:             return '<span class="badge bg-secondary">Không xác định</span>';
+        }
+    }
+
+    // Gọi khi load trang
+    getCustomerOrders();
 
 </script>
