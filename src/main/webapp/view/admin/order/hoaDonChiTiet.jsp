@@ -311,29 +311,37 @@
 </style>
 
 <script>
+    /* =========================
+       Helpers
+    ========================= */
     function getCsrfHeaders() {
-        const token = document.querySelector('meta[name="_csrf"]')?.content;
+        const token  = document.querySelector('meta[name="_csrf"]')?.content;
         const header = document.querySelector('meta[name="_csrf_header"]')?.content;
         return (token && header) ? { [header]: token } : {};
     }
 
-    // Ma trận chuyển trạng thái (khớp service)
-    const TRANSITIONS = {
-        CHO_XAC_NHAN:      ['CHO_CHUAN_BI_HANG','HUY'],
-        CHO_CHUAN_BI_HANG: ['DANG_GIAO','HUY'],
-        DANG_GIAO:         ['HOAN_THANH','GIAO_THAT_BAI'],
-        GIAO_THAT_BAI:     ['DANG_GIAO','HOAN_HANG','HUY'],
-        HOAN_HANG:         ['DA_HOAN_HANG'],
-        DA_HOAN_HANG:      [],
-        HOAN_THANH:        [],
-        HUY:               []
-    };
+    // Gọi API và tự động "unwrap" ApiResponse{ data, message, ... }
+    async function api(url, options) {
+        const res = await fetch(url, {
+            headers: { Accept: 'application/json', ...(options?.headers || {}) },
+            ...options
+        });
+        const ct  = res.headers.get('content-type') || '';
+        const raw = ct.includes('application/json') ? await res.json() : await res.text();
 
+        if (!res.ok) {
+            // Ưu tiên message bên server
+            const msg = (raw && typeof raw === 'object')
+                ? (raw.message || raw.error || 'Có lỗi xảy ra')
+                : (raw || 'Có lỗi xảy ra');
+            throw new Error(msg);
+        }
+        // Dạng ApiResponse => trả về data, nếu không có thì trả raw
+        if (raw && typeof raw === 'object' && 'data' in raw) return raw.data;
+        return raw;
+    }
 
-    // Thứ tự để đánh dấu các bước đã qua
-    const ORDER = ['CHO_XAC_NHAN','CHO_CHUAN_BI_HANG','DANG_GIAO','HOAN_THANH'];
-
-
+    // Map badge trạng thái để cập nhật UI
     const BADGE = {
         'CHO_XAC_NHAN'      : '<span class="badge bg-warning text-dark">Chờ xác nhận</span>',
         'CHO_CHUAN_BI_HANG' : '<span class="badge bg-info text-dark">Chờ chuẩn bị hàng</span>',
@@ -345,67 +353,102 @@
         'HUY'               : '<span class="badge bg-danger">Huỷ</span>'
     };
 
+    // Thứ tự các bước chính
+    const ORDER = ['CHO_XAC_NHAN', 'CHO_CHUAN_BI_HANG', 'DANG_GIAO', 'HOAN_THANH'];
 
+    // Ma trận chuyển trạng thái (khớp với Service)
+    const TRANSITIONS = {
+        CHO_XAC_NHAN:      ['CHO_CHUAN_BI_HANG','HUY'],
+        CHO_CHUAN_BI_HANG: ['DANG_GIAO','HUY'],
+        DANG_GIAO:         ['HOAN_THANH','GIAO_THAT_BAI'],
+        GIAO_THAT_BAI:     ['DANG_GIAO','HOAN_HANG','HUY'],
+        HOAN_HANG:         ['DA_HOAN_HANG'],
+        DA_HOAN_HANG:      [],
+        HOAN_THANH:        [],
+        HUY:               []
+    };
+
+    // Cập nhật nhãn trạng thái trên header
+    function setStatusBadge(status) {
+        const label = document.getElementById('label-status');
+        if (label) label.innerHTML = BADGE[status] || `<span class="badge bg-light text-dark">${status}</span>`;
+    }
+
+    // Khởi tạo stepper
     (function initStatusFlow(){
         const flow = document.getElementById('statusFlow');
-        if(!flow) return;
+        if (!flow) return;
 
         let current = (flow.dataset.current || '').toUpperCase();
-        const id = flow.dataset.id;
+        const id    = flow.dataset.id;
         const items = [...flow.querySelectorAll('.status-item')];
 
-        function refreshUI(){
-            items.forEach(btn=>{
+        function refreshUI() {
+            items.forEach(btn => {
                 const s = btn.dataset.status.toUpperCase();
-                btn.classList.remove('done','current','allowed','disabled');
+                btn.classList.remove('done', 'current', 'allowed', 'disabled');
 
-                if(ORDER.includes(s) && ORDER.includes(current) && ORDER.indexOf(s) < ORDER.indexOf(current)){
+                // Đánh dấu các bước đã qua (chỉ với các bước trong ORDER)
+                if (ORDER.includes(s) && ORDER.includes(current) && ORDER.indexOf(s) < ORDER.indexOf(current)) {
                     btn.classList.add('done');
                 }
-                if(s === current){ btn.classList.add('current'); }
+                if (s === current) {
+                    btn.classList.add('current');
+                }
 
                 const allowed = (TRANSITIONS[current] || []);
-                if(allowed.includes(s)){
+                if (allowed.includes(s)) {
                     btn.classList.add('allowed');
-                }else if(s !== current){
+                } else if (s !== current) {
                     btn.classList.add('disabled');
                 }
             });
         }
 
-        async function updateStatus(next){
-            try{
-                const res = await fetch(`/admin/hoaDon/${id}/trang-thai`, {
-                    method:'POST',
-                    headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8', ...getCsrfHeaders() },
-                    body:new URLSearchParams({ trangThai: next })
+        async function updateStatus(next) {
+            // Chặn click nhiều lần
+            items.forEach(b => b.disabled = true);
+            try {
+                const data = await api(`/admin/hoaDon/${id}/trang-thai`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                        ...getCsrfHeaders()
+                    },
+                    body: new URLSearchParams({ trangThai: next })
                 });
-                const ct = res.headers.get('content-type') || '';
-                const data = ct.includes('application/json') ? await res.json() : await res.text();
-                if(!res.ok) throw new Error(typeof data==='string' ? data : (data.message || 'Có lỗi xảy ra'));
 
-                current = (data.trangThai || next).toUpperCase();
+                // data lúc này là HoaDonDetailResponseDTO (đã "unwrap")
+                current = (data?.trangThai || next).toUpperCase();
                 flow.dataset.current = current;
+
                 refreshUI();
+                setStatusBadge(current);
 
-                const label = document.getElementById('label-status');
-                if(label) label.innerHTML = BADGE[current] || current;
-
-                alert('Đã cập nhật trạng thái.');
-            }catch(e){
+                alert('Đã cập nhật trạng thái thành công!');
+                // (Tuỳ chọn) Nếu muốn đồng bộ thêm dữ liệu khác sau khi đổi trạng thái,
+                // có thể gọi lại detail và cập nhật DOM:
+                // const fresh = await api(`/admin/hoaDon/${id}/api/detail`, { method: 'GET' });
+                // ...cập nhật các vùng cần thiết từ fresh ...
+            } catch (e) {
                 console.error(e);
                 alert('Cập nhật thất bại: ' + e.message);
+            } finally {
+                items.forEach(b => b.disabled = false);
             }
         }
 
-        items.forEach(btn=>{
-            btn.addEventListener('click', ()=>{
-                if(btn.classList.contains('allowed')){
-                    updateStatus(btn.dataset.status);
+        // Gán click
+        items.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('allowed')) {
+                    const next = btn.dataset.status;
+                    updateStatus(next);
                 }
             });
         });
 
+        // Lần đầu vẽ UI
         refreshUI();
     })();
 </script>

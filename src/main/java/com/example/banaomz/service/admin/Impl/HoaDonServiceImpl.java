@@ -4,7 +4,13 @@ import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonDetailResponseDTO;
 import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonResponseDTO;
 import com.example.banaomz.dto.admin.HoaDonChiTiet.Reponse.HoaDonChiTietResponseDTO;
 import com.example.banaomz.entity.admin.HoaDon;
+import com.example.banaomz.entity.admin.HoaDonChiTiet;
+import com.example.banaomz.entity.admin.SanPham;
+import com.example.banaomz.entity.admin.SanPhamChiTiet;
+import com.example.banaomz.repository.admin.IHoaDonChiTietRepository;
 import com.example.banaomz.repository.admin.IHoaDonRepository;
+import com.example.banaomz.repository.admin.ISanPhamChiTietRepository;
+import com.example.banaomz.repository.admin.ISanPhamRepository;
 import com.example.banaomz.service.admin.IHoaDonService;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.font.PdfFont;
@@ -22,9 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,10 +45,24 @@ public class HoaDonServiceImpl implements IHoaDonService {
     private static final String HOAN_THANH         = "HOAN_THANH";
     private static final String HUY                = "HUY";
 
-    private final IHoaDonRepository hoaDonRepository;
+    /** Nhóm trạng thái được tính là "đã bán" (đã xuất kho & cộng soLuongDaBan) */
+    private static final Set<String> COUNTED_AS_SOLD = Set.of(
+            CHO_XAC_NHAN, CHO_CHUAN_BI_HANG, DANG_GIAO, HOAN_THANH
+    );
 
-    public HoaDonServiceImpl(IHoaDonRepository hoaDonRepository) {
+    private final IHoaDonRepository hoaDonRepository;
+    private final IHoaDonChiTietRepository hoaDonChiTietRepo;
+    private final ISanPhamChiTietRepository sanPhamChiTietRepo;
+    private final ISanPhamRepository sanPhamRepo;
+
+    public HoaDonServiceImpl(IHoaDonRepository hoaDonRepository,
+                             IHoaDonChiTietRepository hoaDonChiTietRepo,
+                             ISanPhamChiTietRepository sanPhamChiTietRepo,
+                             ISanPhamRepository sanPhamRepo) {
         this.hoaDonRepository = hoaDonRepository;
+        this.hoaDonChiTietRepo = hoaDonChiTietRepo;
+        this.sanPhamChiTietRepo = sanPhamChiTietRepo;
+        this.sanPhamRepo = sanPhamRepo;
     }
 
     /* =================== LIST =================== */
@@ -152,93 +171,116 @@ public class HoaDonServiceImpl implements IHoaDonService {
         var hd = hoaDonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hoá đơn ID=" + id));
 
-        // Nếu muốn áp dụng cho mọi loại hóa đơn, bỏ điều kiện này
+        // Nếu chỉ áp dụng cho ONLINE thì bật check; muốn áp dụng mọi loại thì bỏ if này
         if (!"ONLINE".equalsIgnoreCase(hd.getLoaiHoaDon())) {
             throw new IllegalStateException("Chỉ cho phép đổi trạng thái với hoá đơn ONLINE");
         }
 
-        String from = hd.getTrangThai();
-        String to = (trangThaiMoi == null) ? "" : trangThaiMoi.toUpperCase();
+        String from = Optional.ofNullable(hd.getTrangThai()).orElse("");
+        String to   = (trangThaiMoi == null) ? "" : trangThaiMoi.toUpperCase();
 
         if (!canTransit(from, to)) {
             throw new IllegalArgumentException("Không thể chuyển trạng thái từ " + from + " -> " + to);
         }
 
+        // ---- ÁP DỤNG KHO/ĐÃ BÁN THEO CHUYỂN TRẠNG THÁI (idempotent) ----
+        boolean wasCounted  = COUNTED_AS_SOLD.contains(from);
+        boolean willCounted = COUNTED_AS_SOLD.contains(to);
+
+        if (!wasCounted && willCounted) {
+            // Lần đầu đi vào nhóm "đã bán" -> trừ kho & + soLuongDaBan
+            applyInventoryForOrder(hd, -1);
+        } else if (wasCounted && !willCounted) {
+            // Rời nhóm "đã bán" (HUY / DA_HOAN_HANG) -> cộng kho & − soLuongDaBan
+            applyInventoryForOrder(hd, +1);
+        }
+
+        // ---- Các side-effect khác theo từng trạng thái (không đụng kho nữa) ----
         switch (to) {
-            case CHO_XAC_NHAN:
-                lockPricesAndPromotions(hd);
-                break;
-
-            case CHO_CHUAN_BI_HANG:
-                reserveOrDeductStock(hd);
-                break;
-
             case DANG_GIAO:
-                createShipmentAndSetNgayGiao(hd);
+                if (hd.getNgayGiao() == null) hd.setNgayGiao(LocalDateTime.now());
                 break;
-
-            case GIAO_THAT_BAI:
-                markDeliveryFailed(hd);
-                break;
-
-            case HOAN_HANG:
-                startReturnToWarehouse(hd);
-                break;
-
-            case DA_HOAN_HANG:
-                finishReturnAndRestock(hd); // trả kho, mở voucher, đóng vận đơn
-                break;
-
             case HOAN_THANH:
-                hd.setNgayHoanThanh(java.time.LocalDateTime.now());
-                increaseSoldCount(hd);
-                closeAccounting(hd);
+                hd.setNgayHoanThanh(LocalDateTime.now());
                 break;
-
-            case HUY:
-                releaseStock(hd);
-                refundIfNeeded(hd);
-                releaseVoucherIfAny(hd);
-                break;
+            default:
+                // nothing
         }
 
         hd.setTrangThai(to);
-        hd.setNgaySua(java.time.LocalDateTime.now());
+        hd.setNgaySua(LocalDateTime.now());
         hoaDonRepository.save(hd);
 
         return getDetailById(id);
     }
 
     private boolean canTransit(String from, String to) {
-        if (to == null) return false;
-        if (from == null) return CHO_XAC_NHAN.equalsIgnoreCase(to);
-
-        from = from.toUpperCase();
-        to   = to.toUpperCase();
+        if (to == null || to.isEmpty()) return false;
+        if (from == null || from.isEmpty()) return CHO_XAC_NHAN.equals(to);
 
         switch (from) {
             case CHO_XAC_NHAN:
-                return to.equals(CHO_CHUAN_BI_HANG) || to.equals(HUY);
-
+                return to.equals(CHO_CHUAN_BI_HANG) || to.equals(DANG_GIAO) || to.equals(HUY);
             case CHO_CHUAN_BI_HANG:
                 return to.equals(DANG_GIAO) || to.equals(HUY);
-
             case DANG_GIAO:
-                return to.equals(HOAN_THANH) || to.equals(GIAO_THAT_BAI);
-
+                return to.equals(HOAN_THANH) || to.equals(GIAO_THAT_BAI) || to.equals(HOAN_HANG);
             case GIAO_THAT_BAI:
                 return to.equals(DANG_GIAO) || to.equals(HOAN_HANG) || to.equals(HUY);
-
             case HOAN_HANG:
                 return to.equals(DA_HOAN_HANG);
-
             case DA_HOAN_HANG:
             case HOAN_THANH:
             case HUY:
                 return false;
-
             default:
                 return false;
+        }
+    }
+
+    /* ================= INVENTORY CORE ================= */
+
+    /**
+     * Cộng/trừ kho & soLuongDaBan theo chiều:
+     * dir = -1  -> bán: trừ kho biến thể, + soLuongDaBan
+     * dir = +1  -> hoàn/huỷ: cộng kho biến thể, − soLuongDaBan
+     */
+    private void applyInventoryForOrder(HoaDon hd, int dir) {
+        List<HoaDonChiTiet> cts = hoaDonChiTietRepo.findByHoaDonId(hd.getId().longValue());
+        if (cts == null || cts.isEmpty()) return;
+
+        Map<Long, Integer> sumBySanPham = new HashMap<>();
+
+        for (HoaDonChiTiet ct : cts) {
+            SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+            if (spct == null) continue;
+
+            int qty = Optional.ofNullable(ct.getSoLuong()).orElse(0);
+            int ton = Optional.ofNullable(spct.getSoLuong()).orElse(0);
+
+            if (dir == -1 && ton < qty) {
+                // Tránh âm kho
+                throw new IllegalStateException("Kho không đủ cho SPCT ID=" + spct.getId());
+            }
+
+            int newTon = ton + dir * qty; // dir -1: trừ; dir +1: cộng
+            if (newTon < 0) newTon = 0;
+            spct.setSoLuong(newTon);
+            sanPhamChiTietRepo.save(spct);
+
+            Long idSp = spct.getSanPham().getId();
+            sumBySanPham.merge(idSp, qty, Integer::sum);
+        }
+
+        for (Map.Entry<Long, Integer> e : sumBySanPham.entrySet()) {
+            SanPham sp = sanPhamRepo.findById(e.getKey()).orElse(null);
+            if (sp == null) continue;
+
+            int sold = Optional.ofNullable(sp.getSoLuongDaBan()).orElse(0);
+            sold += (dir == -1 ? e.getValue() : -e.getValue());
+            if (sold < 0) sold = 0;
+            sp.setSoLuongDaBan(sold);
+            sanPhamRepo.save(sp);
         }
     }
 
@@ -252,27 +294,7 @@ public class HoaDonServiceImpl implements IHoaDonService {
     @FunctionalInterface interface SupplierX<T> { T get() throws Exception; }
 
     private String formatCurrency(BigDecimal value) {
-        NumberFormat f = NumberFormat.getInstance(new Locale("vi", "VN"));
+        NumberFormat f = NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
         return f.format(value == null ? BigDecimal.ZERO : value) + " ₫";
     }
-
-    /* ====== Stub side-effects (tuỳ hệ thống của bạn) ====== */
-    private void lockPricesAndPromotions(HoaDon hd) { /* khoá giá/ưu đãi nếu cần */ }
-    private void reserveOrDeductStock(HoaDon hd) { /* giữ kho hoặc trừ kho khi chuẩn bị */ }
-    private void createShipmentAndSetNgayGiao(HoaDon hd) {
-        if (hd.getNgayGiao() == null) hd.setNgayGiao(java.time.LocalDateTime.now());
-        /* tạo vận đơn nếu cần */
-    }
-    private void markDeliveryFailed(HoaDon hd) { /* tăng bộ đếm fail, note lý do... */ }
-    private void startReturnToWarehouse(HoaDon hd) { /* gọi API hãng vận chuyển hoàn hàng... */ }
-    private void finishReturnAndRestock(HoaDon hd) {
-        releaseStock(hd);          // trả kho
-        releaseVoucherIfAny(hd);   // mở lại mã giảm nếu cần
-        /* đóng vận đơn hoàn hàng */
-    }
-    private void increaseSoldCount(HoaDon hd) { /* cộng soLuongDaBan */ }
-    private void closeAccounting(HoaDon hd) { /* ghi nhận doanh thu, đối soát COD */ }
-    private void releaseStock(HoaDon hd) { /* trả lại kho nếu đã giữ */ }
-    private void refundIfNeeded(HoaDon hd) { /* COD: thường chưa thu, nên không hoàn tiền */ }
-    private void releaseVoucherIfAny(HoaDon hd) { /* mở lại mã giảm (nếu có) */ }
 }

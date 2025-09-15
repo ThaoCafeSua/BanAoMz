@@ -3,17 +3,21 @@ package com.example.banaomz.controller.admin.order;
 import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonDetailResponseDTO;
 import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonResponseDTO;
 import com.example.banaomz.dto.admin.HoaDonChiTiet.Reponse.HoaDonChiTietResponseDTO;
+import com.example.banaomz.dto.common.ApiResponse;
 import com.example.banaomz.entity.admin.HoaDon;
 import com.example.banaomz.repository.admin.IHoaDonRepository;
 import com.example.banaomz.service.admin.IHoaDonService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/hoaDon")
@@ -22,13 +26,15 @@ public class HoaDonController {
     private final IHoaDonService hoaDonService;
     private final IHoaDonRepository hoaDonRepository;
 
-    public HoaDonController(IHoaDonService hoaDonService ,
+    public HoaDonController(IHoaDonService hoaDonService,
                             IHoaDonRepository hoaDonRepository) {
         this.hoaDonService = hoaDonService;
         this.hoaDonRepository = hoaDonRepository;
     }
 
-    // Danh sách
+    /* ====================== VIEWS ====================== */
+
+    // Danh sách (render JSP)
     @GetMapping
     public String hienThiDanhSachHoaDon(Model model) {
         List<HoaDonResponseDTO> danhSach = hoaDonService.getAll();
@@ -37,7 +43,7 @@ public class HoaDonController {
         return "/admin/header";
     }
 
-    // Chi tiết
+    // Chi tiết (render JSP)
     @GetMapping("/chiTiet/{id}")
     public String hienThiChiTiet(@PathVariable("id") Long id, Model model) {
         // Header (projection)
@@ -53,15 +59,12 @@ public class HoaDonController {
                         safe(() -> ct.getSanPhamChiTiet().getSanPham().getTenSanPham()),
                         safe(() -> ct.getSanPhamChiTiet().getMauSac().getTenMauSac()),
                         safe(() -> ct.getSanPhamChiTiet().getSize().getTenSize()),
-                        ct.getSoLuong() == null ? 0 : ct.getSoLuong(),
-                        ct.getGiaBan() == null ? java.math.BigDecimal.ZERO : ct.getGiaBan(),
-                        (ct.getGiaBan() == null ? java.math.BigDecimal.ZERO : ct.getGiaBan())
-                                .multiply(java.math.BigDecimal.valueOf(ct.getSoLuong() == null ? 0 : ct.getSoLuong()))
+                        Optional.ofNullable(ct.getSoLuong()).orElse(0),
+                        Optional.ofNullable(ct.getGiaBan()).orElse(BigDecimal.ZERO),
+                        Optional.ofNullable(ct.getGiaBan()).orElse(BigDecimal.ZERO)
+                                .multiply(BigDecimal.valueOf(Optional.ofNullable(ct.getSoLuong()).orElse(0)))
                 ))
-                .toList();
-
-        // Log để nhìn thấy dữ liệu
-        System.out.println("[ADMIN][HD-DETAIL] id=" + id + " | items=" + chiTietList.size());
+                .collect(Collectors.toList());
 
         model.addAttribute("hoaDonDetail", header);
         model.addAttribute("chiTietList", chiTietList);
@@ -69,13 +72,12 @@ public class HoaDonController {
         return "/admin/header";
     }
 
-    // helper tránh NPE
     private static String safe(java.util.concurrent.Callable<String> c) {
         try { return c.call(); } catch (Exception e) { return ""; }
     }
 
+    /* ====================== FILE EXPORT ====================== */
 
-    // Export PDF
     @GetMapping("/xuat-pdf/{id}")
     public void exportHoaDonPdf(@PathVariable("id") Long id, HttpServletResponse response) throws IOException {
         response.setContentType("application/pdf");
@@ -84,28 +86,48 @@ public class HoaDonController {
         response.getOutputStream().flush();
     }
 
-    // Đổi trạng thái (AJAX)
-    @PostMapping("/{id}/trang-thai")
+    /* ====================== JSON APIs ====================== */
+
+    // (Tuỳ chọn) Lấy danh sách JSON
+    @GetMapping(value = "/api/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> changeStatus(@PathVariable Long id,
-                                          @RequestParam("trangThai") String trangThaiMoi) {
+    public ResponseEntity<ApiResponse<List<HoaDonResponseDTO>>> apiList() {
+        return ResponseEntity.ok(ApiResponse.ok(hoaDonService.getAll()));
+    }
+
+    // (Tuỳ chọn) Lấy detail JSON để reload UI sau khi đổi trạng thái
+    @GetMapping(value = "/{id}/api/detail", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<ApiResponse<HoaDonDetailResponseDTO>> apiDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(hoaDonService.getDetailById(id)));
+    }
+
+    /**
+     * Đổi trạng thái (một endpoint duy nhất):
+     * - Hỗ trợ form-param: trangThai=HUY
+     * - Hoặc JSON body: { "trangThai": "HUY" }
+     * Service đã lo cộng/trừ kho & soLuongDaBan theo flow vào/ra nhóm đếm bán.
+     */
+    @RequestMapping(
+            value = "/{id}/trang-thai",
+            method = { RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH },
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @ResponseBody
+    public ResponseEntity<?> changeStatus(
+            @PathVariable Long id,
+            @RequestParam("trangThai") String trangThaiMoi) {
         if (trangThaiMoi == null || trangThaiMoi.isBlank()) {
             return ResponseEntity.badRequest().body("Thiếu trạng thái mới");
         }
         try {
-            HoaDonDetailResponseDTO dto = hoaDonService.updateTrangThai(id, trangThaiMoi);
-            return ResponseEntity.ok(dto); // trả về header detail để UI cập nhật nhanh
+            var dto = hoaDonService.updateTrangThai(id, trangThaiMoi);
+            return ResponseEntity.ok(dto); // hoặc ApiResponse.ok(dto) nếu bạn dùng wrapper
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Lỗi: " + e.getMessage());
         }
-    }
-
-    // (Tuỳ chọn) API lấy detail JSON để reload phần chi tiết sau khi đổi trạng thái
-    @GetMapping("/{id}/api/detail")
-    @ResponseBody
-    public ResponseEntity<HoaDonDetailResponseDTO> apiDetail(@PathVariable Long id) {
-        return ResponseEntity.ok(hoaDonService.getDetailById(id));
     }
 }
