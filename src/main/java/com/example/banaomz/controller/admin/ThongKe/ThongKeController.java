@@ -14,4 +14,5 @@ public class ThongKeController {
         model.addAttribute("page", "dashboard/index");
         return "admin/main";
     }
+    
 }
