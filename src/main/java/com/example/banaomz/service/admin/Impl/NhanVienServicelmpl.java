@@ -33,6 +33,14 @@ public class NhanVienServicelmpl extends BaseServiceImpl<NhanVien, Long, INhanVi
         }
 
         public NhanVienDTO createCustomer(NhanVienDTO dto) {
+            if (repository.existsByEmail(dto.getEmail())) {
+                throw new RuntimeException("Email đã tồn tại.");
+            }
+
+            if (repository.existsBySoDienThoai(dto.getSoDienThoai())) {
+                throw new RuntimeException("Số điện thoại đã tồn tại.");
+            }
+
             NhanVien nv = modelMapper.map(dto, NhanVien.class);
             nv.setMatKhau(dto.getMatKhau());
             if (dto.getChucVuId() != null) {
@@ -44,6 +52,14 @@ public class NhanVienServicelmpl extends BaseServiceImpl<NhanVien, Long, INhanVi
 
     @Override
     public NhanVienDTO updateCustomer(NhanVienDTO dto) {
+        if (repository.existsByEmailAndIdNot(dto.getEmail(), dto.getId())) {
+            throw new RuntimeException("Email đã tồn tại.");
+        }
+
+        if (repository.existsBySoDienThoaiAndIdNot(dto.getSoDienThoai(), dto.getId())) {
+            throw new RuntimeException("Số điện thoại đã tồn tại.");
+        }
+
         NhanVien nv = repository.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với ID: " + dto.getId()));
 

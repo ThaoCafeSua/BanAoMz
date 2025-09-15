@@ -184,13 +184,17 @@ public class BanHangServiceImpl implements IBanHangService {
     public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham,
                                 Long idKhachHang,
                                 Long idPhieuGiamGia,
-                                String phuongThucTT) {
+                                String phuongThucTT,
+                                String tenNguoiNhan,
+                                String sdtNguoiNhan) {
         HoaDon hoaDon = new HoaDon();
         hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
         hoaDon.setNgayTao(LocalDateTime.now());
         hoaDon.setTrangThai("DA_THANH_TOAN");
         hoaDon.setLoaiHoaDon("TAI_QUAY");
         hoaDon.setNhanVien(nhanVienRepo.findById(1L).orElse(null));
+        hoaDon.setTenNguoiNhan(tenNguoiNhan);
+        hoaDon.setSoDienThoaiNguoiNhan(sdtNguoiNhan);
         if (idKhachHang != null) {
             Optional<KhachHang> optionalKH = khachHangRepo.findById(idKhachHang);
             if (optionalKH.isPresent()) {

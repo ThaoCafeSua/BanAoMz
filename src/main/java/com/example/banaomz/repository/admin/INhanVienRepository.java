@@ -30,5 +30,12 @@ public interface INhanVienRepository extends IBaseRepository<NhanVien, Long> {
     Optional<NhanVien> findCustomerAddressById(@Param("idCustomer") Long idCustomer);
 
     NhanVien findByEmail(String email);
+
     boolean existsBySoDienThoai(String soDienThoai);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByEmailAndIdNot(String email, Long id);
+
+    boolean existsBySoDienThoaiAndIdNot(String soDienThoai, Long id);
 }

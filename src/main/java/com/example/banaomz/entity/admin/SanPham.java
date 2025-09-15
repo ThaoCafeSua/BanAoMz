@@ -43,11 +43,10 @@ public class SanPham extends BaseEntity {
     private String trangThai;
 
     @Column(name = "so_luong_da_ban")
-    private String slDaBan;
+    private Integer soLuongDaBan;
 
     @Column(name = "url_anh")
     private String urlAnh;
-
 
     @OneToMany(mappedBy = "sanPham")
     @JsonIgnore
