@@ -1,0 +1,34 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<!-- Đặt trong <head> (chỉ include 1 lần) -->
+<meta name="_csrf"        content="${_csrf != null ? _csrf.token : ''}"/>
+<meta name="_csrf_header" content="${_csrf != null ? _csrf.headerName : ''}"/>
+<meta name="_csrf_param"  content="${_csrf != null ? _csrf.parameterName : '_csrf'}"/>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const t = document.querySelector('meta[name="_csrf"]')?.content || '';
+        const h = document.querySelector('meta[name="_csrf_header"]')?.content || '';   // cho AJAX
+        const p = document.querySelector('meta[name="_csrf_param"]')?.content || '_csrf'; // cho FORM
+
+        if (!t) return;
+
+        // Tự chèn input CSRF cho mọi form POST (trừ form có data-no-csrf)
+        document.querySelectorAll('form:not([data-no-csrf])').forEach(function (f) {
+            const isPost = String(f.method || 'GET').toLowerCase() === 'post';
+            if (!isPost) return;
+            if (!f.querySelector('input[name="'+p+'"]')) {
+                const i = document.createElement('input');
+                i.type = 'hidden';
+                i.name = p;   // <-- dùng parameterName, KHÔNG dùng headerName
+                i.value = t;
+                f.appendChild(i);
+            }
+        });
+
+        // (Tuỳ chọn) Nếu bạn dùng fetch/$.ajax, nhớ gắn headerName
+        // Ví dụ với fetch:
+        // const defaultHeaders = h && t ? { [h]: t } : {};
+        // fetch(url, { method:'POST', headers: { 'Content-Type':'application/json', ...defaultHeaders }, body: JSON.stringify(data) });
+    });
+</script>

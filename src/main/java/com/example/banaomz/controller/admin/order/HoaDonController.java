@@ -40,7 +40,7 @@ public class HoaDonController {
         List<HoaDonResponseDTO> danhSach = hoaDonService.getAll();
         model.addAttribute("hoaDonList", danhSach);
         model.addAttribute("page", "order/hoaDon");
-        return "/admin/header";
+        return "admin/header";
     }
 
     // Chi tiết (render JSP)
@@ -69,7 +69,7 @@ public class HoaDonController {
         model.addAttribute("hoaDonDetail", header);
         model.addAttribute("chiTietList", chiTietList);
         model.addAttribute("page", "order/hoaDonChiTiet");
-        return "/admin/header";
+        return "admin/header";
     }
 
     private static String safe(java.util.concurrent.Callable<String> c) {

@@ -192,7 +192,8 @@ public class BanHangServiceImpl implements IBanHangService {
         HoaDon hoaDon = new HoaDon();
         hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
         hoaDon.setNgayTao(LocalDateTime.now());
-        hoaDon.setTrangThai("HOAN_THANH");          // ✅ đổi từ "DA_THANH_TOAN" -> "HOAN_THANH"
+        hoaDon.setNgayDat(LocalDateTime.now());
+        hoaDon.setTrangThai("HOAN_THANH");
         hoaDon.setLoaiHoaDon("TAI_QUAY");
         hoaDon.setNhanVien(nhanVienRepo.findById(1L).orElse(null));
         hoaDon.setTenNguoiNhan(tenNguoiNhan);
