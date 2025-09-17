@@ -184,37 +184,41 @@ public class BanHangServiceImpl implements IBanHangService {
     public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham,
                                 Long idKhachHang,
                                 Long idPhieuGiamGia,
-                                String phuongThucTT) {
+                                String phuongThucTT,
+                                String tenNguoiNhan,
+                                String sdtNguoiNhan) {
+
+        // Tạo hóa đơn
         HoaDon hoaDon = new HoaDon();
         hoaDon.setMaHoaDon("HD" + System.currentTimeMillis());
         hoaDon.setNgayTao(LocalDateTime.now());
-        hoaDon.setTrangThai("DA_THANH_TOAN");
+        hoaDon.setTrangThai("HOAN_THANH");          // ✅ đổi từ "DA_THANH_TOAN" -> "HOAN_THANH"
         hoaDon.setLoaiHoaDon("TAI_QUAY");
         hoaDon.setNhanVien(nhanVienRepo.findById(1L).orElse(null));
-        if (idKhachHang != null) {
-            Optional<KhachHang> optionalKH = khachHangRepo.findById(idKhachHang);
-            if (optionalKH.isPresent()) {
-                hoaDon.setKhachHang(optionalKH.get());
-            } else {
-                // Có thể xử lý lỗi tùy yêu cầu:
-                throw new RuntimeException("Không tìm thấy khách hàng với ID: " + idKhachHang);
-            }
-        } else {
-            // Nếu bạn muốn cho phép thanh toán không cần khách hàng (khách lẻ):
-            hoaDon.setKhachHang(null);
-        }
+        hoaDon.setTenNguoiNhan(tenNguoiNhan);
+        hoaDon.setSoDienThoaiNguoiNhan(sdtNguoiNhan);
 
+        if (idKhachHang != null) {
+            hoaDon.setKhachHang(
+                    khachHangRepo.findById(idKhachHang)
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với ID: " + idKhachHang))
+            );
+        } else {
+            hoaDon.setKhachHang(null); // khách lẻ
+        }
 
         hoaDon = hoaDonRepo.save(hoaDon);
 
         BigDecimal tongTien = BigDecimal.ZERO;
 
+        // ===== Xử lý từng dòng sản phẩm =====
         for (Map<String, Object> item : danhSachSanPham) {
-            Long idSPCT = Long.valueOf(item.get("idSanPhamChiTiet").toString());
+            Long idSPCT  = Long.valueOf(item.get("idSanPhamChiTiet").toString());
             Integer soLuong = Integer.valueOf(item.get("soLuong").toString());
 
             SanPhamChiTiet spct = sanPhamChiTietRepo.findById(idSPCT).orElseThrow();
 
+            // Tạo chi tiết hóa đơn
             HoaDonChiTiet ct = new HoaDonChiTiet();
             ct.setHoaDon(hoaDon);
             ct.setSanPhamChiTiet(spct);
@@ -223,33 +227,30 @@ public class BanHangServiceImpl implements IBanHangService {
             ct.setGiaGoc(spct.getGiaBan());
             ct.setGiaGiam(BigDecimal.ZERO);
             ct.setNgayTao(LocalDateTime.now());
-
             hoaDonChiTietRepo.save(ct);
 
+            // Tính tiền
             tongTien = tongTien.add(spct.getGiaBan().multiply(BigDecimal.valueOf(soLuong)));
 
+            // Trừ tồn kho (ở cấp SPCT)
             int tonKho = spct.getSoLuong() != null ? spct.getSoLuong() : 0;
             spct.setSoLuong(Math.max(0, tonKho - soLuong));
             sanPhamChiTietRepo.save(spct);
+
+            // ✅ Tăng đã bán ở cấp Sản phẩm (SanPham.soLuongDaBan)
+            SanPham sanPham = spct.getSanPham();                  // liên kết ManyToOne từ SPCT
+            Integer daBan = sanPham.getSoLuongDaBan() == null ? 0 : sanPham.getSoLuongDaBan();
+            sanPham.setSoLuongDaBan(daBan + soLuong);
+            // Lưu ý: SanPham được load trong cùng persistence context nên thay đổi sẽ được dirty-check và flush khi commit.
+            // Nếu muốn "chắc ăn" bạn có thể autowire ISanPhamRepository và gọi sanPhamRepo.save(sanPham).
         }
 
+        // Phiếu giảm giá (giữ nguyên logic hiện tại)
         BigDecimal tienGiam = BigDecimal.ZERO;
         if (idPhieuGiamGia != null) {
             PhieuGiamGia phieu = phieuGiamGiaRepo.findById(idPhieuGiamGia).orElseThrow();
             hoaDon.setPhieuGiamGia(phieu);
-
-//            if (tongTien.compareTo(BigDecimal.valueOf(phieu.getDieuKienApDung())) >= 0) {
-//                BigDecimal giam = BigDecimal.valueOf(phieu.getGiaTriGiam());
-//                if (giam.compareTo(BigDecimal.valueOf(100)) <= 0) {
-//                    tienGiam = tongTien.multiply(giam).divide(BigDecimal.valueOf(100));
-//                } else {
-//                    tienGiam = giam;
-//                }
-//                if (tienGiam.compareTo(tongTien) > 0) {
-//                    tienGiam = tongTien;
-//                }
-//            }
-
+            // TODO: Tính giảm giá nếu cần, hiện để 0 như trước
         }
 
         hoaDon.setTongTien(tongTien);
@@ -260,6 +261,7 @@ public class BanHangServiceImpl implements IBanHangService {
 
         return hoaDonRepo.save(hoaDon);
     }
+
 
     @Override
     public List<HoaDonChiTiet> layDanhSachSanPhamTrongHoaDon(Long idHoaDon) {

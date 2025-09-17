@@ -18,7 +18,8 @@ public interface  IBanHangService {
 
     void xoaSanPhamKhoiHoaDon(Long idHDCT);
 
-    public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idKhachHang, Long idPhieuGiamGia, String phuongThucTT);
+    public HoaDon hoanTatHoaDon(List<Map<String, Object>> danhSachSanPham, Long idKhachHang, Long idPhieuGiamGia, String phuongThucTT ,  String tenNguoiNhan,
+                                String sdtNguoiNhan);
 
 
     List<HoaDonChiTiet> layDanhSachSanPhamTrongHoaDon(Long idHoaDon);

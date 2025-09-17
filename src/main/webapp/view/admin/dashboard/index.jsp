@@ -1,322 +1,308 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<!-- ====== CSS & JS libs ====== -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
 <div class="container mt-4">
-    <h2 class="mb-4" style="color: #001f3d;">Thống Kê</h2>
+    <div class="d-flex align-items-center gap-3 mb-3">
+        <i class="fa-solid fa-chart-line fa-xl text-primary"></i>
+        <h2 class="mb-0 fw-bold" style="color:#001f3d">Thống kê</h2>
+    </div>
 
-    <!-- Thống kê tổng quan -->
-    <div class="row">
-        <!-- Tổng doanh thu -->
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-3">
         <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Tổng Doanh Thu Hôm Nay</h5>
-                    <h4 class="text-success" id="moneyDay"></h4>
-                </div>
-            </div>
-        </div>
-        <!-- Tổng doanh thu -->
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Tổng Doanh Thu Tháng Này</h5>
-                    <h4 class="text-success" id="moneyMonth"></h4>
-                </div>
-            </div>
-        </div>
-        <!-- Tổng doanh thu -->
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Tổng Doanh Thu Năm Nay</h5>
-                    <h4 class="text-success" id="moneyYear"></h4>
-                </div>
-            </div>
-        </div>
-        <!-- Số lượng tồn kho -->
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Số Lượng Tồn Kho</h5>
-                    <h4 class="text-warning" id="soLuongTon"></h4>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
+            <div class="kpi-card card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Doanh Thu Theo Khoảng Ngày</h5>
-                    <h4 class="text-warning" id="doanhThuTheoKhoang">0</h4>
-                    <div class="my-2" style="padding-top: 40px">
-                        <label class="form-label">Chọn Ngày: </label>
-                        <div style="display: flex">
-                            <input type="date" class="form-control" id="dateInputStr" name="date">
-                            <input type="date" class="form-control ml-2" id="dateInputEnd" name="date">
-                            <div class="col-12">
-                                <button class="btn btn-primary" type="submit" id="btn_search">Tìm Kiếm</button>
-                            </div>
-                        </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="kpi-title">Doanh thu hôm nay</span>
+                        <span class="kpi-icon bg-success-subtle text-success"><i class="fa-solid fa-sack-dollar"></i></span>
+                    </div>
+                    <div class="kpi-value text-success mt-2" id="moneyDay">0 đ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="kpi-title">Doanh thu tháng này</span>
+                        <span class="kpi-icon bg-primary-subtle text-primary"><i class="fa-solid fa-calendar-days"></i></span>
+                    </div>
+                    <div class="kpi-value text-primary mt-2" id="moneyMonth">0 đ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="kpi-title">Doanh thu năm nay</span>
+                        <span class="kpi-icon bg-info-subtle text-info"><i class="fa-solid fa-calendar"></i></span>
+                    </div>
+                    <div class="kpi-value text-info mt-2" id="moneyYear">0 đ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="kpi-title">Số lượng tồn kho</span>
+                        <span class="kpi-icon bg-warning-subtle text-warning"><i class="fa-solid fa-warehouse"></i></span>
+                    </div>
+                    <div class="kpi-value text-warning mt-2" id="soLuongTon">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Doanh thu theo khoảng ngày -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="card-title mb-0">Doanh thu theo khoảng ngày</h5>
+                        <div class="badge rounded-pill text-bg-warning-subtle border border-warning-subtle text-warning-emphasis px-3">
+                            <i class="fa-regular fa-money-bill-1 me-1"></i><span id="doanhThuTheoKhoang">0 đ</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 align-items-end mt-1">
+                        <div class="col">
+                            <label class="form-label small mb-1">Từ ngày</label>
+                            <input type="date" class="form-control" id="dateInputStr">
+                        </div>
+                        <div class="col">
+                            <label class="form-label small mb-1">Đến ngày</label>
+                            <input type="date" class="form-control" id="dateInputEnd">
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-primary" id="btn_search"><i class="fa-solid fa-magnifying-glass me-1"></i>Tìm kiếm</button>
+                        </div>
+                    </div>
+
+                    <div class="small text-muted mt-2">Chọn khoảng ngày rồi bấm <strong>Tìm kiếm</strong>.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Biểu đồ doanh thu</h5>
+                    <div style="height:320px">
+                        <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
-
             </div>
         </div>
-
-    </div>
-
-    <!-- Biểu đồ thống kê -->
-    <div class="row">
-        <!-- Biểu đồ doanh thu -->
-        <div class="col-md-6">
-            <div class="card mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Biểu Đồ Doanh Thu</h5>
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <!-- Biểu đồ số lượng bán -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Biểu Đồ Số Lượng Bán</h5>
-                    <canvas id="salesChart"></canvas>
+                    <h5 class="card-title">Biểu đồ số lượng bán</h5>
+                    <div style="height:320px">
+                        <canvas id="salesChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="card mb-4">
-        <div style="padding: 20px">
-            <h5 class="card-title">Thống Kê Theo Tháng</h5>
-            <table class="table col-12" id="doanhThuTable" >
-                <thead>
-                <tr style="width: 100%">
+
+    <!-- Bảng theo tháng -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Thống kê theo tháng</h5>
+            <table class="table table-striped align-middle" id="doanhThuTable" style="width:100%">
+                <thead class="table-light">
+                <tr>
                     <th>Tháng</th>
-                    <th>Doanh Thu</th>
-                    <th>Số Lượng Bán</th>
+                    <th>Doanh thu</th>
+                    <th>Số lượng bán</th>
                 </tr>
                 </thead>
-                <tbody>
-
-                </tbody>
+                <tbody></tbody>
             </table>
-        </div>
-    </div>
-    <!-- Thống kê theo thời gian -->
-    <div class="row">
-        <div class="col-md-12">
-
         </div>
     </div>
 </div>
 
-<!-- Custom Styles -->
-<!-- Custom Styles -->
 <style>
-    /* Đổi màu chữ tiêu đề và nội dung */
-    .card-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #003366; /* Màu chữ xanh than */
+    :root{
+        --brand:#001f3d;
     }
-
-    #revenueChart, #salesChart {
-        height: 300px;  /* Hoặc chiều cao bạn muốn */
-        width: 100%;    /* Đảm bảo biểu đồ chiếm toàn bộ chiều rộng */
+    .kpi-card .kpi-title{ font-size:.9rem; color:#6b7280; }
+    .kpi-card .kpi-value{ font-size:1.6rem; font-weight:800; }
+    .kpi-card .kpi-icon{
+        width:40px; height:40px; display:grid; place-items:center; border-radius:10px;
+        font-size:1rem;
     }
-
-    .card-body {
-        padding: 20px;
-        height: 350px;  /* Đảm bảo chiều cao của phần tử chứa */
-        display: flex;  /* Sử dụng flexbox */
-        flex-direction: column;  /* Đặt hướng của các phần tử là theo cột */
-        justify-content: center;  /* Căn giữa theo chiều dọc */
-        align-items: center;  /* Căn giữa theo chiều ngang */
-        padding: 10px;  /* Giảm bớt khoảng cách bên trong ô */
-    }
-
-    .card-body h4 {
-        font-size: 18px;  /* Giảm kích thước font của nội dung */
-        color: #003366;  /* Màu chữ xanh than */
-    }
-
-    /* Tùy chỉnh bảng */
-    .table th, .table td {
-        text-align: center;
-        vertical-align: middle;
-        border: 1px solid #003366;  /* Kẻ bảng bằng màu xanh than */
-        color: #003366; /* Màu chữ xanh than trong bảng */
-    }
-
-    /* Tạo màu nền cho các hàng khi di chuột qua */
-    .table tbody tr:hover {
-        background-color: #e0e0e0; /* Màu nền nhạt khi di chuột qua */
-    }
-
-    /* Định dạng các button */
-    .btn-primary {
-        background-color: #003366; /* Màu nền button */
-        border-color: #003366; /* Màu viền button */
-    }
-
-    .btn-primary:hover {
-        background-color: #002244; /* Màu nền khi hover */
-        border-color: #002244; /* Màu viền khi hover */
-    }
-
+    .card-title{ color:var(--brand); font-weight:700; }
 </style>
 
-
-<!-- Biểu đồ sử dụng Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    $(document).ready(function () {
-        // Biểu đồ doanh thu
-        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
-        const revenueChart = new Chart(ctxRevenue, {
-            type: 'line', // Loại biểu đồ
-            data: {
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
-                datasets: [{
-                    label: 'Doanh Thu (VNĐ)',
-                    data: [0, 0, 0, 0, 0],  // Chưa có dữ liệu
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
+    // ===== Helpers =====
+    function formatCurrency(n){
+        if (n === null || n === undefined) return '0 đ';
+        const num = Number(n) || 0;
+        return num.toLocaleString('vi-VN') + ' đ';
+    }
+    function toastError(msg){ toastr.error(msg || 'Có lỗi xảy ra'); }
+    toastr.options = { positionClass: "toast-bottom-right", timeOut: 2000 };
+
+    // ===== Charts init =====
+    const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+    const ctxSales   = document.getElementById('salesChart').getContext('2d');
+
+    // Gradient cho line chart
+    function makeGradient(ctx){
+        const g = ctx.createLinearGradient(0,0,0,300);
+        g.addColorStop(0,'rgba(13,59,102,0.25)');
+        g.addColorStop(1,'rgba(13,59,102,0)');
+        return g;
+    }
+
+    const revenueChart = new Chart(ctxRevenue, {
+        type: 'line',
+        data: { labels: [], datasets: [{
+                label: 'Doanh thu (đ)',
+                data: [],
+                borderColor:'#0d3b66',
+                backgroundColor: makeGradient(ctxRevenue),
+                borderWidth:2,
+                tension:.25,
+                fill:true,
+                pointRadius:3,
+                pointHoverRadius:4
+            }]},
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false}, tooltip:{ callbacks:{
+                        label:(ctx)=> ' ' + formatCurrency(ctx.parsed.y)
+                    }}},
+            scales:{
+                x:{ grid:{display:false} },
+                y:{ ticks:{ callback:(v)=> v.toLocaleString('vi-VN') }, grid:{ color:'rgba(0,0,0,.05)'} }
             }
-        });
-
-        // Biểu đồ số lượng bán
-        const ctxSales = document.getElementById('salesChart').getContext('2d');
-        const salesChart = new Chart(ctxSales, {
-            type: 'bar', // Loại biểu đồ
-            data: {
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
-                datasets: [{
-                    label: 'Số Lượng Bán',
-                    data: [0, 0, 0, 0, 0],  // Chưa có dữ liệu
-                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                    borderColor: 'rgba(255, 159, 64, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-
-        // Dữ liệu thống kê
-        $('#totalRevenue').text('0 VNĐ');
-        $('#totalSales').text('0');
-        $('#bestSeller').text('Chưa có dữ liệu');
-        $('#stockRemaining').text('0');
-
-        loadDoanhThu()
-        function loadDoanhThu() {
-            $.ajax({
-                url: '/admin/doanh-thu',
-                method: 'GET',
-                success: function (data) {
-                    let result = data.data
-                    $('#moneyDay').text(formatCurrency(result.day));
-                    $('#moneyMonth').text(formatCurrency(result.month));
-                    $('#moneyYear').text(formatCurrency(result.year));
-                    $('#soLuongTon').text(result.soLuongTon);
-                },
-                error: function (err) {
-
-                }
-            });
         }
+    });
 
+    const salesChart = new Chart(ctxSales, {
+        type: 'bar',
+        data: { labels: [], datasets: [{
+                label: 'Số lượng bán',
+                data: [],
+                backgroundColor:'rgba(255,159,64,0.35)',
+                borderColor:'rgba(255,159,64,1)', borderWidth:1,
+                borderRadius:6
+            }]},
+        options:{
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false} },
+            scales:{ x:{ grid:{display:false} }, y:{ beginAtZero:true } }
+        }
+    });
 
-        let doanhThuTable = $('#doanhThuTable').DataTable({
-            "paging": true,        // Bật phân trang
-            "searching": false,     // Bật tìm kiếm
-            "ordering": false,      // Bật sắp xếp
-            "info": false,          // Bật thông tin tổng quan
-            "lengthChange": false,  // Cho phép thay đổi số lượng bản ghi hiển thị
-            "pageLength": 5,       // Số lượng bản ghi trên mỗi trang
-            "columnDefs": [
-                {"className": "width-table", "targets": "_all"}
-            ],
+    // ===== Load KPI tổng quan =====
+    function loadDoanhThu() {
+        $.ajax({
+            url:'/admin/doanh-thu', method:'GET'
+        }).done(function(res){
+            const r = res?.data || {};
+            $('#moneyDay').text(formatCurrency(r.day));
+            $('#moneyMonth').text(formatCurrency(r.month));
+            $('#moneyYear').text(formatCurrency(r.year));
+            $('#soLuongTon').text(r.soLuongTon ?? 0);
+        }).fail(function(){
+            toastError('Không lấy được doanh thu tổng quan');
         });
-        loadTableDoanhThu()
-        function loadTableDoanhThu() {
-            $.ajax({
-                url: '/admin/doanh-thu-table',
-                method: 'GET',
-                success: function (response) {
-                    let data = response.data.sort((a, b) => a.month - b.month);
+    }
 
-                    doanhThuTable.clear();
-                    $.each(response.data, function (index, item) {
-                        doanhThuTable.row.add([
-                            item.month,
-                            formatCurrency(item.doanhThu),
-                            item.soLuongBan
-                        ]);
-                    });
-                    doanhThuTable.draw();
+    // ===== Bảng theo tháng + cập nhật Charts =====
+    let doanhThuTable;
+    function initTable(){
+        doanhThuTable = $('#doanhThuTable').DataTable({
+            paging:true, searching:false, ordering:false, info:false, lengthChange:false, pageLength:6,
+            language:{ emptyTable:'Chưa có dữ liệu' }
+        });
+    }
 
+    function loadTableDoanhThu(){
+        $.ajax({ url:'/admin/doanh-thu-table', method:'GET' })
+            .done(function(resp){
+                const data = (resp?.data || []).sort((a,b)=> a.month - b.month);
 
-                    // Dữ liệu trả về từ API
-                    const months = data.map(item => 'Tháng ' + item.month);
-                    const revenueData = data.map(item => item.doanhThu);
-                    const salesData = data.map(item => item.soLuongBan);
+                doanhThuTable.clear();
+                data.forEach(it=>{
+                    doanhThuTable.row.add([
+                        'Tháng ' + it.month,
+                        formatCurrency(it.doanhThu),
+                        it.soLuongBan ?? 0
+                    ]);
+                });
+                doanhThuTable.draw();
 
-                    // Cập nhật biểu đồ doanh thu
-                    revenueChart.data.labels = months;
-                    revenueChart.data.datasets[0].data = revenueData;
-                    revenueChart.update();
+                const months = data.map(it=> 'Tháng ' + it.month);
+                const revenueData = data.map(it=> it.doanhThu || 0);
+                const salesData   = data.map(it=> it.soLuongBan || 0);
 
-                    // Cập nhật biểu đồ số lượng bán
-                    salesChart.data.labels = months;
-                    salesChart.data.datasets[0].data = salesData;
-                    salesChart.update();
-                },
-                error: function (err) {
-                    // toastr.error('Lỗi khi lấy dữ liệu nhân viên', err);
-                }
-            });
-        }
-        function getDoanhThuTheoKhoangNgay(startDate, endDate) {
-            $.ajax({
-                url: '/admin/doanh-thu-khoang-ngay',
-                method: 'GET',
-                data: {
-                    startDate: startDate,
-                    endDate: endDate
-                },
-                success: function(response) {
-                    // Hiển thị kết quả doanh thu
-                    $('#doanhThuTheoKhoang').text(formatCurrency(response.data));
-                },
-                error: function(xhr, status, error) {
-                    console.error('Có lỗi xảy ra: ' + error);
-                }
-            });
-        }
+                revenueChart.data.labels = months;
+                revenueChart.data.datasets[0].data = revenueData;
+                revenueChart.update();
 
-        $('#btn_search').click(function() {
-            // Lấy giá trị ngày bắt đầu và ngày kết thúc từ input
-            const startDate = $('#dateInputStr').val();
-            const endDate = $('#dateInputEnd').val();
+                salesChart.data.labels = months;
+                salesChart.data.datasets[0].data = salesData;
+                salesChart.update();
+            })
+            .fail(function(){ toastError('Không lấy được thống kê theo tháng'); });
+    }
 
-            // Kiểm tra xem người dùng có chọn đầy đủ ngày hay không
-            if (!startDate || !endDate) {
-                toastr.error("Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc.");
+    // ===== Doanh thu theo khoảng ngày =====
+    function getDoanhThuTheoKhoangNgay(startDate, endDate){
+        return $.ajax({
+            url:'/admin/doanh-thu-khoang-ngay', method:'GET', data:{ startDate, endDate }
+        }).done(function(resp){
+            $('#doanhThuTheoKhoang').text(formatCurrency(resp?.data || 0));
+        }).fail(function(){
+            toastError('Không lấy được doanh thu theo khoảng ngày');
+        });
+    }
+
+    // ===== Page init =====
+    $(function(){
+        initTable();
+        loadDoanhThu();
+        loadTableDoanhThu();
+
+        // Tìm kiếm theo khoảng ngày
+        $('#btn_search').on('click', function(){
+            const start = $('#dateInputStr').val();
+            const end   = $('#dateInputEnd').val();
+            if(!start || !end){
+                toastr.error('Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc.');
                 return;
             }
-            // Gọi hàm AJAX để lấy doanh thu
-            getDoanhThuTheoKhoangNgay(startDate, endDate);
+            getDoanhThuTheoKhoangNgay(start, end);
+        });
+
+        // Enter ở input date cũng trigger tìm
+        $('#dateInputStr,#dateInputEnd').on('keydown', function(e){
+            if(e.key === 'Enter') $('#btn_search').click();
         });
     });
 </script>
