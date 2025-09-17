@@ -1,11 +1,20 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Đăng nhập hệ thống</title>
     <style>
+
+        body{font-family:Arial;background:#f4f4f4}
+        .login-box{width:400px;margin:100px auto;background:#fff;padding:30px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        h2{text-align:center;margin-bottom:25px;color:#001f3d}
+        input[type="text"],input[type="password"]{width:100%;padding:12px;margin:6px 0 16px;border:1px solid #ccc;border-radius:6px}
+        button{width:100%;padding:10px;background:#001f3d;color:#fff;border:none;border-radius:6px;cursor:pointer}
+        .error{color:red;text-align:center;margin-bottom:15px}
+
         body {
             font-family: Arial, sans-serif;
             background: #f4f4f4;
@@ -63,6 +72,7 @@
             cursor: pointer;
         }
         #forgotMsg { margin-top: 10px; text-align: center; }
+
     </style>
 </head>
 <body>
@@ -70,6 +80,14 @@
 <!-- Chỉ duy nhất 1 container -->
 <div id="mainBox" class="login-container">
     <h2>Đăng nhập hệ thống</h2>
+
+
+    <form action="/auth/login" method="post">
+        <!-- CSRF token bắt buộc -->
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+
+ 
     <div id="messageArea">
         <c:if test="${not empty error}">
             <div class="error">${error}</div>
@@ -80,6 +98,7 @@
     </div>
 
     <form id="loginForm" action="${pageContext.request.contextPath}/auth/login" method="post">
+
         <label>Email</label>
         <input type="text" name="email" required>
 

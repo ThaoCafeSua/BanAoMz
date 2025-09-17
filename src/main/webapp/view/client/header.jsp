@@ -247,7 +247,10 @@
                 <!-- Icons -->
                 <div class="icons d-flex align-items-center">
                     <a href="/cart" class="me-3"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="${pageContext.request.contextPath}/khachhang/detail/${khachHang.id}" class="text-white fw-bold"><i class="fas fa-user"></i></a>
+                    <a href="${pageContext.request.contextPath}/khachhang/detail/${sessionScope.KH_ID}"
+                       class="text-white fw-bold me-3">
+                        <i class="fas fa-user"></i>
+                    </a>
                     <a href="/khachhang/dangnhap" class="text-white fw-bold"><i class="bi bi-power"></i></a>
                 </div>
             </div>

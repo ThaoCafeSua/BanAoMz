@@ -6,7 +6,6 @@ import com.example.banaomz.entity.admin.HoaDonChiTiet;
 import com.example.banaomz.entity.admin.KhachHang;
 import com.example.banaomz.entity.admin.SanPham;
 import com.example.banaomz.entity.admin.SanPhamChiTiet;
-
 import com.example.banaomz.repository.client.HoaDonChiTietClientRepository;
 import com.example.banaomz.repository.client.HoaDonClientRepository;
 import com.example.banaomz.repository.client.ISanPhamClientRepository;
@@ -39,8 +38,28 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         this.sanPhamRepository = sanPhamRepository;
     }
 
+    /* ================== BẢN CŨ (giữ tương thích) ================== */
     @Override
     public void taoHoaDonMember(List<GioHang> cart, KhachHang kh, String hoTen, String sdt, String diaChi) {
+        // gọi sang bản mới với shipFee = 0
+        taoHoaDonMember(cart, kh, hoTen, sdt, diaChi,
+                BigDecimal.ZERO, null, null, null, null, null, null, null);
+    }
+
+    @Override
+    public void taoHoaDonGuest(List<GioHang> cart, String hoTen, String sdt, String diaChi) {
+        // gọi sang bản mới với shipFee = 0
+        taoHoaDonGuest(cart, hoTen, sdt, diaChi,
+                BigDecimal.ZERO, null, null, null, null, null, null, null);
+    }
+
+    /* ================== BẢN MỚI (có ship) ================== */
+    @Override
+    public void taoHoaDonMember(List<GioHang> cart, KhachHang kh,
+                                String hoTen, String sdt, String diaChi,
+                                BigDecimal shipFee, Long shipServiceId, Integer toDistrictId, String toWardCode,
+                                Integer weight, Integer length, Integer width, Integer height) {
+
         if (cart == null || cart.isEmpty()) throw new IllegalStateException("Giỏ hàng trống");
         if (kh == null) throw new IllegalArgumentException("Khách hàng null");
 
@@ -49,18 +68,30 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         hoaDon = hoaDonRepository.save(hoaDon);
 
         BigDecimal tongTien = processChiTietAndUpdateStock(cart, hoaDon);
-        finalizeHoaDonTotals(hoaDon, tongTien);
+        finalizeHoaDonTotals(hoaDon, tongTien, nvl(shipFee));
+
+        // (tuỳ) lưu metadata GHN nếu bạn có cột trong bảng HoaDon
+        // hoaDon.setGhnServiceId(shipServiceId); ...
+        // hoaDonRepository.save(hoaDon);
     }
 
     @Override
-    public void taoHoaDonGuest(List<GioHang> cart, String hoTen, String sdt, String diaChi) {
+    public void taoHoaDonGuest(List<GioHang> cart,
+                               String hoTen, String sdt, String diaChi,
+                               BigDecimal shipFee, Long shipServiceId, Integer toDistrictId, String toWardCode,
+                               Integer weight, Integer length, Integer width, Integer height) {
+
         if (cart == null || cart.isEmpty()) throw new IllegalStateException("Giỏ hàng trống");
 
         HoaDon hoaDon = baseHoaDon(hoTen, sdt, diaChi);
         hoaDon = hoaDonRepository.save(hoaDon);
 
         BigDecimal tongTien = processChiTietAndUpdateStock(cart, hoaDon);
-        finalizeHoaDonTotals(hoaDon, tongTien);
+        finalizeHoaDonTotals(hoaDon, tongTien, nvl(shipFee));
+
+        // (tuỳ) lưu metadata GHN nếu có
+        // hoaDon.setGhnServiceId(shipServiceId); ...
+        // hoaDonRepository.save(hoaDon);
     }
 
     /* ================== Helpers ================== */
@@ -78,7 +109,7 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
             spct.setSoLuong(spct.getSoLuong() - req);
             spctRepository.save(spct);
 
-            // Cập nhật so_luong_da_ban cho sản phẩm cha
+            // Cộng đã bán cho SP cha
             SanPham sp = spct.getSanPham();
             if (sp != null) {
                 Integer sold = sp.getSoLuongDaBan() == null ? 0 : sp.getSoLuongDaBan();
@@ -93,7 +124,7 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
             c.setHoaDon(hoaDon);
             c.setSanPhamChiTiet(spct);
             c.setGiaBan(donGia);
-            c.setGiaGoc(donGia);         // TODO: nếu có giá gốc riêng, map lại
+            c.setGiaGoc(donGia);         // nếu có giá gốc riêng thì map lại
             c.setGiaGiam(BigDecimal.ZERO);
             c.setSoLuong(req);
             c.setMoTa("Bán online");
@@ -107,15 +138,17 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         return tongTien;
     }
 
-    private void finalizeHoaDonTotals(HoaDon hoaDon, BigDecimal tongTien) {
+    // CHANGED: nhận thêm phiShip
+    private void finalizeHoaDonTotals(HoaDon hoaDon, BigDecimal tongTien, BigDecimal phiShip) {
         BigDecimal tienGiam = BigDecimal.ZERO;  // TODO: áp mã giảm nếu có
-        BigDecimal phiShip = BigDecimal.ZERO;   // TODO: tính phí ship nếu có
-        BigDecimal thanhTien = tongTien.subtract(tienGiam).add(phiShip);
+        BigDecimal thanhTien = tongTien.subtract(tienGiam).add(nvl(phiShip));
 
         hoaDon.setTongTien(tongTien);
         hoaDon.setTienGiam(tienGiam);
-        hoaDon.setPhiVanChuyen(phiShip);
+        hoaDon.setPhiVanChuyen(nvl(phiShip));
         hoaDon.setThanhTien(thanhTien);
+
+        // Trạng thái online mới tạo -> CHO_XAC_NHAN
         hoaDon.setTrangThai("CHO_XAC_NHAN");
         hoaDon.setNgaySua(LocalDateTime.now());
         hoaDonRepository.save(hoaDon);
@@ -124,14 +157,14 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
     private HoaDon baseHoaDon(String hoTen, String sdt, String diaChi) {
         HoaDon h = new HoaDon();
         h.setMaHoaDon(genCode());
-        h.setPhuongThucThanhToan("COD"); // TODO: map theo input thực tế
+        h.setPhuongThucThanhToan("COD"); // hoặc map theo lựa chọn của khách
         h.setLoaiHoaDon("ONLINE");
         h.setHinhThucHoaDon("BAN_LE");
         h.setDiaChiNguoiNhan(diaChi);
         h.setTenNguoiNhan(hoTen);
         h.setSoDienThoaiNguoiNhan(sdt);
         h.setNgayDat(LocalDateTime.now());
-        h.setTrangThai("KHOI_TAO");
+        h.setTrangThai("KHOI_TAO"); // sẽ chuyển sang CHO_XAC_NHAN ở finalize
         h.setNgayTao(LocalDateTime.now());
         return h;
     }
@@ -144,11 +177,10 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         if (g == null || g.getSanPhamChiTiet() == null || g.getSanPhamChiTiet().getId() == null) {
             throw new IllegalArgumentException("Giỏ hàng lỗi: thiếu SPCT");
         }
-        Long id = g.getSanPhamChiTiet().getId(); // giữ nguyên Long
+        Long id = g.getSanPhamChiTiet().getId();
         return spctRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy SPCT id=" + id));
     }
-
 
     private void checkStock(SanPhamChiTiet spct, int req) {
         int ton = spct.getSoLuong() == null ? 0 : spct.getSoLuong();
@@ -158,14 +190,13 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
 
     private int nonNull(Integer n) { return n == null ? 0 : n; }
 
+    private BigDecimal nvl(BigDecimal v){ return v == null ? BigDecimal.ZERO : v; }
+
     private BigDecimal big(Number n) {
         if (n == null) return BigDecimal.ZERO;
-        if (n instanceof BigDecimal) {
-            return (BigDecimal) n;
-        }
-        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
-            return BigDecimal.valueOf(n.longValue());
-        }
+        if (n instanceof BigDecimal) return (BigDecimal) n;
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long)
+            return BigDecimal.valueOf(((Number) n).longValue());
         return BigDecimal.valueOf(n.doubleValue());
     }
 }
