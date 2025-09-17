@@ -110,7 +110,5 @@ public class CustomerController {
     public ResponseEntity<?> addressCustomer(@RequestBody DiaChiDTO req) {
         customerService.addressCustomer(req);
         return new ResponseEntity<>(ResponseObject.builder().data(req).build(), HttpStatus.OK);
-
     }
-
 }

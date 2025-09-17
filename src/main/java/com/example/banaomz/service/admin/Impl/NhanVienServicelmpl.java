@@ -5,6 +5,7 @@ import com.example.banaomz.entity.admin.NhanVien;
 import com.example.banaomz.repository.admin.INhanVienRepository;
 import com.example.banaomz.service.admin.IChucVuService;
 import com.example.banaomz.service.admin.INhanVienService;
+import com.example.banaomz.service.admin.IMailService;
 import com.example.banaomz.service.common.impl.BaseServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,8 +22,31 @@ public class NhanVienServicelmpl extends BaseServiceImpl<NhanVien, Long, INhanVi
         @Autowired private INhanVienRepository repository;
         @Autowired private IChucVuService chucVuService;
         @Autowired private ModelMapper modelMapper;
+        @Autowired private IMailService mailService;
 
-        public List<NhanVienDTO> findAllCustomer(String search) {
+    @Override
+    public void resetPassword(String email) {
+        NhanVien nv = repository.findByEmail(email);
+        if (nv == null) {
+            throw new RuntimeException("Email không tồn tại");
+        }
+
+        // Tạo mật khẩu mới ngẫu nhiên (8 ký tự)
+        String newPass = UUID.randomUUID().toString().substring(0, 8);
+
+        // 🚨 Không mã hóa (lưu plain text)
+        nv.setMatKhau(newPass);
+        repository.save(nv);
+
+        // Gửi mail
+        mailService.sendMail(
+                email,
+                "Mật khẩu mới của bạn",
+                "Xin chào " + nv.getTenNhanVien() + ",\n\nMật khẩu mới của bạn là: " + newPass
+        );
+    }
+
+    public List<NhanVienDTO> findAllCustomer(String search) {
             return repository.findAllCustomer(search).stream().map(entity -> {
                 NhanVienDTO dto = modelMapper.map(entity, NhanVienDTO.class);
                 if (entity.getChucVu() != null) {

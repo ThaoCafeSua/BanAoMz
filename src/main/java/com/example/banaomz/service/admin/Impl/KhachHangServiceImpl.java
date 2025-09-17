@@ -10,16 +10,16 @@ import com.example.banaomz.exception.ErrorCode;
 import com.example.banaomz.repository.admin.IKhachHangRepository;
 import com.example.banaomz.service.admin.IDiaChiService;
 import com.example.banaomz.service.admin.IKhachHangService;
-import com.example.banaomz.service.common.IMailService;
+import com.example.banaomz.service.admin.IMailService;
 import com.example.banaomz.service.common.impl.BaseServiceImpl;
 import com.example.banaomz.ultiltes.RandomStringGenerator;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -40,6 +40,28 @@ public class KhachHangServiceImpl extends BaseServiceImpl<KhachHang, Long, IKhac
 
     @Autowired
     private IMailService mailService;
+
+    @Override
+    public void resetPassword(String email) {
+        KhachHang kh = repository.findByEmail(email);
+        if (kh == null) {
+            throw new RuntimeException("Email không tồn tại");
+        }
+
+        // Tạo mật khẩu mới ngẫu nhiên (8 ký tự)
+        String newPass = UUID.randomUUID().toString().substring(0, 8);
+
+        // 🚨 Không mã hóa (lưu plain text)
+        kh.setMatKhau(newPass);
+        repository.save(kh);
+
+        // Gửi mail
+        mailService.sendMail(
+                email,
+                "Mật khẩu mới của bạn",
+                "Xin chào " + kh.getHoVaTen() + ",\n\nMật khẩu mới của bạn là: " + newPass
+        );
+    }
 
     @Override
     public KhachHang login(String email, String matKhau) {
