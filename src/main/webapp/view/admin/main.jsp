@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
 
 <!-- main.jsp -->
 <div class="main-content">
