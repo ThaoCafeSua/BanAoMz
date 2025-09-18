@@ -1,5 +1,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<<<<<<< HEAD
 <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
+=======
+<meta name="_csrf" content="${_csrf.token}">
+<meta name="_csrf_header" content="${_csrf.headerName}">
+
+>>>>>>> origin/dev_hoang
 
 <!-- main.jsp -->
 <div class="main-content">
@@ -25,5 +31,17 @@
         // checkAuth();
     });
 </script>
+<script>
+    $(function () {
+        var token  = $('meta[name="_csrf"]').attr('content');
+        var header = $('meta[name="_csrf_header"]').attr('content');
+
+        // Áp cho mọi $.ajax
+        $(document).ajaxSend(function (e, xhr) {
+            xhr.setRequestHeader(header, token);
+        });
+    });
+</script>
+
 
 <%@ include file="footer.jsp" %> <!-- Footer -->

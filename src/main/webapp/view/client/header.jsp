@@ -249,6 +249,7 @@
                 <!-- Icons -->
                 <div class="icons d-flex align-items-center">
                     <a href="/cart" class="me-3"><i class="fas fa-shopping-cart"></i></a>
+<<<<<<< HEAD
 
                     <!-- ✅ Kiểm tra đăng nhập -->
                     <c:choose>
@@ -270,6 +271,13 @@
                             <i class="bi bi-power"></i>
                         </a>
                     </c:if>
+=======
+                    <a href="${pageContext.request.contextPath}/khachhang/detail/${sessionScope.KH_ID}"
+                       class="text-white fw-bold me-3">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <a href="/khachhang/dangnhap" class="text-white fw-bold"><i class="bi bi-power"></i></a>
+>>>>>>> origin/dev_hoang
                 </div>
             </div>
         </div>

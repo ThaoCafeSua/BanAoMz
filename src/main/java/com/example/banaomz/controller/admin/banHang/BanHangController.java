@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/admin/banHang")
+@RequestMapping("admin/banHang")
 public class BanHangController {
 
     @Autowired
@@ -46,7 +46,7 @@ public class BanHangController {
         List<SanPhamTaiQuayViewModel> danhSach = banHangService.layDanhSachSanPhamGoc();
         model.addAttribute("sanPhamList", danhSach);
         model.addAttribute("page", "banHang/banHang");
-        return "/admin/header";
+        return "admin/header";
     }
 
     @PostMapping("/tao-hoa-don")

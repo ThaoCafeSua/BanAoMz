@@ -22,5 +22,8 @@ public interface SanPhamChiTietClientRepository  extends JpaRepository<SanPhamCh
                               @Param("mauId") Long mauId,
                               @Param("sizeId") Long sizeId);
 
+    @Query("select s.soLuong from SanPhamChiTiet s where s.id = :id")
+    Integer getStock(@Param("id") Long id);
+
 
 }
