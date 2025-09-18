@@ -22,8 +22,10 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -33,19 +35,23 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+
 public class HoaDonServiceImpl implements IHoaDonService {
 
     // ===== Trạng thái cho COD (KH nhận hàng rồi mới thanh toán) =====
-    private static final String CHO_XAC_NHAN       = "CHO_XAC_NHAN";
-    private static final String CHO_CHUAN_BI_HANG  = "CHO_CHUAN_BI_HANG";
-    private static final String DANG_GIAO          = "DANG_GIAO";
-    private static final String GIAO_THAT_BAI      = "GIAO_THAT_BAI";
-    private static final String HOAN_HANG          = "HOAN_HANG";
-    private static final String DA_HOAN_HANG       = "DA_HOAN_HANG";
-    private static final String HOAN_THANH         = "HOAN_THANH";
-    private static final String HUY                = "HUY";
+    private static final String CHO_XAC_NHAN = "CHO_XAC_NHAN";
+    private static final String CHO_CHUAN_BI_HANG = "CHO_CHUAN_BI_HANG";
+    private static final String DANG_GIAO = "DANG_GIAO";
+    private static final String GIAO_THAT_BAI = "GIAO_THAT_BAI";
+    private static final String HOAN_HANG = "HOAN_HANG";
+    private static final String DA_HOAN_HANG = "DA_HOAN_HANG";
+    private static final String HOAN_THANH = "HOAN_THANH";
+    private static final String HUY = "HUY";
 
-    /** Nhóm trạng thái được tính là "đã bán" (đã xuất kho & cộng soLuongDaBan) */
+    /**
+     * Nhóm trạng thái được tính là "đã bán" (đã xuất kho & cộng soLuongDaBan)
+     */
     private static final Set<String> COUNTED_AS_SOLD = Set.of(
             CHO_XAC_NHAN, CHO_CHUAN_BI_HANG, DANG_GIAO, HOAN_THANH
     );
@@ -55,15 +61,6 @@ public class HoaDonServiceImpl implements IHoaDonService {
     private final ISanPhamChiTietRepository sanPhamChiTietRepo;
     private final ISanPhamRepository sanPhamRepo;
 
-    public HoaDonServiceImpl(IHoaDonRepository hoaDonRepository,
-                             IHoaDonChiTietRepository hoaDonChiTietRepo,
-                             ISanPhamChiTietRepository sanPhamChiTietRepo,
-                             ISanPhamRepository sanPhamRepo) {
-        this.hoaDonRepository = hoaDonRepository;
-        this.hoaDonChiTietRepo = hoaDonChiTietRepo;
-        this.sanPhamChiTietRepo = sanPhamChiTietRepo;
-        this.sanPhamRepo = sanPhamRepo;
-    }
 
     /* =================== LIST =================== */
     @Override
@@ -86,6 +83,52 @@ public class HoaDonServiceImpl implements IHoaDonService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<HoaDonDetailResponseDTO> getOrdersByCustomerId(Long customerId) {
+        List<HoaDon> hoaDonList = hoaDonRepository.findByKhachHangId(customerId);
+        return hoaDonList.stream()
+                .map(h -> new HoaDonDetailResponseDTO(
+                        h.getId(),
+                        h.getMaHoaDon(),
+                        h.getNgayDat(),
+                        h.getTrangThai(),
+                        h.getKhachHang().getHoVaTen(),
+                        h.getTenNguoiNhan(),
+                        h.getSoDienThoaiNguoiNhan(),
+                        h.getDiaChiNguoiNhan(),
+                        h.getTongTien(),
+                        h.getTienGiam(),
+                        h.getPhiVanChuyen(),
+                        h.getThanhTien(),
+                        h.getLoaiHoaDon(),
+                        h.getPhuongThucThanhToan()
+                ))
+                .toList();
+    }
+
+    @Override
+    public void huyDonHang(Long id) {
+        HoaDon hoaDon = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        if ("DANG_GIAO".equalsIgnoreCase(hoaDon.getTrangThai())) {
+            throw new RuntimeException("Đơn hàng đang được giao không thể hủy.");
+        }
+
+        if ("HOAN_THANH".equalsIgnoreCase((hoaDon.getTrangThai()))) {
+            throw new RuntimeException(("Đơn hàng đã được giao thành công."));
+        }
+
+        if ("DA_HUY".equalsIgnoreCase((hoaDon.getTrangThai()))) {
+            throw new RuntimeException(("Đơn hàng đã đc hủy."));
+        }
+
+        hoaDon.setTrangThai("DA_HUY");
+        hoaDon.setNgaySua(LocalDateTime.now());
+        hoaDonRepository.save(hoaDon);
+    }
+
 
     /* =================== DETAIL (header) =================== */
     @Override

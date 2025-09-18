@@ -41,6 +41,10 @@
         <a href="/home" class="btn btn-outline-secondary btn-sm mb-3">
             <i class="fa-solid fa-arrow-left"></i> Trang chủ
         </a>
+        <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
+           class="btn btn-primary">
+            Theo dõi đơn hàng
+        </a>
 
         <!-- Form cập nhật -->
         <form action="${pageContext.request.contextPath}/khachhang/update" method="post" class="card p-4 shadow">

@@ -1,3 +1,4 @@
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -148,18 +149,22 @@
             <h3>MzShop</h3>
         </div>
         <!-- ✅ Thông báo phân quyền: chỉ hiển thị 1 lần sau đăng nhập -->
-        <c:if test="${sessionScope.showRoleAlert}">
+        <c:if test="${showRoleAlert}">
             <div id="user-role-alert"
                  class="text-white bg-success px-3 py-1 rounded shadow"
-                 style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 10px">
+                 style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 12px">
                 <i class="fas fa-user-shield me-1"></i>
                 Đang đăng nhập với quyền:
-                <strong>${sessionScope.userRole}</strong>
+                <strong>${userRole}</strong>
             </div>
-
-            <!-- 🔑 Xóa cờ để các lần load tiếp theo KHÔNG hiển thị -->
-            <c:remove var="showRoleAlert" scope="session"/>
         </c:if>
+        <script>
+            $(function () {
+                setTimeout(function () {
+                    $("#user-role-alert").fadeOut("slow");
+                }, 2500); // 2.5 giây tự ẩn
+            });
+        </script>
     </div>
 </header>
 
@@ -174,13 +179,7 @@
     <!-- 🔑 Xóa khỏi session ngay khi render -->
     <c:remove var="accessDenied" scope="session"/>
 
-    <script>
-        $(function () {
-            setTimeout(function () {
-                $("#access-denied-alert").fadeOut("slow");
-            }, 3000);
-        });
-    </script>
+
 </c:if>
 
 <script>
@@ -190,13 +189,6 @@
         const content = document.querySelector(".content");
         sidebar.classList.toggle("collapsed");
         content.classList.toggle("expanded");
-    });
-
-    // ✅ Tự động ẩn thông báo phân quyền sau 2 giây
-    $(function () {
-        setTimeout(function () {
-            $("#user-role-alert").fadeOut("slow");
-        }, 2000);
     });
 </script>
 
@@ -280,7 +272,6 @@
         </li>
     </ul>
 </div>
-
 <!-- Toggle Sidebar Button -->
 <button id="toggleSidebar">
     <i class="fas fa-bars"></i>

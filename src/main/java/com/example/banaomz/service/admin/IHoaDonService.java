@@ -11,5 +11,7 @@ public interface IHoaDonService {
     HoaDonDetailResponseDTO getDetailById(Long id);
     void exportHoaDonPdf(Long id, OutputStream outputStream);
     HoaDonDetailResponseDTO updateTrangThai(Long id, String trangThaiMoi);
-
+    List<HoaDonDetailResponseDTO> getOrdersByCustomerId(Long customerId);
+    void huyDonHang(Long id);
+    //HoaDonDetailResponseDTO getOrderDetail(Long idHoaDon, Long customerId);
 }

@@ -1,3 +1,4 @@
+
 package com.example.banaomz.controller.admin.dangNhap;
 
 import com.example.banaomz.dto.admin.nhanVien.NhanVienDTO;
@@ -28,16 +29,22 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String doLogin(@ModelAttribute("user") NhanVienDTO user, HttpSession session, Model model,
+    public String doLogin(@ModelAttribute("user") NhanVienDTO user,
+                          HttpSession session,
+                          Model model,
                           RedirectAttributes redirectAttributes) {
+
         NhanVien nv = nhanVienRepository.findByEmail(user.getEmail());
 
-        // Kiểm tra thông tin đăng nhập (không mã hóa mật khẩu)
         if (nv != null && nv.getMatKhau().equals(user.getMatKhau())) {
-            session.setAttribute("currentUser", nv); // lưu user vào session
+            // Lưu thông tin user để sử dụng lâu dài
+            session.setAttribute("currentUser", nv);
             session.setAttribute("userRole", nv.getChucVu().getTenChucVu());
-            redirectAttributes.addFlashAttribute("message",
-                    "Đang truy cập với chức vụ " + nv.getChucVu().getTenChucVu());
+
+            // ✅ Gửi flash attribute (chỉ hiển thị 1 lần sau redirect)
+            redirectAttributes.addFlashAttribute("showRoleAlert", true);
+            redirectAttributes.addFlashAttribute("userRole", nv.getChucVu().getTenChucVu());
+
             return "redirect:/admin"; // Trang quản trị
         } else {
             model.addAttribute("error", "Email hoặc mật khẩu không đúng");

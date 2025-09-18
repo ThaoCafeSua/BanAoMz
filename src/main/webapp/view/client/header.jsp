@@ -1,3 +1,4 @@
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <!DOCTYPE html>
@@ -247,13 +248,49 @@
                 <!-- Icons -->
                 <div class="icons d-flex align-items-center">
                     <a href="/cart" class="me-3"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="${pageContext.request.contextPath}/khachhang/detail/${sessionScope.KH_ID}"
-                       class="text-white fw-bold me-3">
-                        <i class="fas fa-user"></i>
-                    </a>
-                    <a href="/khachhang/dangnhap" class="text-white fw-bold"><i class="bi bi-power"></i></a>
+
+                    <!-- ✅ Kiểm tra đăng nhập -->
+                    <c:choose>
+                        <c:when test="${not empty khachHang}">
+                            <a href="${pageContext.request.contextPath}/khachhang/detail/${khachHang.id}"
+                               class="text-white fw-bold">
+                                Xin chào ${khachHang.hoVaTen}
+                            </a>
+                        </c:when>
+
+                        <c:otherwise>
+                            <a href="javascript:void(0);" class="text-white fw-bold" onclick="askLogin()">Xin chào</a>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <!-- Logout (chỉ hiện nếu đã đăng nhập) -->
+                    <c:if test="${not empty khachHang}">
+                        <a href="/khachhang/logout" class="text-white fw-bold" id="logoutLink">
+                            <i class="bi bi-power"></i>
+                        </a>
+                    </c:if>
                 </div>
             </div>
         </div>
     </nav>
 </header>
+<script>
+    //Popup hỏi đăng nhập
+    function askLogin() {
+        if (confirm("Bạn chưa đăng nhập Bạn có muốn chuyển đến trang đăng nhập không?")) {
+            window.location.href = "${pageContext.request.contextPath}/khachhang/dangnhap";
+        }
+    }
+
+    // Xác nhận đăng xuất
+    const logout = document.getElementById('logoutLink');
+    if (logout) {
+        logout.addEventListener('click', function (e) {
+            if (!confirm('Bạn có muốn đăng xuất không?')) {
+                e.preventDefault();
+            }
+        });
+    }
+</script>
+</body>
+</html>
