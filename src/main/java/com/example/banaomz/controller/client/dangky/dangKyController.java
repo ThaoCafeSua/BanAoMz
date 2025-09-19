@@ -1,10 +1,12 @@
 package com.example.banaomz.controller.client.dangky;
 
 import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonDetailResponseDTO;
+import com.example.banaomz.dto.admin.HoaDonChiTiet.Reponse.HoaDonChiTietResponseDTO;
 import com.example.banaomz.dto.admin.ResponseObject;
 import com.example.banaomz.dto.admin.diaChi.DiaChiDTO;
 import com.example.banaomz.dto.admin.khachHang.KhachHangDTO;
 import com.example.banaomz.entity.admin.HoaDon;
+import com.example.banaomz.entity.admin.HoaDonChiTiet;
 import com.example.banaomz.entity.admin.KhachHang;
 import com.example.banaomz.repository.admin.IHoaDonRepository;
 import com.example.banaomz.service.admin.IDiaChiService;
@@ -18,8 +20,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/khachhang")
@@ -156,6 +161,43 @@ public class dangKyController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/khachhang/" + customerId + "/donhang";
+    }
+
+    @GetMapping("/chitiet/{id}")
+    public String xemChiTiet(@PathVariable Long id, Model model) {
+
+        // Lấy thông tin header (dùng service như cũ)
+        HoaDonDetailResponseDTO hoaDon = hoaDonService.getDetailById(id);
+
+        // Lấy entity để map list chi tiết trực tiếp trong controller
+        HoaDon hd = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn ID: " + id));
+
+        List<HoaDonChiTietResponseDTO> chiTietList = hd.getHoaDonChiTietList().stream()
+                .map(ct -> new HoaDonChiTietResponseDTO(
+                        safe(() -> ct.getSanPhamChiTiet().getSanPham().getTenSanPham()),
+                        safe(() -> ct.getSanPhamChiTiet().getMauSac().getTenMauSac()),
+                        safe(() -> ct.getSanPhamChiTiet().getSize().getTenSize()),
+                        Optional.ofNullable(ct.getSoLuong()).orElse(0),
+                        Optional.ofNullable(ct.getGiaBan()).orElse(BigDecimal.ZERO),
+                        Optional.ofNullable(ct.getGiaBan()).orElse(BigDecimal.ZERO)
+                                .multiply(BigDecimal.valueOf(Optional.ofNullable(ct.getSoLuong()).orElse(0)))
+                ))
+                .toList();
+
+        // Format ngày để JSP hiển thị
+        String ngayDat = hoaDon.getNgayDat()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        model.addAttribute("hoaDonDetail", hoaDon);
+        model.addAttribute("chiTietList", chiTietList);
+        model.addAttribute("page", "khachhang/chiiet");
+
+        return "client/khachhang/chitiet";
+    }
+
+    private static String safe(java.util.concurrent.Callable<String> c) {
+        try { return c.call(); } catch (Exception e) { return ""; }
     }
 
 

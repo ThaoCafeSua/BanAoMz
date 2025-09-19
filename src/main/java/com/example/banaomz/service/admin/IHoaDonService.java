@@ -13,5 +13,6 @@ public interface IHoaDonService {
     HoaDonDetailResponseDTO updateTrangThai(Long id, String trangThaiMoi);
     List<HoaDonDetailResponseDTO> getOrdersByCustomerId(Long customerId);
     void huyDonHang(Long id);
-    //HoaDonDetailResponseDTO getOrderDetail(Long idHoaDon, Long customerId);
+
+
 }

@@ -36,7 +36,8 @@ public class SecurityConfig {
                         "/admin/color/update",
                         "/admin/origin/update",
                         "/admin/brand/update",
-                        "/admin/category/update"// chỉ endpoint này
+                        "/admin/category/update",// chỉ endpoint này
+                        "/admin/customer/address"
                 ))
 
                 .authorizeHttpRequests(auth -> auth

@@ -120,15 +120,14 @@ public class HoaDonServiceImpl implements IHoaDonService {
             throw new RuntimeException(("Đơn hàng đã được giao thành công."));
         }
 
-        if ("DA_HUY".equalsIgnoreCase((hoaDon.getTrangThai()))) {
+        if ("HUY".equalsIgnoreCase((hoaDon.getTrangThai()))) {
             throw new RuntimeException(("Đơn hàng đã đc hủy."));
         }
 
-        hoaDon.setTrangThai("DA_HUY");
+        hoaDon.setTrangThai("HUY");
         hoaDon.setNgaySua(LocalDateTime.now());
         hoaDonRepository.save(hoaDon);
     }
-
 
     /* =================== DETAIL (header) =================== */
     @Override

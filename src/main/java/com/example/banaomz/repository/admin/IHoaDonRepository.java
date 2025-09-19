@@ -6,6 +6,7 @@ import com.example.banaomz.entity.admin.HoaDon;
 import com.example.banaomz.entity.admin.HoaDonChiTiet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -115,7 +116,13 @@ public interface IHoaDonRepository extends JpaRepository<HoaDon, Long> {
     @Query("SELECT h FROM HoaDon h WHERE h.khachHang.id = :customerId AND h.loaiHoaDon = 'ONLINE'")
     List<HoaDon> findByKhachHangId(@Param("customerId") Long customerId);
 
-
+    public interface HoaDonRepository extends JpaRepository<HoaDon, Long> {
+        @EntityGraph(attributePaths = {"chiTietList", "chiTietList.sanPhamChiTiet",
+                "chiTietList.sanPhamChiTiet.sanPham",
+                "chiTietList.sanPhamChiTiet.mauSac",
+                "chiTietList.sanPhamChiTiet.size"})
+        Optional<HoaDon> findWithDetailsById(Long id);
+    }
 
 }
 
