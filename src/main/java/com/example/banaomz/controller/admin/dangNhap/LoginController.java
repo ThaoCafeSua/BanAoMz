@@ -1,4 +1,3 @@
-
 package com.example.banaomz.controller.admin.dangNhap;
 
 import com.example.banaomz.dto.admin.nhanVien.NhanVienDTO;
@@ -24,44 +23,48 @@ public class LoginController {
 
     @GetMapping("/login")
     public String showLoginForm(Model model) {
-        model.addAttribute("user", new NhanVienDTO());
+        if (!model.containsAttribute("user")) {
+            model.addAttribute("user", new NhanVienDTO());
+        }
         return "auth/login";
     }
 
     @PostMapping("/login")
     public String doLogin(@ModelAttribute("user") NhanVienDTO user,
                           HttpSession session,
-                          Model model,
-                          RedirectAttributes redirectAttributes) {
+                          RedirectAttributes ra) {
 
         NhanVien nv = nhanVienRepository.findByEmail(user.getEmail());
 
         if (nv != null && nv.getMatKhau().equals(user.getMatKhau())) {
-            // Lưu thông tin user để sử dụng lâu dài
             session.setAttribute("currentUser", nv);
             session.setAttribute("userRole", nv.getChucVu().getTenChucVu());
 
-            // ✅ Gửi flash attribute (chỉ hiển thị 1 lần sau redirect)
-            redirectAttributes.addFlashAttribute("showRoleAlert", true);
-            redirectAttributes.addFlashAttribute("userRole", nv.getChucVu().getTenChucVu());
-
-            return "redirect:/admin"; // Trang quản trị
-        } else {
-            model.addAttribute("error", "Email hoặc mật khẩu không đúng");
-            return "auth/login";
+            ra.addFlashAttribute("showRoleAlert", true);
+            ra.addFlashAttribute("userRole", nv.getChucVu().getTenChucVu());
+            return "redirect:/admin";
         }
+
+        ra.addFlashAttribute("error", "Email hoặc mật khẩu không đúng");
+        ra.addFlashAttribute("user", user);
+        return "redirect:/auth/login";
+    }
+
+    @GetMapping("/forgot")
+    public String showForgotPage() {
+        return "auth/forgot";
     }
 
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam("email") String email,
-                                 RedirectAttributes redirectAttributes) {
+    public String forgotPassword(@RequestParam String email, RedirectAttributes ra) {
         try {
             nhanVienService.resetPassword(email);
-            redirectAttributes.addFlashAttribute("success", "Mật khẩu mới đã được gửi vào email!");
+            ra.addFlashAttribute("success","Mật khẩu mới đã được gửi vào email!");
+            return "redirect:/auth/login";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/auth/forgot";
         }
-        return "redirect:/auth/login";
     }
 
     @GetMapping("/logout")
