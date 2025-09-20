@@ -248,7 +248,6 @@
                 <!-- Icons -->
                 <div class="icons d-flex align-items-center">
                     <a href="/cart" class="me-3"><i class="fas fa-shopping-cart"></i></a>
-
                     <!-- ✅ Kiểm tra đăng nhập -->
                     <c:choose>
                         <c:when test="${not empty khachHang}">

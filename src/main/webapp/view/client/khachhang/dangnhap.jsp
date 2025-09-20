@@ -30,7 +30,7 @@
     <form action="/khachhang/dangnhap" method="post" class="col-md-6 mx-auto">
         <!-- CSRF bắt buộc cho mọi form POST khi bật Spring Security -->
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-
+    </form>
 
     <form action="${pageContext.request.contextPath}/khachhang/dangnhap"
           method="post" class="col-md-6 mx-auto">
@@ -94,6 +94,9 @@
             data: { email: email },
             success: function (res) {
                 $('#forgotModal').hide();
+                $('#mainBox').prepend(
+                    '<div class="success">✅ Mật khẩu mới đã được gửi vào email của bạn!</div>'
+                );
                 // Hiển thị thông báo thành công NGAY TRÊN form đăng nhập
                 //$('#mainBox').prepend('<div class="alert alert-success text-center">'+res+'</div>');
             },

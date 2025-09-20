@@ -359,7 +359,56 @@
             addAddress()
         });
 
+        function validateAddress() {
+            let nameAddress = $('#nameAddress').val().trim();
+            let phoneAddress = $('#phoneAddress').val().trim();
+            let provinceAddress = $('#provinceAddress').val();
+            let districtAddress = $('#districtAddress').val();
+            let wardAddress = $('#wardAddress').val();
+            let detailAddress = $('#detailAddress').val().trim();
+
+            if (nameAddress === "") {
+                toastr.error("Vui lòng nhập họ và tên người nhận");
+                return false;
+            }
+
+            const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+            if (phoneAddress === "") {
+                toastr.error("Vui lòng nhập số điện thoại");
+                return false;
+            } else if (!phoneRegex.test(phoneAddress)) {
+                toastr.error("Số điện thoại không hợp lệ");
+                return false;
+            }
+
+            if (!provinceAddress) {
+                toastr.error("Vui lòng chọn Tỉnh/Thành");
+                return false;
+            }
+
+            if (!districtAddress) {
+                toastr.error("Vui lòng chọn Quận/Huyện");
+                return false;
+            }
+
+            if (!wardAddress) {
+                toastr.error("Vui lòng chọn Phường/Xã");
+                return false;
+            }
+
+            if (detailAddress === "") {
+                toastr.error("Vui lòng nhập địa chỉ chi tiết");
+                return false;
+            }
+
+            return true;
+        }
+
         function addAddress() {
+            if (!validateAddress()) {
+                return; // ❌ Dừng lại nếu lỗi
+            }
+
             let idAddress = $('#idAddress').val();
             let nameAddress = $('#nameAddress').val();
             let phoneAddress = $('#phoneAddress').val();

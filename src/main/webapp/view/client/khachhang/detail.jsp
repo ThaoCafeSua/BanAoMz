@@ -41,10 +41,6 @@
         <a href="/home" class="btn btn-outline-secondary btn-sm mb-3">
             <i class="fa-solid fa-arrow-left"></i> Trang chủ
         </a>
-        <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
-           class="btn btn-primary">
-            Theo dõi đơn hàng
-        </a>
 
         <!-- Form cập nhật -->
         <form action="${pageContext.request.contextPath}/khachhang/update" method="post" class="card p-4 shadow">
@@ -85,6 +81,10 @@
                 <button type="submit" class="btn btn-success">
                     <i class="fa-solid fa-save"></i> Cập nhật
                 </button>
+                <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
+                   class="btn btn-primary">
+                    Theo dõi đơn hàng
+                </a>
             </div>
         </form>
     </div>
@@ -287,7 +287,62 @@
             addAddress()
         });
 
+        function validateAddress() {
+            let nameAddress = $('#nameAddress').val().trim();
+            let phoneAddress = $('#phoneAddress').val().trim();
+            let provinceAddress = $('#provinceAddress').val();
+            let districtAddress = $('#districtAddress').val();
+            let wardAddress = $('#wardAddress').val();
+            let detailAddress = $('#detailAddress').val().trim();
+
+            // ✅ Tên người nhận
+            if (nameAddress === "") {
+                toastr.error("Vui lòng nhập họ và tên người nhận");
+                return false;
+            }
+
+            // ✅ Số điện thoại
+            const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/; // Chuẩn VN
+            if (phoneAddress === "") {
+                toastr.error("Vui lòng nhập số điện thoại");
+                return false;
+            } else if (!phoneRegex.test(phoneAddress)) {
+                toastr.error("Số điện thoại không hợp lệ");
+                return false;
+            }
+
+            // ✅ Tỉnh/Thành
+            if (!provinceAddress) {
+                toastr.error("Vui lòng chọn Tỉnh/Thành");
+                return false;
+            }
+
+            // ✅ Quận/Huyện
+            if (!districtAddress) {
+                toastr.error("Vui lòng chọn Quận/Huyện");
+                return false;
+            }
+
+            // ✅ Phường/Xã
+            if (!wardAddress) {
+                toastr.error("Vui lòng chọn Phường/Xã");
+                return false;
+            }
+
+            // ✅ Địa chỉ chi tiết
+            if (detailAddress === "") {
+                toastr.error("Vui lòng nhập địa chỉ chi tiết");
+                return false;
+            }
+
+            return true; // Hợp lệ
+        }
+
+
         function addAddress() {
+            if (!validateAddress()) {
+                return; // ❌ Dừng lại nếu lỗi
+            }
             let idAddress = $('#idAddress').val();
             let nameAddress = $('#nameAddress').val();
             let phoneAddress = $('#phoneAddress').val();
