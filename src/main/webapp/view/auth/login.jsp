@@ -87,8 +87,6 @@
         <!-- CSRF token bắt buộc -->
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-
-
     <div id="messageArea">
         <c:if test="${not empty error}">
             <div class="error">${error}</div>
@@ -147,22 +145,9 @@
             success: function (res) {
                 // Đóng popup và chỉ CẬP NHẬT thông báo trong container hiện tại
                 $('#forgotModal').hide();
-
-                // THAY THẾ nội dung cũ (xóa form cũ nếu cần)
-                $('#mainBox').html(
-                    '<h2>Đăng nhập hệ thống</h2>' +
-                    '<div class="success">'+res+'</div>' +
-                    '<form action="${pageContext.request.contextPath}/auth/login" method="post">' +
-                    '<label>Email   </label>' +
-                    '<input type="text" name="email" required>' +
-                    '<label>Mật khẩu</label>' +
-                    '<input type="password" name="matKhau" required>' +
-                    '<button type="submit">Đăng nhập</button>' +
-                    '</form>' +
-                    '<div class="forgot"><a id="forgotLink">Quên mật khẩu?</a></div>'
+                $('#mainBox').prepend(
+                    '<div class="success">✅ Mật khẩu mới đã được gửi vào email của bạn!</div>'
                 );
-
-                // Gắn lại sự kiện cho link "Quên mật khẩu" mới
                 $('#forgotLink').click(function () {
                     $('#forgotModal').show();
                     $('#forgotEmail').val('');
