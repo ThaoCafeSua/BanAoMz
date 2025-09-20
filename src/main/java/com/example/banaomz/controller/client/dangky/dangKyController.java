@@ -92,12 +92,6 @@ public class dangKyController {
         return ResponseEntity.ok(ResponseObject.builder().data(saved).build());
     }
 
-    // Trang đăng nhập
-    @GetMapping("/dangnhap")
-    public String showLoginForm() {
-        return "client/khachhang/dangnhap";
-    }
-
     @PostMapping("/dangnhap")
     public String dangNhap(@RequestParam("email") String email,
                            @RequestParam("matKhau") String matKhau,
@@ -105,6 +99,7 @@ public class dangKyController {
                            Model model) {
         KhachHang khachHang = khachHangService.login(email, matKhau);
         if (khachHang != null) {
+            session.setAttribute("KH_ID", khachHang.getId());
             session.setAttribute("khachHang", khachHang);
             return "redirect:/home";
         } else {
@@ -112,6 +107,7 @@ public class dangKyController {
             return "client/khachhang/dangnhap";
         }
     }
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
