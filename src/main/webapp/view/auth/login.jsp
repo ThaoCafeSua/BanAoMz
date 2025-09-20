@@ -1,91 +1,33 @@
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
-<!DOCTYPE html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!doctype html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Đăng nhập hệ thống</title>
     <style>
-
         body{font-family:Arial;background:#f4f4f4}
-        .login-box{width:400px;margin:100px auto;background:#fff;padding:30px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-        h2{text-align:center;margin-bottom:25px;color:#001f3d}
-        input[type="text"],input[type="password"]{width:100%;padding:12px;margin:6px 0 16px;border:1px solid #ccc;border-radius:6px}
-        button{width:100%;padding:10px;background:#001f3d;color:#fff;border:none;border-radius:6px;cursor:pointer}
-        .error{color:red;text-align:center;margin-bottom:15px}
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-        }
-        .login-container {
-            width: 380px;
-            margin: 80px auto;
-            padding: 30px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        h2 { text-align:center; color:#001f3d; margin-bottom:20px; }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 16px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #001f3d;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .error   { color: red;   text-align: center; margin-bottom: 15px; }
-        .success { color: green; text-align: center; margin-bottom: 15px; }
-        .forgot  { text-align: center; margin-top: 12px; }
-        .forgot a { color: #001f3d; text-decoration: underline; cursor: pointer; }
-
-        /* Popup */
-        #forgotModal {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5);
-        }
-        .modal-content {
-            background: #fff;
-            width: 350px;
-            margin: 100px auto;
-            padding: 20px;
-            border-radius: 8px;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .close {
-            position: absolute;
-            top: 8px; right: 12px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        #forgotMsg { margin-top: 10px; text-align: center; }
-
+        .box{width:380px;margin:80px auto;background:#fff;padding:30px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+        h2{text-align:center;color:#001f3d;margin-bottom:20px}
+        input,button{width:100%;padding:12px;border-radius:6px}
+        input{border:1px solid #ccc;margin:8px 0 14px}
+        button{border:none;background:#001f3d;color:#fff;cursor:pointer}
+        .error{color:#d00;text-align:center;margin-bottom:10px}
+        .success{color:#090;text-align:center;margin-bottom:10px}
+        .help{text-align:center;margin-top:10px}
+        .help a{color:#001f3d;text-decoration:underline}
     </style>
 </head>
 <body>
-
-<!-- Chỉ duy nhất 1 container -->
-<div id="mainBox" class="login-container">
+<div class="box">
     <h2>Đăng nhập hệ thống</h2>
 
+    <c:if test="${not empty error}"><div class="error">${error}</div></c:if>
+    <c:if test="${not empty success}"><div class="success">${success}</div></c:if>
 
-    <form action="/auth/login" method="post">
-        <!-- CSRF token bắt buộc -->
+    <form action="${pageContext.request.contextPath}/auth/login" method="post" autocomplete="on">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
 
     <div id="messageArea">
         <c:if test="${not empty error}">
@@ -98,19 +40,19 @@
 
     <form id="loginForm" action="${pageContext.request.contextPath}/auth/login" method="post">
 
+
         <label>Email</label>
-        <input type="text" name="email" required>
-
+        <input type="email" name="email" autocomplete="username" required>
         <label>Mật khẩu</label>
-        <input type="password" name="matKhau" required>
-
+        <input type="password" name="matKhau" autocomplete="current-password" required>
         <button type="submit">Đăng nhập</button>
     </form>
 
-    <div class="forgot">
-        <a id="forgotLink">Quên mật khẩu?</a>
+    <div class="help">
+        <a href="${pageContext.request.contextPath}/auth/forgot">Quên mật khẩu?</a>
     </div>
 </div>
+
 
 <!-- Popup quên mật khẩu -->
 <div id="forgotModal">
