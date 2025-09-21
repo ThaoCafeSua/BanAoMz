@@ -12,6 +12,7 @@ import com.example.banaomz.repository.admin.IHoaDonRepository;
 import com.example.banaomz.service.admin.IDiaChiService;
 import com.example.banaomz.service.admin.IHoaDonService;
 import com.example.banaomz.service.admin.IKhachHangService;
+import com.example.banaomz.service.client.IHoaDonClientService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,15 +33,21 @@ public class dangKyController {
 
     private final IKhachHangService khachHangService;
     private final IDiaChiService diaChiService;
-    private final IHoaDonService hoaDonService;
+    private final IHoaDonService hoaDonService;      // vẫn dùng cho các chỗ khác
     private final IHoaDonRepository hoaDonRepository;
+    private final IHoaDonClientService hoaDonClientService; // 👉 NEW
 
     @Autowired
-    public dangKyController(IKhachHangService khachHangService, IDiaChiService diaChiService, IHoaDonService hoaDonService, IHoaDonRepository hoaDonRepository) {
+    public dangKyController(IKhachHangService khachHangService,
+                            IDiaChiService diaChiService,
+                            IHoaDonService hoaDonService,
+                            IHoaDonRepository hoaDonRepository,
+                            IHoaDonClientService hoaDonClientService) { // 👉 NEW
         this.khachHangService = khachHangService;
         this.diaChiService = diaChiService;
         this.hoaDonService = hoaDonService;
         this.hoaDonRepository = hoaDonRepository;
+        this.hoaDonClientService = hoaDonClientService; // 👉 NEW
     }
 
     // Trang đăng ký
@@ -153,15 +160,29 @@ public class dangKyController {
     @PostMapping("/don-hang/huy")
     public String huyDon(@RequestParam("id") Long id,
                          @RequestParam("customerId") Long customerId,
+                         HttpSession session,
                          RedirectAttributes redirectAttributes) {
         try {
-            hoaDonService.huyDonHang(id);
+            // Lấy KH_ID từ session để đảm bảo đúng chủ đơn
+            Object v = session.getAttribute("KH_ID");
+            Long khId = (v instanceof Long) ? (Long) v :
+                    (v instanceof Integer) ? ((Integer) v).longValue() : null;
+
+            if (khId == null || !khId.equals(customerId)) {
+                redirectAttributes.addFlashAttribute("error", "Phiên đăng nhập không hợp lệ.");
+                return "redirect:/khachhang/" + customerId + "/donhang";
+            }
+
+            // 👉 Dùng service CLIENT riêng: hoàn kho & giảm soLuongDaBan ngay khi KH huỷ
+            hoaDonClientService.huyDonHangByCustomer(id, khId);
+
             redirectAttributes.addFlashAttribute("message", "Đã hủy đơn hàng thành công!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/khachhang/" + customerId + "/donhang";
     }
+
 
     @GetMapping("/chitiet/{id}")
     public String xemChiTiet(@PathVariable Long id, Model model) {

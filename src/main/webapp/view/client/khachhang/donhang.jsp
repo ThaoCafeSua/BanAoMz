@@ -75,17 +75,29 @@
                     <td>${order.tongTien}</td>
                     <td>${order.trangThai}</td>
                     <td>
-                        <!-- Nút hủy đơn -->
                         <form action="${pageContext.request.contextPath}/khachhang/don-hang/huy"
                               method="post"
                               onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này không?');">
-                            <input type="hidden" name="customerId" value="${khachHang.id}" />
-                            <input type="hidden" name="id" value="${order.id}" />
-                            <button type="submit" class="btn btn-danger btn-sm">Hủy đơn</button>
+                            <input type="hidden" name="customerId" value="${customerId}"/>  <!-- SỬA Ở ĐÂY -->
+                            <input type="hidden" name="id" value="${order.id}"/>
+
+                            <c:choose>
+                                <c:when test="${order.trangThai ne 'DANG_GIAO'
+                     and order.trangThai ne 'GIAO_THAT_BAI'
+                     and order.trangThai ne 'DA_HOAN_HANG'
+                     and order.trangThai ne 'HOAN_HANG'
+                     and order.trangThai ne 'HOAN_THANH'
+                     and order.trangThai ne 'HUY'}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Hủy đơn</button>
+                                </c:when>
+                                <c:otherwise>
+                                    <button type="button" class="btn btn-secondary btn-sm" disabled>Không thể hủy</button>
+                                </c:otherwise>
+                            </c:choose>
+
                             <a href="${pageContext.request.contextPath}/khachhang/chitiet/${order.id}"
-                               class="btn btn-info btn-sm">
-                                🔍
-                            </a>
+                               class="btn btn-info btn-sm">🔍</a>
+
                             <c:if test="${not empty _csrf}">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             </c:if>

@@ -1,11 +1,15 @@
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt"  prefix="fmt" %>
+<fmt:setLocale value="vi_VN"/>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ban Ao MzShop</title>
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -31,111 +35,44 @@
     <style>
         /* Header */
         header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background-color: #001f3d; /* Màu xanh than */
-            color: white;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background-color: #001f3d; color: white; z-index: 1000;
             box-shadow: 0 2px 2px rgba(0,0,0,0.1);
         }
-        .header-flex {
-            display: flex;
-            align-items: center;       /* Căn giữa theo chiều dọc */
-            gap: 10px;                 /* Khoảng cách giữa logo và h3 */
-        }
-
-        .header-flex img {
-            width: 50px;               /* Điều chỉnh kích thước logo nếu cần */
-            height: auto;
-            align-items: center;       /* Căn giữa theo chiều dọc */
-
-        }
-
+        .header-flex { display: flex; align-items: center; gap: 10px; }
+        .header-flex img { width: 50px; height: auto; }
 
         /* Sidebar */
         .sidebar {
-            width: 20%;
-            transition: width 0.3s;
-            background-color: #001f3d; /* Màu xanh than */
-            position: fixed;
-            top: 60px; /* Dưới header */
-            left: 0;
-            bottom: 0;
-            padding: 10px;
-            color: white;
+            width: 20%; transition: width 0.3s; background-color: #001f3d;
+            position: fixed; top: 60px; left: 0; bottom: 0; padding: 10px; color: white;
         }
+        .sidebar.collapsed { width: 60px; padding: 20px 10px; }
 
-        .sidebar.collapsed {
-            width: 60px;
-            padding: 20px 10px;
-        }
-
-        /* Sidebar links */
         .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 10px;
+            color: white; text-decoration: none; display: block; padding: 10px;
             transition: background-color 0.3s;
         }
-
-        .sidebar a:hover {
-            background-color: #004080; /* Màu xanh than đậm khi hover */
-        }
+        .sidebar a:hover { background-color: #004080; }
 
         /* Content */
-        .content {
-            margin-left: 20%;
-            padding-top: 70px; /* Không bị header che khuất */
-            transition: margin-left 0.3s;
-        }
+        .content { margin-left: 20%; padding-top: 70px; transition: margin-left 0.3s; }
+        .content.expanded { margin-left: 60px; }
 
-        .content.expanded {
-            margin-left: 60px; /* Khi sidebar thu gọn */
-        }
-
-        /* Nút toggle */
+        /* Toggle */
         #toggleSidebar {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1100;
-            padding: 10px;
-            background-color: #001f3d; /* Màu xanh than */
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            border-radius: 5px;
+            position: fixed; top: 10px; left: 10px; z-index: 1100; padding: 10px;
+            background-color: #001f3d; border: none; color: white; font-size: 20px;
+            cursor: pointer; border-radius: 5px;
         }
+        #toggleSidebar:hover { background-color: #004080; }
 
-        #toggleSidebar:hover {
-            background-color: #004080; /* Màu xanh than đậm khi hover */
-        }
-
-        /* Responsive: Điều chỉnh khi màn hình nhỏ */
+        /* Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-                padding: 10px;
-                top: 60px; /* Dưới header */
-            }
-
-            .content {
-                margin-left: 60px;
-            }
-
-            .sidebar.collapsed {
-                width: 0;
-                padding: 0;
-            }
-
-            .content.expanded {
-                margin-left: 0;
-            }
+            .sidebar { width: 60px; padding: 10px; top: 60px; }
+            .content { margin-left: 60px; }
+            .sidebar.collapsed { width: 0; padding: 0; }
+            .content.expanded { margin-left: 0; }
         }
     </style>
 </head>
@@ -146,9 +83,10 @@
     <div class="container header-flex justify-content-between">
         <div class="d-flex align-items-center gap-2">
             <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
-            <h3>MzShop</h3>
+            <h3 class="m-0">MzShop</h3>
         </div>
-        <!-- ✅ Thông báo phân quyền: chỉ hiển thị 1 lần sau đăng nhập -->
+
+        <!-- Thông báo phân quyền: chỉ hiển thị 1 lần sau đăng nhập -->
         <c:if test="${showRoleAlert}">
             <div id="user-role-alert"
                  class="text-white bg-success px-3 py-1 rounded shadow"
@@ -162,38 +100,42 @@
             $(function () {
                 setTimeout(function () {
                     $("#user-role-alert").fadeOut("slow");
-                }, 2500); // 2.5 giây tự ẩn
+                }, 2500);
             });
         </script>
     </div>
 </header>
 
-<!-- ✅ Thông báo không có quyền -->
+<!-- Thông báo không có quyền -->
 <c:if test="${not empty sessionScope.accessDenied}">
     <div id="access-denied-alert"
          class="text-white bg-danger px-3 py-1 rounded shadow"
          style="position: fixed; top: 65px; right: 20px; z-index: 2000; font-size: 12px">
             ${sessionScope.accessDenied}
     </div>
-
-    <!-- 🔑 Xóa khỏi session ngay khi render -->
+    <!-- Xóa khỏi session ngay khi render -->
     <c:remove var="accessDenied" scope="session"/>
-
-
 </c:if>
 
 <script>
     // Nút đóng/mở sidebar
-    document.getElementById("toggleSidebar").addEventListener("click", function () {
-        const sidebar = document.querySelector(".sidebar");
-        const content = document.querySelector(".content");
-        sidebar.classList.toggle("collapsed");
-        content.classList.toggle("expanded");
+    document.addEventListener("DOMContentLoaded", function () {
+        const btn = document.getElementById("toggleSidebar");
+        if (btn) {
+            btn.addEventListener("click", function () {
+                const sidebar = document.querySelector(".sidebar");
+                const content = document.querySelector(".content");
+                if (sidebar && content) {
+                    sidebar.classList.toggle("collapsed");
+                    content.classList.toggle("expanded");
+                }
+            });
+        }
     });
 </script>
 
 <!-- Sidebar -->
-<div class="sidebar ">
+<div class="sidebar">
     <ul class="nav flex-column">
         <li class="nav-item">
             <a class="nav-link active text-white h5" href="/admin" aria-label="Thống kê">
@@ -272,6 +214,7 @@
         </li>
     </ul>
 </div>
+
 <!-- Toggle Sidebar Button -->
 <button id="toggleSidebar">
     <i class="fas fa-bars"></i>
@@ -279,7 +222,8 @@
 
 <!-- Main Content -->
 <div class="content">
-    <jsp:include page="${page}.jsp" /> <!-- Nội dung động -->
+    <jsp:include page="${page}.jsp" />
 </div>
+
 </body>
 </html>

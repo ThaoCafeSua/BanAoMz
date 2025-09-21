@@ -29,4 +29,7 @@ public interface IHoaDonClientService {
                         String hoTen, String sdt, String diaChi,
                         BigDecimal shipFee, Long shipServiceId, Integer toDistrictId, String toWardCode,
                         Integer weight, Integer length, Integer width, Integer height);
+
+
+    void huyDonHangByCustomer(Long orderId, Long khachHangId);
 }
