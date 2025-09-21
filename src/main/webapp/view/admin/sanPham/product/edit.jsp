@@ -641,13 +641,12 @@
             var indexToUpdate = $(this).data('index'); // Lấy index của item cần cập nhật
             var newQuantity = $(this).val(); // Lấy giá trị mới của số lượng
 
-            // Kiểm tra xem giá trị nhập vào có phải là số và không phải số âm
-            if (isNaN(newQuantity) || newQuantity < 0) {
-                $(this).val(1); // Đặt lại giá trị trong input thành 100000
-                newQuantity = 1; // Cập nhật số lượng trong mảng dữ liệu
+            if (newQuantity === "" || isNaN(newQuantity) || parseInt(newQuantity) < 0) {
+                newQuantity = 0;
+                $(this).val(newQuantity);
+            } else {
+                newQuantity = parseInt(newQuantity, 10);
             }
-
-
             // Cập nhật số lượng trong mảng dữ liệu
             productDetailArr[indexToUpdate].soLuong = newQuantity;
             console.log(productDetailArr);
