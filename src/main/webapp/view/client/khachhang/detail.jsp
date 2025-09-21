@@ -31,6 +31,87 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h3, h5.card-title {
+        color: #001f3d;
+        font-weight: 600;
+    }
+
+    a {
+        color: #001f3d;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    a:hover {
+        color: #74ace0 !important;
+    }
+
+    .btn-primary {
+        background-color: #001f3d;
+        border-color: #001f3d;
+    }
+
+    .btn-primary:hover {
+        background-color: #74ace0;
+        border-color: #74ace0;
+    }
+
+    .btn-outline-secondary {
+        border-color: #001f3d;
+        color: #001f3d;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #001f3d;
+        color: #fff;
+    }
+
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    table thead {
+        background-color: #001f3d;
+        color: #fff;
+    }
+
+    table tbody tr:hover {
+        background-color: #f1f7fc;
+    }
+
+    label.form-label {
+        font-weight: 500;
+        color: #001f3d;
+    }
+
+    input.form-control, select.form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+    }
+
+    input.form-control:focus, select.form-select:focus {
+        border-color: #74ace0;
+        box-shadow: 0 0 0 0.2rem rgba(116, 172, 224, 0.25);
+    }
+
+    .modal-content {
+        border-radius: 16px;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+
+</style>
 
 
 <div class="container mt-4">
@@ -40,6 +121,10 @@
         <!-- Nút quay lại -->
         <a href="/home" class="btn btn-outline-secondary btn-sm mb-3">
             <i class="fa-solid fa-arrow-left"></i> Trang chủ
+        </a>
+        <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
+           class="btn btn-primary btn-theodoi">
+            Theo dõi đơn hàng
         </a>
 
         <!-- Form cập nhật -->

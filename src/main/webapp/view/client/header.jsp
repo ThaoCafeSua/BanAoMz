@@ -1,3 +1,4 @@
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <!DOCTYPE html>
@@ -87,6 +88,7 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         /* Hiệu ứng khi di chuột vào nút */
         #hero button:hover {
             background-color: #001f3d;
@@ -198,7 +200,6 @@
         }
 
         .navbar-toggler-icon {
-
             background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='white' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
         }
 
@@ -250,16 +251,16 @@
 
                     <!-- ✅ Kiểm tra đăng nhập -->
                     <c:choose>
-                    <c:when test="${not empty khachHang}">
-                    <a href="${pageContext.request.contextPath}/khachhang/detail/${khachHang.id}"
-                       class="text-white fw-bold">
-                        Xin chào ${khachHang.hoVaTen}
-                    </a>
-                    </c:when>
+                        <c:when test="${not empty khachHang}">
+                            <a href="${pageContext.request.contextPath}/khachhang/detail/${khachHang.id}"
+                               class="text-white fw-bold">
+                                Xin chào ${khachHang.hoVaTen}
+                            </a>
+                        </c:when>
 
-                    <c:otherwise>
-                    <a href="javascript:void(0);" class="text-white fw-bold" onclick="askLogin()">Xin chào</a>
-                    </c:otherwise>
+                        <c:otherwise>
+                            <a href="javascript:void(0);" class="text-white fw-bold" onclick="askLogin()">Xin chào</a>
+                        </c:otherwise>
                     </c:choose>
 
                     <!-- Logout (chỉ hiện nếu đã đăng nhập) -->

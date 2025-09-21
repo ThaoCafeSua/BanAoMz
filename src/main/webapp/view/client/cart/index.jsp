@@ -534,5 +534,7 @@
         await initAddressPickers();
         await prefillFromAccount();
     })();
+    (window.copy||console.log)(JSON.stringify({fullName:(document.querySelector('#hoTen')?.value||'').trim(),phone:(document.querySelector('#sdt')?.value||'').trim(),addressDetail:(document.querySelector('#diaChi')?.value||'').trim(),province:{code:document.querySelector('#provinceSelect')?.value||'',name:(document.querySelector('#provinceSelect')?.selectedOptions?.[0]?.textContent||'').trim()},district:{code:document.querySelector('#districtSelect')?.value||'',name:(document.querySelector('#districtSelect')?.selectedOptions?.[0]?.textContent||'').trim()},ward:{code:document.querySelector('#wardSelect')?.value||'',name:(document.querySelector('#wardSelect')?.selectedOptions?.[0]?.textContent||'').trim()},toDistrictId:document.querySelector('#toDistrictId')?.value||'',toWardCode:(document.querySelector('#toWardCode')?.value||'').trim()}));
+
 </script>
 

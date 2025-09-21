@@ -1,28 +1,30 @@
 package com.example.banaomz.controller.client.dangky;
 
 import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonDetailResponseDTO;
+import com.example.banaomz.dto.admin.HoaDonChiTiet.Reponse.HoaDonChiTietResponseDTO;
 import com.example.banaomz.dto.admin.ResponseObject;
 import com.example.banaomz.dto.admin.diaChi.DiaChiDTO;
 import com.example.banaomz.dto.admin.khachHang.KhachHangDTO;
 import com.example.banaomz.entity.admin.HoaDon;
+import com.example.banaomz.entity.admin.HoaDonChiTiet;
 import com.example.banaomz.entity.admin.KhachHang;
+import com.example.banaomz.repository.admin.IHoaDonRepository;
 import com.example.banaomz.service.admin.IDiaChiService;
 import com.example.banaomz.service.admin.IHoaDonService;
 import com.example.banaomz.service.admin.IKhachHangService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/khachhang")
@@ -30,12 +32,15 @@ public class dangKyController {
 
     private final IKhachHangService khachHangService;
     private final IDiaChiService diaChiService;
-    private  IHoaDonService hoaDonService;
+    private final IHoaDonService hoaDonService;
+    private final IHoaDonRepository hoaDonRepository;
 
     @Autowired
-    public dangKyController(IKhachHangService khachHangService, IDiaChiService diaChiService) {
+    public dangKyController(IKhachHangService khachHangService, IDiaChiService diaChiService, IHoaDonService hoaDonService, IHoaDonRepository hoaDonRepository) {
         this.khachHangService = khachHangService;
         this.diaChiService = diaChiService;
+        this.hoaDonService = hoaDonService;
+        this.hoaDonRepository = hoaDonRepository;
     }
 
     // Trang đăng ký
@@ -92,6 +97,12 @@ public class dangKyController {
         return ResponseEntity.ok(ResponseObject.builder().data(saved).build());
     }
 
+    // Trang đăng nhập
+    @GetMapping("/dangnhap")
+    public String showLoginForm() {
+        return "client/khachhang/dangnhap";
+    }
+
     @PostMapping("/dangnhap")
     public String dangNhap(@RequestParam("email") String email,
                            @RequestParam("matKhau") String matKhau,
@@ -108,19 +119,87 @@ public class dangKyController {
         }
     }
 
-
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/khachhang/dangnhap";
     }
 
-    @PostMapping("/orders")
-    @ResponseBody
-    public ResponseEntity<?> getOrders(@RequestBody Long customerId) {
-        List<HoaDonDetailResponseDTO> orders = (List<HoaDonDetailResponseDTO>) hoaDonService.getDetailById(customerId);
-        return ResponseEntity.ok(Map.of("data", orders));
+    @GetMapping("/{id}/donhang")
+    public String getDonHangByCustomer(@PathVariable("id") Long id,@RequestParam(value = "status", required = false) String status, Model model) {
+        Optional<KhachHang> khachHang = khachHangService.findById(id);
+        if (khachHang.isEmpty()) {
+            return "redirect:/error"; // hoặc thông báo "Khách hàng không tồn tại"
+        }
+        List<HoaDonDetailResponseDTO> list = hoaDonService.getOrdersByCustomerId(id);
+        model.addAttribute("customerId", id);
+        model.addAttribute("donHangList", list);
+        List<HoaDon> donHangList;
+
+        if (status == null || status.isEmpty() || status.equals("ALL")) {
+            donHangList = hoaDonRepository.findByKhachHangId(id);
+        } else {
+            donHangList = hoaDonRepository.findByKhachHangIdAndTrangThai(id, status);
+        }
+
+        model.addAttribute("donHangList", donHangList);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("customerId", id);
+        return "client/khachhang/donhang";
     }
+
+
+
+    @PostMapping("/don-hang/huy")
+    public String huyDon(@RequestParam("id") Long id,
+                         @RequestParam("customerId") Long customerId,
+                         RedirectAttributes redirectAttributes) {
+        try {
+            hoaDonService.huyDonHang(id);
+            redirectAttributes.addFlashAttribute("message", "Đã hủy đơn hàng thành công!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/khachhang/" + customerId + "/donhang";
+    }
+
+    @GetMapping("/chitiet/{id}")
+    public String xemChiTiet(@PathVariable Long id, Model model) {
+
+        // Lấy thông tin header (dùng service như cũ)
+        HoaDonDetailResponseDTO hoaDon = hoaDonService.getDetailById(id);
+
+        // Lấy entity để map list chi tiết trực tiếp trong controller
+        HoaDon hd = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn ID: " + id));
+
+        List<HoaDonChiTietResponseDTO> chiTietList = hd.getHoaDonChiTietList().stream()
+                .map(ct -> new HoaDonChiTietResponseDTO(
+                        safe(() -> ct.getSanPhamChiTiet().getSanPham().getTenSanPham()),
+                        safe(() -> ct.getSanPhamChiTiet().getMauSac().getTenMauSac()),
+                        safe(() -> ct.getSanPhamChiTiet().getSize().getTenSize()),
+                        Optional.ofNullable(ct.getSoLuong()).orElse(0),
+                        Optional.ofNullable(ct.getGiaBan()).orElse(BigDecimal.ZERO),
+                        Optional.ofNullable(ct.getGiaBan()).orElse(BigDecimal.ZERO)
+                                .multiply(BigDecimal.valueOf(Optional.ofNullable(ct.getSoLuong()).orElse(0)))
+                ))
+                .toList();
+
+        // Format ngày để JSP hiển thị
+        String ngayDat = hoaDon.getNgayDat()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        model.addAttribute("hoaDonDetail", hoaDon);
+        model.addAttribute("chiTietList", chiTietList);
+        model.addAttribute("page", "khachhang/chiiet");
+
+        return "client/khachhang/chitiet";
+    }
+
+    private static String safe(java.util.concurrent.Callable<String> c) {
+        try { return c.call(); } catch (Exception e) { return ""; }
+    }
+
 
 
 
