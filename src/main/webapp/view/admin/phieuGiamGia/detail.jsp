@@ -70,11 +70,11 @@
                         <textarea class="form-control" name="moTa" readonly rows="3">${phieuGiamGia.moTa}</textarea>
                     </div>
 
-<%--                    <div class="mb-3">--%>
-<%--                        <label class="form-label label-primary">Trạng Thái:</label>--%>
-<%--                        <input type="text" class="form-control" name="trangThai" readonly--%>
-<%--                            value="${phieuGiamGia.trangThai}">--%>
-<%--                    </div>--%>
+                    <%-- <div class="mb-3">--%>
+                        <%-- <label class="form-label label-primary">Trạng Thái:</label>--%>
+                            <%-- <input type="text" class="form-control" name="trangThai" readonly--%>
+                                <%-- value="${phieuGiamGia.trangThai}">--%>
+                                    <%-- </div>--%>
                 </div>
             </div>
         </div>
