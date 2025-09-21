@@ -181,8 +181,8 @@
                 let ngayKetThuc = $("#ngayKetThuc").val();
                 let soLuong = parseInt($("#soLuong").val().trim());
 
-                if (!maPhieu || !tenPhieu) {
-                    toastr.error("Mã và Tên phiếu không được để trống");
+                if (!tenPhieu) {
+                    toastr.error("Tên phiếu không được để trống");
                     return false;
                 }
                 if (isNaN(giaTriGiam) || giaTriGiam <= 0) {
