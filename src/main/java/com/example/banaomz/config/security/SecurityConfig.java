@@ -39,11 +39,12 @@ public class SecurityConfig {
                         "/admin/category/update",// chỉ endpoint này
                         "/admin/customer/address",
 
-                        "auth/forgot-password"
+                        "auth/forgot-password",
 
                         "/auth/forgot-password",
                         "khachhang/dangnhap",
                         "/khachhang/forgot-password",
+                        "/admin/employee/create"
 
                 ))
 
