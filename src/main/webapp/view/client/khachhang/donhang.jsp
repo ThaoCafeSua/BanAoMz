@@ -16,9 +16,10 @@
 
         <!-- Nút quay lại -->
         <div class="mt-3">
-            <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+            <a href="${pageContext.request.contextPath}/khachhang/detail/${khachHang.id}"
+               class="btn btn-info btn-sm">
                 ⬅
-            </button>
+            </a>
         </div>
 
     </div>
@@ -32,6 +33,9 @@
                 <option value="CHO_XAC_NHAN" ${selectedStatus == 'CHO_XAC_NHAN' ? 'selected' : ''}>Chờ xử lý</option>
                 <option value="CHO_CHUAN_BI_HANG" ${selectedStatus == 'CHO_CHUAN_BI_HANG' ? 'selected' : ''}>Chờ chuẩn bị hàng</option>
                 <option value="DANG_GIAO" ${selectedStatus == 'DANG_GIAO' ? 'selected' : ''}>Đang giao</option>
+                <option value="GIAO_THAT_BAI" ${selectedStatus == 'GIAO_THAT_BAI' ? 'selected' : ''}>Giao thất bại</option>
+                <option value="HOAN_HANG" ${selectedStatus == 'HOAN_HANG' ? 'selected' : ''}>Hoàn hàng</option>
+                <option value="DA_HOAN_HANG" ${selectedStatus == 'DA_HOAN_HANG' ? 'selected' : ''}>Đã hoàn hàng</option>
                 <option value="HOAN_THANH" ${selectedStatus == 'HOAN_THANH' ? 'selected' : ''}>Hoàn thành</option>
                 <option value="HUY" ${selectedStatus == 'HUY' ? 'selected' : ''}>Đã hủy</option>
             </select>
@@ -84,7 +88,7 @@
                             <button type="submit" class="btn btn-danger btn-sm">Hủy đơn</button>
                             <a href="${pageContext.request.contextPath}/khachhang/chitiet/${order.id}"
                                class="btn btn-info btn-sm">
-                                🔍
+                                Xem chi tiết
                             </a>
                             <c:if test="${not empty _csrf}">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>

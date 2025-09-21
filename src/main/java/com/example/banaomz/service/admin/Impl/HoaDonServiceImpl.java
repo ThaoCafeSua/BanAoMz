@@ -116,6 +116,18 @@ public class HoaDonServiceImpl implements IHoaDonService {
             throw new RuntimeException("Đơn hàng đang được giao không thể hủy.");
         }
 
+        if ("GIAO_THAT_BAI".equalsIgnoreCase(hoaDon.getTrangThai())) {
+            throw new RuntimeException("Giao thất bại. Đơn hàng đang được giao lại.");
+        }
+
+        if ("HOAN_HANG".equalsIgnoreCase(hoaDon.getTrangThai())) {
+            throw new RuntimeException("Đơn hàng đang được hoàn trả.");
+        }
+
+        if ("DA_HOAN_HANG".equalsIgnoreCase(hoaDon.getTrangThai())) {
+            throw new RuntimeException("Đơn hàng đã hoàn trả về kho.");
+        }
+
         if ("HOAN_THANH".equalsIgnoreCase((hoaDon.getTrangThai()))) {
             throw new RuntimeException(("Đơn hàng đã được giao thành công."));
         }
