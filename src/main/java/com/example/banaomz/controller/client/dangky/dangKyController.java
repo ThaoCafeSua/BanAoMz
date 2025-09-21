@@ -80,14 +80,6 @@ public class dangKyController {
         return "client/khachhang/detail"; // JSP detail
     }
 
-    // API lấy detail khách hàng + danh sách địa chỉ
-    @PostMapping("/detail")
-    @ResponseBody
-    public ResponseEntity<?> getDetailCustomer(@RequestBody Long id) {
-        KhachHangDTO dto = khachHangService.detailCustomer(id);
-        return ResponseEntity.ok(ResponseObject.builder().data(dto).build());
-    }
-
     // API lấy danh sách địa chỉ
     @GetMapping("/{id}/addresses")
     @ResponseBody
@@ -125,6 +117,21 @@ public class dangKyController {
             return "client/khachhang/dangnhap";
         }
     }
+
+    @PostMapping("/update")
+    public String updateCustomer(@ModelAttribute("khachHang") KhachHangDTO dto,
+                                 HttpSession session) {
+        try {
+            KhachHangDTO updated = khachHangService.updateCustomer(dto);
+            session.setAttribute("khachHang", updated);
+            session.setAttribute("success", "Cập nhật khách hàng thành công!");
+            return "redirect:/khachhang/detail/" + dto.getId();
+        } catch (RuntimeException e) {
+            session.setAttribute("error", e.getMessage());
+            return "redirect:/khachhang/detail/" + dto.getId();
+        }
+    }
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {

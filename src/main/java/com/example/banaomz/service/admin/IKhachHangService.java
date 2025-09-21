@@ -21,7 +21,6 @@ public interface IKhachHangService extends IBaseService<KhachHang,Long> {
 
     DiaChiDTO addressCustomer(DiaChiDTO req);
 
-
     void resetPassword(String email);
 }
 
