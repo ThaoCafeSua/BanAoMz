@@ -2,6 +2,8 @@
 
 <%@ include file="header.jsp" %>
 
+<link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
+
 <main>
     <jsp:include page="${page}.jsp" />
     <div id="loading" class="loading-overlay" style="display: none">

@@ -9,6 +9,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ban Ao MzShop</title>
+<<<<<<< HEAD
+=======
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
+>>>>>>> 0c046853ee37b97f7f98972bf550d79a5e392eb1
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">

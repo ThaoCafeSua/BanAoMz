@@ -37,49 +37,121 @@
                         <div class="mb-3">
                             <label for="maPhieuGiamGia" class="form-label">Mã Phiếu Giảm Giá</label>
                             <input type="text" class="form-control" name="maPhieuGiamGia" id="maPhieuGiamGia"
-                                placeholder="Nhập mã phiếu giảm giá" value="${phieuGiamGia.maPhieuGiamGia}">
+                                value="${phieuGiamGia.maPhieuGiamGia}" readonly>
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'maPhieuGiamGia'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="mb-3">
                             <label for="tenPhieuGiamGia" class="form-label">Tên Phiếu Giảm Giá</label>
                             <input type="text" class="form-control" name="tenPhieuGiamGia" id="tenPhieuGiamGia"
-                                placeholder="Nhập tên phiếu giảm giá" value="${phieuGiamGia.tenPhieuGiamGia}">
+                                value="${phieuGiamGia.tenPhieuGiamGia}">
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'tenPhieuGiamGia'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="mb-3">
                             <label for="giaTriGiam" class="form-label">Giá Trị Giảm</label>
                             <input type="number" class="form-control" name="giaTriGiam" id="giaTriGiam"
-                                placeholder="Nhập giá trị giảm" value="${phieuGiamGia.giaTriGiam}">
+                                value="${phieuGiamGia.giaTriGiam}">
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'giaTriGiam'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="mb-3">
                             <label for="dieuKienApDung" class="form-label">Điều Kiện Áp Dụng</label>
                             <input type="number" class="form-control" name="dieuKienApDung" id="dieuKienApDung"
-                                placeholder="Nhập điều kiện áp dụng" value="${phieuGiamGia.dieuKienApDung}">
+                                value="${phieuGiamGia.dieuKienApDung}">
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'dieuKienApDung'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="mb-3">
                             <label for="ngayBatDau" class="form-label">Ngày Bắt Đầu</label>
                             <input type="date" class="form-control" name="ngayBatDau" id="ngayBatDau"
                                 value="${phieuGiamGia.ngayBatDau}">
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'ngayBatDau'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="mb-3">
                             <label for="ngayKetThuc" class="form-label">Ngày Kết Thúc</label>
                             <input type="date" class="form-control" name="ngayKetThuc" id="ngayKetThuc"
                                 value="${phieuGiamGia.ngayKetThuc}">
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'ngayKetThuc'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="mb-3">
                             <label for="soLuong" class="form-label">Số Lượng</label>
                             <input type="number" class="form-control" name="soLuong" id="soLuong"
-                                placeholder="Nhập số lượng" value="${phieuGiamGia.soLuong}">
+                                value="${phieuGiamGia.soLuong}">
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'soLuong'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="mb-3">
                             <label for="moTa" class="form-label">Mô Tả</label>
-                            <textarea class="form-control" name="moTa" id="moTa" rows="3"
-                                placeholder="Nhập mô tả">${phieuGiamGia.moTa}</textarea>
+                            <textarea class="form-control" name="moTa" id="moTa"
+                                rows="3">${phieuGiamGia.moTa}</textarea>
+                            <c:if test="${not empty org.springframework.validation.BindingResult.phieuGiamGia}">
+                                <c:forEach
+                                    items="${org.springframework.validation.BindingResult.phieuGiamGia.fieldErrors}"
+                                    var="error">
+                                    <c:if test="${error.field == 'moTa'}">
+                                        <small class="text-danger">${error.defaultMessage}</small>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
                         </div>
 
                         <div class="d-flex justify-content-end mt-4">
@@ -94,18 +166,37 @@
             function validateForm(event) {
                 event.preventDefault();
 
-                var maPhieu = $("#maPhieuGiamGia").val().trim();
-                var tenPhieu = $("#tenPhieuGiamGia").val().trim();
-                var giaTriGiam = $("#giaTriGiam").val().trim();
-                var dieuKien = $("#dieuKienApDung").val().trim();
+                let maPhieu = $("#maPhieuGiamGia").val().trim();
+                let tenPhieu = $("#tenPhieuGiamGia").val().trim();
+                let giaTriGiam = parseInt($("#giaTriGiam").val().trim());
+                let dieuKien = parseInt($("#dieuKienApDung").val().trim());
+                let ngayBatDau = $("#ngayBatDau").val();
+                let ngayKetThuc = $("#ngayKetThuc").val();
+                let soLuong = parseInt($("#soLuong").val().trim());
 
-                if (maPhieu === "" || tenPhieu === "" || giaTriGiam === "" || dieuKien === "") {
-                    toastr.error("Vui lòng điền đầy đủ thông tin");
+                if (!tenPhieu) {
+                    toastr.error("Tên phiếu không được để trống");
+                    return false;
+                }
+                if (isNaN(giaTriGiam) || giaTriGiam <= 0) {
+                    toastr.error("Giá trị giảm phải lớn hơn 0");
+                    return false;
+                }
+                if (isNaN(dieuKien) || dieuKien < 0) {
+                    toastr.error("Điều kiện áp dụng phải >= 0");
+                    return false;
+                }
+                if (!ngayBatDau || !ngayKetThuc || new Date(ngayBatDau) > new Date(ngayKetThuc)) {
+                    toastr.error("Ngày bắt đầu/kết thúc không hợp lệ");
+                    return false;
+                }
+                if (isNaN(soLuong) || soLuong < 1) {
+                    toastr.error("Số lượng phải >= 1");
                     return false;
                 }
 
                 Swal.fire({
-                    title: 'Bạn chắc chắn muốn ${btnText}?',
+                    title: 'Bạn chắc chắn muốn ' + $(".btn-submit").text() + '?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#001f3d',

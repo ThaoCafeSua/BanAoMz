@@ -43,10 +43,14 @@ public class SecurityConfig {
 
                         "/auth/forgot-password",
                         "khachhang/dangnhap",
+<<<<<<< HEAD
                         "/khachhang/forgot-password",
                         "/admin/employee/create"
+=======
+                        "/khachhang/forgot-password"
+>>>>>>> 0c046853ee37b97f7f98972bf550d79a5e392eb1
 
-                ))
+                        ))
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**","/js/**","/images/**").permitAll()

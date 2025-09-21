@@ -8,6 +8,81 @@
     <title>Theo dõi đơn hàng</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    h3.text-primary {
+        color: #001f3d !important;
+        font-weight: 600;
+    }
+
+    /* Table header */
+    .table-primary {
+        background-color: #001f3d !important;
+        color: #fff !important;
+    }
+
+    /* Nút quay lại */
+    .btn-secondary {
+        background-color: #72b4ef;
+        border-color: #001f3d;
+        color: #fff;
+    }
+    .btn-secondary:hover {
+        background-color: #003366;
+        border-color: #003366;
+        color: #fff;
+    }
+
+    /* Nút lọc */
+    .btn-primary {
+        background-color: #001f3d;
+        border-color: #001f3d;
+        color: #fff;
+    }
+    .btn-primary:hover {
+        background-color: #003366;
+        border-color: #003366;
+    }
+
+    /* Nút chi tiết */
+    .btn-info {
+        background-color: #72b4ef;
+        border-color: #001f3d;
+        color: #fff;
+    }
+    .btn-info:hover {
+        background-color: #003366;
+        border-color: #003366;
+    }
+
+    /* Nút hủy */
+    .btn-danger {
+        background-color: #e03131;
+        border-color: #e03131;
+        color: #fff;
+    }
+    .btn-danger:hover {
+        background-color: #c92a2a;
+        border-color: #c92a2a;
+    }
+
+    /* Alert */
+    .alert-info {
+        background-color: #e7f5ff;
+        color: #001f3d;
+    }
+    .alert-success {
+        background-color: #d3f9d8;
+        color: #2b8a3e;
+    }
+    .alert-danger {
+        background-color: #ffe3e3;
+        color: #c92a2a;
+    }
+</style>
 <body class="bg-light">
 <div class="container mt-4">
 
@@ -58,7 +133,7 @@
 
     <c:if test="${not empty donHangList}">
         <table class="table table-bordered table-hover bg-white">
-            <thead class="table-primary text-center">
+            <thead class="table-primary text-center ">
             <tr>
                 <th>Mã đơn</th>
                 <th>Ngày tạo</th>

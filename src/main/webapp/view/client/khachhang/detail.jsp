@@ -6,6 +6,7 @@
 <html>
 <head>
     <title>Chi tiết khách hàng</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 <body>
@@ -31,16 +32,127 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h3, h5.card-title {
+        color: #001f3d;
+        font-weight: 600;
+    }
+
+    a {
+        color: #001f3d;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    a:hover {
+        color: #000102 !important;
+    }
+
+    .btn-primary {
+        background-color: #001f3d;
+        border-color: #001f3d;
+    }
+
+    .btn-primary:hover {
+        background-color: #74ace0;
+        border-color: #74ace0;
+    }
+
+    .btn-outline-secondary {
+        border-color: #001f3d;
+        color: #001f3d;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #001f3d;
+        color: #fff;
+    }
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    table thead {
+        background-color: #001f3d;
+        color: #fff;
+    }
+
+    table tbody tr:hover {
+        background-color: #f1f7fc;
+    }
+
+    label.form-label {
+        font-weight: 500;
+        color: #001f3d;
+    }
+
+    input.form-control, select.form-select {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+    }
+
+    input.form-control:focus, select.form-select:focus {
+        border-color: #74ace0;
+        box-shadow: 0 0 0 0.2rem rgba(116, 172, 224, 0.25);
+    }
+
+    .modal-content {
+        border-radius: 16px;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+    a.btn.btn-primary {
+        float: right;
+    }
+    .btn-outline-secondary {
+        color: #6caae3;
+        border-color: #69abe9;
+    }
+
+    /* Hiệu ứng hover */
+    .btn-outline-secondary:hover {
+        background-color: #74ace0;
+        border-color: #74ace0;
+        color: #fff; /* chữ trắng khi hover */
+        transform: scale(1.05);
+        transition: all 0.2s ease-in-out;
+    }
+
+</style>
 
 
 <div class="container mt-4">
     <div class="container mt-4">
         <h3 style="color: #001f3d;" class="mt-4">Chi tiết & Cập nhật khách hàng</h3>
 
-        <!-- Nút quay lại -->
-        <a href="/home" class="btn btn-outline-secondary btn-sm mb-3">
-            <i class="fa-solid fa-arrow-left"></i> Trang chủ
-        </a>
+        <div class="action-buttons">
+            <!-- Nút quay lại -->
+            <a href="/home" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-arrow-left"></i> Trang chủ
+            </a>
+
+            <!-- Nút theo dõi đơn hàng -->
+            <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
+               class="btn btn-primary">
+                Theo dõi đơn hàng
+            </a>
+        </div>
 
         <!-- Form cập nhật -->
         <form action="${pageContext.request.contextPath}/khachhang/update" method="post" class="card p-4 shadow">
@@ -48,15 +160,15 @@
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Tên khách hàng:</label>
+                    <label class="form-label fw-bold text-outline-blue">Tên khách hàng:</label>
                     <input type="text" name="hoVaTen" value="${khachHang.hoVaTen}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Ngày sinh:</label>
+                    <label class="form-label fw-bold text-outline-blue">Ngày sinh:</label>
                     <input type="date" name="ngaySinh" value="${khachHang.ngaySinh}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Giới tính:</label>
+                    <label class="form-label fw-bold text-outline-blue">Giới tính:</label>
                     <select name="gioiTinh" class="form-select">
                         <option value="Nam" ${khachHang.gioiTinh == 'Nam' ? 'selected' : ''}>Nam</option>
                         <option value="Nữ" ${khachHang.gioiTinh == 'Nữ' ? 'selected' : ''}>Nữ</option>
@@ -64,63 +176,58 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Số điện thoại:</label>
+                    <label class="form-label fw-bold text-outline-blue">Số điện thoại:</label>
                     <input type="text" name="soDienThoai" value="${khachHang.soDienThoai}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Email:</label>
+                    <label class="form-label fw-bold text-outline-blue">Email:</label>
                     <input type="email" name="email" value="${khachHang.email}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Mật khẩu:</label>
-                    <input type="password" name="matKhau" value="${khachHang.matKhau}" class="form-control"/>
+                    <label class="form-label fw-bold text-outline-blue">Mật khẩu:</label>
+                    <input type="text" name="matKhau" value="${khachHang.matKhau}" class="form-control"/>
                 </div>
             </div>
-
-            <div class="mt-4">
+            <div class="mt-4 d-flex justify-content-center">
                 <button type="submit" class="btn btn-success">
                     <i class="fa-solid fa-save"></i> Cập nhật
                 </button>
-                <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
-                   class="btn btn-primary">
-                    Theo dõi đơn hàng
-                </a>
             </div>
+
         </form>
     </div>
 </div>
 
-    <!-- Địa chỉ giao hàng -->
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title">Địa chỉ nhận hàng</h5>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal">
-                    <i class="fa-solid fa-plus"></i> Thêm địa chỉ
-                </button>
-            </div>
-
-            <!-- Bảng danh sách địa chỉ -->
-            <table class="table table-hover" id="addressTable">
-                <thead style="background-color: #001f3d; color: white;">
-                <tr class="text-center">
-                    <th>STT</th>
-                    <th>Mặc định</th>
-                    <th>Người nhận</th>
-                    <th>Điện thoại</th>
-                    <th>Tỉnh/Thành</th>
-                    <th>Quận/Huyện</th>
-                    <th>Phường/Xã</th>
-                    <th>Chi tiết</th>
-                    <th>Hành động</th>
-                </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+<!-- Địa chỉ giao hàng -->
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Địa chỉ nhận hàng</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal">
+                <i class="fa-solid fa-plus"></i> Thêm địa chỉ
+            </button>
         </div>
-    </div>
 
-    <!-- Modal Thêm/Sửa Địa Chỉ -->
+        <!-- Bảng danh sách địa chỉ -->
+        <table class="table table-hover" id="addressTable">
+            <thead style="background-color: #001f3d; color: white;">
+            <tr class="text-center">
+                <th>STT</th>
+                <th>Mặc định</th>
+                <th>Người nhận</th>
+                <th>Điện thoại</th>
+                <th>Tỉnh/Thành</th>
+                <th>Quận/Huyện</th>
+                <th>Phường/Xã</th>
+                <th>Chi tiết</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<!-- Modal Thêm/Sửa Địa Chỉ -->
 <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -179,7 +286,6 @@
         </div>
     </div>
 </div>
-
 <script>
 
     let customerId = ${customerId};
@@ -517,5 +623,4 @@
             wardId = $(this).val();
         })
     })
-
 </script>
