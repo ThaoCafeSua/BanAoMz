@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <meta name="_csrf" content="${_csrf != null ? _csrf.token : ''}"/>
@@ -72,8 +74,13 @@
             </span>
                     </p>
 
+                    <spring:eval
+                            expression="hoaDonDetail.ngayDat != null ?
+            T(java.time.format.DateTimeFormatter).ofPattern('dd/MM/yyyy HH:mm')
+              .format(hoaDonDetail.ngayDat) : null"
+                            var="ngayDatFmt"/>
                     <p class="mb-2"><strong>Ngày đặt:</strong>
-                        <c:out value="${hoaDonDetail.ngayDat}" default="Không có"/>
+                        <c:out value="${ngayDatFmt}" default="Không có"/>
                     </p>
 
                     <p class="mb-2"><strong>Phương thức thanh toán:</strong>

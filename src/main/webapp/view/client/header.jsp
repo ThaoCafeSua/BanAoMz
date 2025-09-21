@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
 
     <style>
         .navbar{
@@ -248,7 +249,6 @@
                 <!-- Icons -->
                 <div class="icons d-flex align-items-center">
                     <a href="/cart" class="me-3"><i class="fas fa-shopping-cart"></i></a>
-
                     <!-- ✅ Kiểm tra đăng nhập -->
                     <c:choose>
                         <c:when test="${not empty khachHang}">

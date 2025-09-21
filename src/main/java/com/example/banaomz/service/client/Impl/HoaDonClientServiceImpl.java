@@ -38,32 +38,70 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         this.sanPhamRepository = sanPhamRepository;
     }
 
+    /* ================== HELPERS ================== */
+
+    /** Ghép địa chỉ đầy đủ theo format: "chi tiết, Xã/Phường, Quận/Huyện, Tỉnh/Thành phố" (bỏ qua phần null/blank). */
+    private static String buildFullAddress(String detail, String xa, String huyen, String tinh) {
+        StringBuilder sb = new StringBuilder();
+        if (detail != null && !detail.isBlank()) sb.append(detail.trim());
+        if (xa != null && !xa.isBlank()) { if (sb.length() > 0) sb.append(", "); sb.append(xa.trim()); }
+        if (huyen != null && !huyen.isBlank()) { if (sb.length() > 0) sb.append(", "); sb.append(huyen.trim()); }
+        if (tinh != null && !tinh.isBlank()) { if (sb.length() > 0) sb.append(", "); sb.append(tinh.trim()); }
+        return sb.toString();
+    }
+
     /* ================== BẢN CŨ (giữ tương thích) ================== */
     @Override
     public void taoHoaDonMember(List<GioHang> cart, KhachHang kh, String hoTen, String sdt, String diaChi) {
-        // gọi sang bản mới với shipFee = 0
-        taoHoaDonMember(cart, kh, hoTen, sdt, diaChi,
+        // gọi sang bản mới với shipFee = 0 và không có xa/huyện/tỉnh
+        taoHoaDonMember(cart, kh, hoTen, sdt, diaChi, null, null, null,
                 BigDecimal.ZERO, null, null, null, null, null, null, null);
     }
 
     @Override
     public void taoHoaDonGuest(List<GioHang> cart, String hoTen, String sdt, String diaChi) {
-        // gọi sang bản mới với shipFee = 0
-        taoHoaDonGuest(cart, hoTen, sdt, diaChi,
+        // gọi sang bản mới với shipFee = 0 và không có xa/huyện/tỉnh
+        taoHoaDonGuest(cart, hoTen, sdt, diaChi, null, null, null,
                 BigDecimal.ZERO, null, null, null, null, null, null, null);
     }
 
-    /* ================== BẢN MỚI (có ship) ================== */
+    /* ================== BẢN MỚI (có ship) ==================
+       Giữ method hiện có (không có xa/huyện/tỉnh) để tương thích, sẽ gọi overload có đủ địa chỉ.
+    */
     @Override
     public void taoHoaDonMember(List<GioHang> cart, KhachHang kh,
                                 String hoTen, String sdt, String diaChi,
+                                BigDecimal shipFee, Long shipServiceId, Integer toDistrictId, String toWardCode,
+                                Integer weight, Integer length, Integer width, Integer height) {
+        // chuyển tiếp sang overload có đủ phần địa chỉ; tạm không có xa/huyện/tỉnh
+        taoHoaDonMember(cart, kh, hoTen, sdt, diaChi, null, null, null,
+                shipFee, shipServiceId, toDistrictId, toWardCode, weight, length, width, height);
+    }
+
+    @Override
+    public void taoHoaDonGuest(List<GioHang> cart,
+                               String hoTen, String sdt, String diaChi,
+                               BigDecimal shipFee, Long shipServiceId, Integer toDistrictId, String toWardCode,
+                               Integer weight, Integer length, Integer width, Integer height) {
+        // chuyển tiếp sang overload có đủ phần địa chỉ; tạm không có xa/huyện/tỉnh
+        taoHoaDonGuest(cart, hoTen, sdt, diaChi, null, null, null,
+                shipFee, shipServiceId, toDistrictId, toWardCode, weight, length, width, height);
+    }
+
+    /* ================== OVERLOAD MỚI (NHẬN THÊM XA/HUYỆN/TỈNH) ==================
+       => DÙNG HÀM NÀY KHI BẠN ĐÃ LẤY ĐƯỢC TÊN "xa/huyen/tinh" TỪ GHN HOẶC FORM.
+    */
+    public void taoHoaDonMember(List<GioHang> cart, KhachHang kh,
+                                String hoTen, String sdt, String diaChiChiTiet, String xa, String huyen, String tinh,
                                 BigDecimal shipFee, Long shipServiceId, Integer toDistrictId, String toWardCode,
                                 Integer weight, Integer length, Integer width, Integer height) {
 
         if (cart == null || cart.isEmpty()) throw new IllegalStateException("Giỏ hàng trống");
         if (kh == null) throw new IllegalArgumentException("Khách hàng null");
 
-        HoaDon hoaDon = baseHoaDon(hoTen, sdt, diaChi);
+        String fullAddr = buildFullAddress(diaChiChiTiet, xa, huyen, tinh);
+
+        HoaDon hoaDon = baseHoaDon(hoTen, sdt, fullAddr);
         hoaDon.setKhachHang(kh);
         hoaDon = hoaDonRepository.save(hoaDon);
 
@@ -75,15 +113,16 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         // hoaDonRepository.save(hoaDon);
     }
 
-    @Override
     public void taoHoaDonGuest(List<GioHang> cart,
-                               String hoTen, String sdt, String diaChi,
+                               String hoTen, String sdt, String diaChiChiTiet, String xa, String huyen, String tinh,
                                BigDecimal shipFee, Long shipServiceId, Integer toDistrictId, String toWardCode,
                                Integer weight, Integer length, Integer width, Integer height) {
 
         if (cart == null || cart.isEmpty()) throw new IllegalStateException("Giỏ hàng trống");
 
-        HoaDon hoaDon = baseHoaDon(hoTen, sdt, diaChi);
+        String fullAddr = buildFullAddress(diaChiChiTiet, xa, huyen, tinh);
+
+        HoaDon hoaDon = baseHoaDon(hoTen, sdt, fullAddr);
         hoaDon = hoaDonRepository.save(hoaDon);
 
         BigDecimal tongTien = processChiTietAndUpdateStock(cart, hoaDon);
@@ -154,13 +193,13 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         hoaDonRepository.save(hoaDon);
     }
 
-    private HoaDon baseHoaDon(String hoTen, String sdt, String diaChi) {
+    private HoaDon baseHoaDon(String hoTen, String sdt, String fullAddress) {
         HoaDon h = new HoaDon();
         h.setMaHoaDon(genCode());
         h.setPhuongThucThanhToan("COD"); // hoặc map theo lựa chọn của khách
         h.setLoaiHoaDon("ONLINE");
         h.setHinhThucHoaDon("BAN_LE");
-        h.setDiaChiNguoiNhan(diaChi);
+        h.setDiaChiNguoiNhan(fullAddress); // <-- ĐÃ GHÉP ĐỊA CHỈ ĐẦY ĐỦ
         h.setTenNguoiNhan(hoTen);
         h.setSoDienThoaiNguoiNhan(sdt);
         h.setNgayDat(LocalDateTime.now());

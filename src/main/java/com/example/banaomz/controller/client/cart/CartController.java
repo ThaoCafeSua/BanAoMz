@@ -227,14 +227,20 @@ public class CartController {
     }
 
     // ========== CHECKOUT có GHN ==========
+    // Sửa chữ ký method checkout: nhận thêm 3 param tên
     @PostMapping("/checkout")
     @ResponseBody
     public ResponseEntity<?> checkout(
             @RequestParam String hoTen,
             @RequestParam String sdt,
-            @RequestParam String diaChi,
+            @RequestParam String diaChi,                 // chi tiết (số nhà, đường)
 
-            // ==== GHN params (FE có thể gửi dưới dạng string, Spring sẽ convert) ====
+            // >>> thêm 3 tham số tên để ghép địa chỉ đầy đủ
+            @RequestParam(name = "xa",    required = false) String xa,
+            @RequestParam(name = "huyen", required = false) String huyen,
+            @RequestParam(name = "tinh",  required = false) String tinh,
+
+            // GHN params (giữ nguyên)
             @RequestParam(name = "shipFee", required = false) BigDecimal shipFee,
             @RequestParam(name = "shipServiceId", required = false) Long shipServiceId,
             @RequestParam(name = "shipToDistrictId", required = false) Integer shipToDistrictId,
@@ -243,27 +249,28 @@ public class CartController {
             @RequestParam(name = "shipLength", required = false) Integer shipLength,
             @RequestParam(name = "shipWidth", required = false) Integer shipWidth,
             @RequestParam(name = "shipHeight", required = false) Integer shipHeight,
-
             HttpSession session
     ) {
         try {
-            // mặc định nếu FE không truyền
-            if (shipFee == null)       shipFee = BigDecimal.ZERO;
-            if (shipWeight == null)    shipWeight = 0;
-            if (shipLength == null)    shipLength = 0;
-            if (shipWidth == null)     shipWidth = 0;
-            if (shipHeight == null)    shipHeight = 0;
+            if (shipFee == null)    shipFee = BigDecimal.ZERO;
+            if (shipWeight == null) shipWeight = 0;
+            if (shipLength == null) shipLength = 0;
+            if (shipWidth == null)  shipWidth = 0;
+            if (shipHeight == null) shipHeight = 0;
+
+            // GHÉP địa chỉ đầy đủ: "chi tiết, Xã/Phường, Quận/Huyện, Tỉnh/TP"
+            String diaChiDayDu = fullAddress(diaChi, xa, huyen, tinh);
 
             KhachHang kh = getKhachHangFromSession(session);
             if (kh != null) {
-                // MEMBER: lấy cart từ DB
                 List<GioHang> cart = gioHangService.getCartByKhachHang(kh.getId().intValue());
                 if (cart == null || cart.isEmpty()) {
                     return ResponseEntity.badRequest().body("Giỏ hàng trống");
                 }
 
+                // Truyền ĐỊA CHỈ ĐẦY ĐỦ vào tham số diaChi hiện có của service
                 hoaDonService.taoHoaDonMember(
-                        cart, kh, hoTen, sdt, diaChi,
+                        cart, kh, hoTen, sdt, diaChiDayDu,
                         shipFee, shipServiceId, shipToDistrictId, shipToWardCode,
                         shipWeight, shipLength, shipWidth, shipHeight
                 );
@@ -271,7 +278,6 @@ public class CartController {
                 gioHangService.clearCartByKhachHang(kh.getId().intValue());
                 return ResponseEntity.ok("Đặt hàng thành công (member)");
             } else {
-                // GUEST: lấy cart từ session
                 @SuppressWarnings("unchecked")
                 List<GioHang> cart = (List<GioHang>) session.getAttribute("CART_GUEST");
                 if (cart == null || cart.isEmpty()) {
@@ -279,7 +285,7 @@ public class CartController {
                 }
 
                 hoaDonService.taoHoaDonGuest(
-                        cart, hoTen, sdt, diaChi,
+                        cart, hoTen, sdt, diaChiDayDu,
                         shipFee, shipServiceId, shipToDistrictId, shipToWardCode,
                         shipWeight, shipLength, shipWidth, shipHeight
                 );
@@ -355,4 +361,16 @@ public class CartController {
         }
         return out;
     }
+    // Thêm vào cuối class (helper nhỏ)
+    private static String fullAddress(String... parts) {
+        StringBuilder sb = new StringBuilder();
+        for (String p : parts) {
+            if (p != null && !p.isBlank()) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(p.trim());
+            }
+        }
+        return sb.toString();
+    }
+
 }

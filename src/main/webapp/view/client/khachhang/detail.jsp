@@ -6,6 +6,7 @@
 <html>
 <head>
     <title>Chi tiết khách hàng</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 <body>
@@ -49,7 +50,7 @@
     }
 
     a:hover {
-        color: #74ace0 !important;
+        color: #000102 !important;
     }
 
     .btn-primary {
@@ -70,6 +71,12 @@
     .btn-outline-secondary:hover {
         background-color: #001f3d;
         color: #fff;
+    }
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
     }
 
     .card {
@@ -110,6 +117,22 @@
         font-size: 0.85rem;
         padding: 6px 10px;
     }
+    a.btn.btn-primary {
+        float: right;
+    }
+    .btn-outline-secondary {
+        color: #6caae3;
+        border-color: #69abe9;
+    }
+
+    /* Hiệu ứng hover */
+    .btn-outline-secondary:hover {
+        background-color: #74ace0;
+        border-color: #74ace0;
+        color: #fff; /* chữ trắng khi hover */
+        transform: scale(1.05);
+        transition: all 0.2s ease-in-out;
+    }
 
 </style>
 
@@ -118,14 +141,18 @@
     <div class="container mt-4">
         <h3 style="color: #001f3d;" class="mt-4">Chi tiết & Cập nhật khách hàng</h3>
 
-        <!-- Nút quay lại -->
-        <a href="/home" class="btn btn-outline-secondary btn-sm mb-3">
-            <i class="fa-solid fa-arrow-left"></i> Trang chủ
-        </a>
-        <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
-           class="btn btn-primary btn-theodoi">
-            Theo dõi đơn hàng
-        </a>
+        <div class="action-buttons">
+            <!-- Nút quay lại -->
+            <a href="/home" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-arrow-left"></i> Trang chủ
+            </a>
+
+            <!-- Nút theo dõi đơn hàng -->
+            <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
+               class="btn btn-primary">
+                Theo dõi đơn hàng
+            </a>
+        </div>
 
         <!-- Form cập nhật -->
         <form action="${pageContext.request.contextPath}/khachhang/update" method="post" class="card p-4 shadow">
@@ -133,15 +160,15 @@
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Tên khách hàng:</label>
+                    <label class="form-label fw-bold text-outline-blue">Tên khách hàng:</label>
                     <input type="text" name="hoVaTen" value="${khachHang.hoVaTen}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Ngày sinh:</label>
+                    <label class="form-label fw-bold text-outline-blue">Ngày sinh:</label>
                     <input type="date" name="ngaySinh" value="${khachHang.ngaySinh}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Giới tính:</label>
+                    <label class="form-label fw-bold text-outline-blue">Giới tính:</label>
                     <select name="gioiTinh" class="form-select">
                         <option value="Nam" ${khachHang.gioiTinh == 'Nam' ? 'selected' : ''}>Nam</option>
                         <option value="Nữ" ${khachHang.gioiTinh == 'Nữ' ? 'selected' : ''}>Nữ</option>
@@ -149,24 +176,24 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Số điện thoại:</label>
+                    <label class="form-label fw-bold text-outline-blue">Số điện thoại:</label>
                     <input type="text" name="soDienThoai" value="${khachHang.soDienThoai}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Email:</label>
+                    <label class="form-label fw-bold text-outline-blue">Email:</label>
                     <input type="email" name="email" value="${khachHang.email}" class="form-control"/>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold text-primary">Mật khẩu:</label>
+                    <label class="form-label fw-bold text-outline-blue">Mật khẩu:</label>
                     <input type="text" name="matKhau" value="${khachHang.matKhau}" class="form-control"/>
                 </div>
             </div>
-
-            <div class="mt-4">
+            <div class="mt-4 d-flex justify-content-center">
                 <button type="submit" class="btn btn-success">
                     <i class="fa-solid fa-save"></i> Cập nhật
                 </button>
             </div>
+
         </form>
     </div>
 </div>
@@ -200,31 +227,6 @@
         </table>
     </div>
 </div>
-
-<!-- THEO DÕI ĐƠN HÀNG -->
-<div class="card mt-4">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title">Theo dõi đơn hàng</h5>
-        </div>
-
-        <!-- Bảng danh sách đơn hàng -->
-        <table class="table table-hover" id="orderTable">
-            <thead style="background-color: #001f3d; color: white;">
-            <tr class="text-center">
-                <th>STT</th>
-                <th>Mã đơn</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-</div>
-
 <!-- Modal Thêm/Sửa Địa Chỉ -->
 <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -391,7 +393,62 @@
             addAddress()
         });
 
+        function validateAddress() {
+            let nameAddress = $('#nameAddress').val().trim();
+            let phoneAddress = $('#phoneAddress').val().trim();
+            let provinceAddress = $('#provinceAddress').val();
+            let districtAddress = $('#districtAddress').val();
+            let wardAddress = $('#wardAddress').val();
+            let detailAddress = $('#detailAddress').val().trim();
+
+            // ✅ Tên người nhận
+            if (nameAddress === "") {
+                toastr.error("Vui lòng nhập họ và tên người nhận");
+                return false;
+            }
+
+            // ✅ Số điện thoại
+            const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/; // Chuẩn VN
+            if (phoneAddress === "") {
+                toastr.error("Vui lòng nhập số điện thoại");
+                return false;
+            } else if (!phoneRegex.test(phoneAddress)) {
+                toastr.error("Số điện thoại không hợp lệ");
+                return false;
+            }
+
+            // ✅ Tỉnh/Thành
+            if (!provinceAddress) {
+                toastr.error("Vui lòng chọn Tỉnh/Thành");
+                return false;
+            }
+
+            // ✅ Quận/Huyện
+            if (!districtAddress) {
+                toastr.error("Vui lòng chọn Quận/Huyện");
+                return false;
+            }
+
+            // ✅ Phường/Xã
+            if (!wardAddress) {
+                toastr.error("Vui lòng chọn Phường/Xã");
+                return false;
+            }
+
+            // ✅ Địa chỉ chi tiết
+            if (detailAddress === "") {
+                toastr.error("Vui lòng nhập địa chỉ chi tiết");
+                return false;
+            }
+
+            return true; // Hợp lệ
+        }
+
+
         function addAddress() {
+            if (!validateAddress()) {
+                return; // ❌ Dừng lại nếu lỗi
+            }
             let idAddress = $('#idAddress').val();
             let nameAddress = $('#nameAddress').val();
             let phoneAddress = $('#phoneAddress').val();
@@ -566,63 +623,4 @@
             wardId = $(this).val();
         })
     })
-    // ================== THEO DÕI ĐƠN HÀNG ==================
-    let orderTable = $('#orderTable').DataTable({
-        paging: true,
-        searching: false,
-        ordering: false,
-        info: false,
-        lengthChange: false,
-        pageLength: 5,
-        columnDefs: [{className: "text-center", targets: "_all"}],
-    });
-
-    function getCustomerOrders() {
-        $('#loading').show();
-        $.ajax({
-            url: '${pageContext.request.contextPath}/khachhang/orders',   // <-- API lấy danh sách đơn hàng
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(customerId),
-            success: function (response) {
-                fillTableOrders(response.data);
-                $('#loading').hide();
-            },
-            error: function () {
-                $('#loading').hide();
-                toastr.error('Lỗi khi lấy danh sách đơn hàng');
-            }
-        });
-    }
-
-    function fillTableOrders(data) {
-        orderTable.clear();
-        $.each(data, function (index, order) {
-            orderTable.row.add([
-                index + 1,
-                order.maDonHang,
-                order.ngayDat,  // Format yyyy-MM-dd từ backend
-                order.tongTien.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'}),
-                getStatusBadge(order.trangThai),  // hiển thị màu trạng thái
-                `<a href="/admin/order/detail/${order.id}" class="btn btn-info btn-sm">
-                 <i class="fa-solid fa-eye"></i>
-             </a>`
-            ]);
-        });
-        orderTable.draw();
-    }
-
-    function getStatusBadge(status) {
-        switch (status) {
-            case 'CHO_XAC_NHAN': return '<span class="badge bg-warning text-dark">Chờ xác nhận</span>';
-            case 'DANG_GIAO':    return '<span class="badge bg-primary">Đang giao</span>';
-            case 'DA_GIAO':      return '<span class="badge bg-success">Đã giao</span>';
-            case 'DA_HUY':       return '<span class="badge bg-danger">Đã hủy</span>';
-            default:             return '<span class="badge bg-secondary">Không xác định</span>';
-        }
-    }
-
-    // Gọi khi load trang
-    getCustomerOrders();
-
 </script>

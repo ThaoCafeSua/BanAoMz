@@ -508,17 +508,23 @@
         const diaChi=document.getElementById('diaChi').value.trim();
         if(!hoTen||!sdt||!diaChi){ alert('Vui lòng điền đầy đủ thông tin.'); return; }
 
+        // LẤY TÊN XÃ/HUYỆN/TỈNH TỪ SELECT
+        const tinh  = (document.querySelector('#provinceSelect')?.selectedOptions?.[0]?.textContent||'').trim();
+        const huyen = (document.querySelector('#districtSelect')?.selectedOptions?.[0]?.textContent||'').trim();
+        const xa    = (document.querySelector('#wardSelect')?.selectedOptions?.[0]?.textContent||'').trim();
+
         try{
             const resp = await postForm(API.checkout,{
-                hoTen,sdt,diaChi,
-                shipServiceId:shipping.serviceId??'',
-                shipToDistrictId:shipping.toDistrictId??'',
-                shipToWardCode:shipping.toWardCode??'',
-                shipWeight:shipping.weight??'',
-                shipLength:shipping.length??'',
-                shipWidth:shipping.width??'',
-                shipHeight:shipping.height??'',
-                shipFee:shipping.total??0
+                hoTen, sdt, diaChi,
+                xa, huyen, tinh,                         // >>> THÊM 3 TRƯỜNG NÀY <<<
+                shipServiceId:  shipping.serviceId??'',
+                shipToDistrictId: shipping.toDistrictId??'',
+                shipToWardCode:   shipping.toWardCode??'',
+                shipWeight:  shipping.weight??'',
+                shipLength:  shipping.length??'',
+                shipWidth:   shipping.width??'',
+                shipHeight:  shipping.height??'',
+                shipFee:     shipping.total??0
             });
             alert(typeof resp==='string'?resp:'Đặt hàng thành công');
             items=[]; renderCart(); invalidateShipping(); formEl.reset(); formEl.style.display='none';
@@ -526,6 +532,7 @@
             alert('Thanh toán thất bại.'); console.error(e2);
         }
     });
+
 
     /* ============== INIT ============== */
     document.getElementById('btn-refresh').addEventListener('click', loadCart);
