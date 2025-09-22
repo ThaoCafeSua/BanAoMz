@@ -1,5 +1,8 @@
 package com.example.banaomz.config.security;
 
+import com.example.banaomz.dto.admin.HoaDon.Reponse.HoaDonDetailResponseDTO;
+import com.example.banaomz.entity.admin.HoaDon;
+import com.example.banaomz.entity.admin.KhachHang;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -8,6 +11,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+import java.util.Optional;
 
 @Configuration
 public class SecurityConfig {

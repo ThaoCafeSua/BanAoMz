@@ -56,11 +56,10 @@
         <div class="alert alert-info">Không tìm thấy đơn hàng phù hợp.</div>
     </c:if>
 
-    <c:if test="${empty donHangList}">
+    <c:if test="${donHangPage.totalElements == 0}">
         <div class="alert alert-info">Bạn chưa có đơn hàng nào.</div>
     </c:if>
-
-    <c:if test="${not empty donHangList}">
+    <c:if test="${donHangPage.totalElements > 0}">
         <table class="table table-bordered table-hover bg-white">
             <thead class="table-primary text-center">
             <tr>
@@ -72,7 +71,7 @@
             </tr>
             </thead>
             <tbody class="text-center">
-            <c:forEach var="order" items="${donHangList}">
+            <c:forEach var="order" items="${donHangPage.content}">
                 <tr>
                     <td>${order.maHoaDon}</td>
                     <td>${order.ngayDat}</td>
@@ -99,6 +98,20 @@
             </c:forEach>
             </tbody>
         </table>
+        <c:if test="${donHangPage.totalElements > 0}">
+            <table>
+                <c:forEach var="order" items="${donHangPage.content}"> ... </c:forEach> </table>
+            <nav>
+                <ul class="pagination">
+                    <c:forEach var="i" begin="0" end="${totalPages - 1}">
+                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                            <a class="page-link"
+                               href="?page=${i}&size=5&status=${selectedStatus}">${i + 1}</a>
+                        </li>
+                    </c:forEach>
+                </ul>
+            </nav>
+        </c:if>
     </c:if>
 </div>
 </body>

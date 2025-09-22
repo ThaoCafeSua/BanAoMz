@@ -23,6 +23,8 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -105,6 +107,11 @@ public class HoaDonServiceImpl implements IHoaDonService {
                         h.getPhuongThucThanhToan()
                 ))
                 .toList();
+    }
+
+    @Override
+    public Page<HoaDon> findByKhachHangId(Long khachHangId, Pageable pageable) {
+        return hoaDonRepository.findByKhachHangId(khachHangId, pageable);
     }
 
     @Override

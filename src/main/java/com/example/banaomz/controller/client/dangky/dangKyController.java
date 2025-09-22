@@ -14,6 +14,10 @@ import com.example.banaomz.service.admin.IHoaDonService;
 import com.example.banaomz.service.admin.IKhachHangService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -139,23 +143,27 @@ public class dangKyController {
     }
 
     @GetMapping("/{id}/donhang")
-    public String getDonHangByCustomer(@PathVariable("id") Long id,@RequestParam(value = "status", required = false) String status, Model model) {
+    public String getDonHangByCustomer(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "status", defaultValue = "ALL") String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            Model model) {
+
         Optional<KhachHang> khachHang = khachHangService.findById(id);
         if (khachHang.isEmpty()) {
-            return "redirect:/error"; // hoặc thông báo "Khách hàng không tồn tại"
-        }
-        List<HoaDonDetailResponseDTO> list = hoaDonService.getOrdersByCustomerId(id);
-        model.addAttribute("customerId", id);
-        model.addAttribute("donHangList", list);
-        List<HoaDon> donHangList;
-
-        if (status == null || status.isEmpty() || status.equals("ALL")) {
-            donHangList = hoaDonRepository.findByKhachHangId(id);
-        } else {
-            donHangList = hoaDonRepository.findByKhachHangIdAndTrangThai(id, status);
+            return "redirect:/error";
         }
 
-        model.addAttribute("donHangList", donHangList);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayDat").descending());
+        Page<HoaDon> donHangPage = "ALL".equalsIgnoreCase(status)
+                ? hoaDonRepository.findByKhachHangId(id, pageable)
+                : hoaDonRepository.findByKhachHangIdAndTrangThai(id, status, pageable);
+
+        model.addAttribute("khachHang", khachHang.get());
+        model.addAttribute("donHangPage", donHangPage);
+        model.addAttribute("totalPages", donHangPage.getTotalPages());
+        model.addAttribute("currentPage", page);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("customerId", id);
         return "client/khachhang/donhang";
