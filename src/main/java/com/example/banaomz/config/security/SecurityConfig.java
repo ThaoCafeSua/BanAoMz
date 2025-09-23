@@ -50,8 +50,10 @@ public class SecurityConfig {
                         "/admin/customer/address",
                         "auth/forgot-password",
 
+
                         "khachhang/dangnhap",
                         "/admin/employee/create"
+
 
 
                         "/auth/forgot-password",
