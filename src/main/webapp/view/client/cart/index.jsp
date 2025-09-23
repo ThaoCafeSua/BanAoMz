@@ -2,8 +2,6 @@
 <meta name="_csrf" content="${_csrf != null ? _csrf.token : ''}"/>
 <meta name="_csrf_header" content="${_csrf != null ? _csrf.headerName : ''}"/>
 
-
-
 <style>
     .cart-container{background:#f9f9f9;padding:30px;border-radius:10px;box-shadow:0 0 10px rgba(0,31,61,.1)}
     .cart-header h5{color:#001f3d;font-weight:700;border-bottom:2px solid #001f3d;padding-bottom:10px;margin-bottom:0}
@@ -16,6 +14,17 @@
     .form-checkout{display:none;width:100%;background:#fff;border:1px solid #e9ecef;border-radius:8px;padding:16px}
     .form-checkout .form-label{font-weight:600}
     .totals small{color:#6c757d}
+    /* hiển thị lỗi */
+    .is-invalid{border-color:#dc3545 !important}
+    /* Ẩn mặc định; chỉ hiện khi input có class is-invalid */
+    .invalid-feedback{display:none;}
+    .form-control.is-invalid + .invalid-feedback{display:block;}
+    .form-checkout .invalid-feedback{display:none;}
+    /* Hiện lỗi khi input có is-invalid – dùng cả + và ~ để chắc kèo */
+    .form-checkout .form-control.is-invalid + .invalid-feedback,
+    .form-checkout .form-control.is-invalid ~ .invalid-feedback{
+        display:block !important; }
+
 </style>
 
 <div class="container cart-container">
@@ -49,47 +58,48 @@
     </div>
 
     <!-- Checkout form -->
-    <form class="form-checkout" id="checkout-form">
+    <form class="form-checkout" id="checkout-form" novalidate>
         <div class="row g-3">
-            <!-- Chỉ còn Họ tên + SĐT ở trên -->
+            <!-- Chỉ cho sửa Họ tên + SĐT -->
             <div class="col-md-4">
                 <label class="form-label" for="hoTen">Họ và tên</label>
                 <input type="text" class="form-control" id="hoTen" placeholder="Nguyễn Văn A" required>
+                <div class="invalid-feedback">Vui lòng nhập họ và tên.</div>
             </div>
             <div class="col-md-4">
                 <label class="form-label" for="sdt">Số điện thoại</label>
-                <input type="tel" class="form-control" id="sdt" placeholder="09xxxxxxxx" required>
+                <input type="tel" class="form-control" id="sdt" placeholder="09xxxxxxxx" maxlength="11" required>
+                <div class="invalid-feedback">SĐT chỉ gồm số, 10–11 số và bắt đầu bằng 0.</div>
             </div>
 
-            <!-- GHN: Chọn địa chỉ + Địa chỉ chi tiết -->
+            <!-- Địa chỉ giao hàng: tự điền + KHÔNG cho sửa -->
             <div class="col-12">
                 <div class="border rounded p-3">
-                    <h6 class="mb-3">Địa chỉ giao hàng (GHN)</h6>
+                    <h6 class="mb-3">Địa chỉ giao hàng</h6>
 
                     <div class="row g-2">
                         <div class="col-md-4">
                             <label class="form-label">Tỉnh / Thành phố</label>
-                            <select id="provinceSelect" class="form-select" placeholder="Chọn Tỉnh - Thành phố"></select>
+                            <select id="provinceSelect" class="form-select" disabled></select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Quận / Huyện</label>
-                            <select id="districtSelect" class="form-select" placeholder="Chọn Quận - Huyện" disabled></select>
+                            <select id="districtSelect" class="form-select" disabled></select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Phường / Xã</label>
-                            <select id="wardSelect" class="form-select" placeholder="Chọn Phường - Xã" disabled></select>
+                            <select id="wardSelect" class="form-select" disabled></select>
                         </div>
                     </div>
 
-                    <!-- Ô Địa chỉ chi tiết chuyển xuống đây -->
                     <div class="row g-2 mt-2">
                         <div class="col-12">
                             <label class="form-label" for="diaChi">Địa chỉ chi tiết</label>
-                            <input type="text" class="form-control" id="diaChi" placeholder="Số nhà, đường…" required>
+                            <input type="text" class="form-control" id="diaChi" placeholder="Số nhà, đường…" readonly>
                         </div>
                     </div>
 
-                    <!-- Hidden fields dùng nội bộ -->
+                    <!-- Hidden fields -->
                     <input id="toDistrictId" type="hidden">
                     <input id="toWardCode"  type="hidden">
 
@@ -114,7 +124,7 @@
         remove:   BASE + '/cart/remove',
         clear:    BASE + '/cart/clear',
         checkout: BASE + '/cart/checkout',
-        me:       BASE + '/khachhang/api/me' // tự fill khi đã đăng nhập
+        me:       BASE + '/khachhang/api/me'
     };
     const GHN = {
         provinces: BASE + '/api/ghn/provinces',
@@ -126,6 +136,7 @@
 
     /* ============== HELPERS ============== */
     const vnd = n => (Number(n||0)).toLocaleString('vi-VN') + '₫';
+    const validVNPhone = v => /^0\d{9,10}$/.test(String(v||'').replace(/\D/g,''));
     function getCsrfHeaders(){
         const t=document.querySelector('meta[name="_csrf"]')?.content;
         const h=document.querySelector('meta[name="_csrf_header"]')?.content;
@@ -137,19 +148,16 @@
         if(!res.ok) throw Object.assign(new Error('HTTP '+res.status), {status:res.status, data});
         return data;
     }
-    // POST form nhưng KHÔNG throw để tự xử lý 409
     async function sendForm(url,obj){
         const body=new URLSearchParams();
         Object.entries(obj||{}).forEach(([k,v])=>body.append(k, v==null?'':v));
         const res=await fetch(url,{
             method:'POST',
             headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8',...getCsrfHeaders()},
-            body,
-            credentials:'same-origin'
+            body,credentials:'same-origin'
         });
         const ct=res.headers.get('content-type')||'';
-        const data = ct.includes('application/json') ? await res.json().catch(()=>null)
-            : await res.text().catch(()=>null);
+        const data = ct.includes('application/json') ? await res.json().catch(()=>null) : await res.text().catch(()=>null);
         return { ok: res.ok, status: res.status, data, response: res };
     }
     async function postForm(url,obj){
@@ -158,64 +166,20 @@
         return r.data;
     }
     async function apiJson(url,method,body){
-        const res=await fetch(url,{
-            method,
-            headers:{'Content-Type':'application/json',...getCsrfHeaders()},
-            body:body?JSON.stringify(body):undefined,
-            credentials:'same-origin'
-        });
-        const ct=res.headers.get('content-type')||'';
-        const data=ct.includes('application/json')?await res.json():await res.text();
-        if(!res.ok) throw new Error(typeof data==='string'?data:(data.message||'Lỗi API'));
-        return data;
+        const res=await fetch(url,{method,headers:{'Content-Type':'application/json',...getCsrfHeaders()},body:body?JSON.stringify(body):undefined,credentials:'same-origin'});
+        const ct=res.headers.get('content-type')||''; const data=ct.includes('application/json')?await res.json():await res.text();
+        if(!res.ok) throw new Error(typeof data==='string'?data:(data.message||'Lỗi API')); return data;
     }
     function pick(o,...ks){ for(const k of ks){ const v=o?o[k]:undefined; if(v!==undefined&&v!==null&&v!=='') return v; } }
     function fillSelect(sel,arr,placeholder){
-        sel.innerHTML='';
-        if(placeholder) sel.insertAdjacentHTML('beforeend','<option value="">'+placeholder+'</option>');
+        sel.innerHTML=''; if(placeholder) sel.insertAdjacentHTML('beforeend','<option value="">'+placeholder+'</option>');
         (arr||[]).forEach(it=>sel.insertAdjacentHTML('beforeend','<option value="'+it.val+'">'+it.label+'</option>'));
-        sel.disabled=!arr||!arr.length;
     }
-    function escapeHtml(s){
-        return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
-
-    // Chuẩn hoá để khớp tên tỉnh/huyện/xã
-    function normalize(txt){
-        return (txt||'').toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-            .replace(/\b(tp\.?|thanh pho|tinh|quan|huyen|thi xa|thi tran|phuong|xa)\b/g,'')
-            .replace(/-/g,' ').replace(/\s+/g,' ').trim();
-    }
-    function findOptionByLabel(sel, name){
-        if(!sel || !name) return null;
-        const target = normalize(name);
-        let best=null;
-        for(const opt of sel.options){
-            const lab = normalize(opt.textContent||opt.innerText||'');
-            if(lab===target) return opt;
-            if(!best && lab.includes(target)) best=opt;
-        }
-        return best;
-    }
-    function setSelectByName(sel, name){
-        const opt=findOptionByLabel(sel,name);
-        if(opt){ sel.value=opt.value; sel.dispatchEvent(new Event('change',{bubbles:true})); return true; }
-        return false;
-    }
-    function waitForOptions(sel, min=2, timeoutMs=6000){
-        return new Promise(resolve=>{
-            const start=Date.now();
-            const id=setInterval(()=>{
-                if(sel && sel.options && sel.options.length>=min){ clearInterval(id); resolve(true); }
-                else if(Date.now()-start>timeoutMs){ clearInterval(id); resolve(false); }
-            },100);
-        });
-    }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     /* ============== STATE ============== */
     let items = [];
-    const DEFAULT_SERVICE_ID = 53320; // Hàng nhẹ
+    const DEFAULT_SERVICE_ID = 53320;
     const DEFAULT_DIM = { weight:500, length:20, width:15, height:10 };
     const shipping = {
         total: 0, serviceId: null, toDistrictId: null, toWardCode: null,
@@ -224,7 +188,6 @@
     };
 
     /* ============== CART UI ============== */
-    // Nếu BE trả về khaDung/available/stock thì đọc để đặt max ở input
     function mapCartItem(r){
         return {
             spctId: Number(r.spctId??r.id??0),
@@ -237,37 +200,27 @@
             max: Number(r.khaDung ?? r.available ?? r.stock ?? 0)
         };
     }
-    function subtotal(){
-        return items.reduce((s,it)=>s+(Number(it.gia)||0)*(Number(it.soLuong)||0),0);
-    }
+    function subtotal(){ return items.reduce((s,it)=>s+(Number(it.gia)||0)*(Number(it.soLuong)||0),0); }
     function updateTotals(){
         const sub=subtotal();
         document.getElementById('subtotal-amount').textContent=vnd(sub);
         document.getElementById('ship-amount').textContent=vnd(shipping.total||0);
         document.getElementById('grand-amount').textContent=vnd(sub+(shipping.total||0));
-        document.getElementById('ship-note').textContent=shipping.serviceId?('(DV #'+shipping.serviceId+')'):'(chưa tính phí)';
+        document.getElementById('ship-note').textContent=shipping.serviceId?('(DV #'+shipping.serviceId+')'):'';
     }
     function invalidateShipping(){
         shipping.total=0; shipping.breakdown='';
         const el=document.getElementById('shipBreakdown'); if(el) el.textContent='';
         updateTotals();
     }
-
-    // Kẹp giá trị ngay khi người dùng gõ
-    window.clampQty = (idx, max, input) => {
-        let v = parseInt(input.value || '1', 10);
-        if (isNaN(v) || v < 1) v = 1;
-        if (max && v > max) v = max;
-        input.value = v;
-    };
+    window.clampQty = (idx, max, input) => { let v = parseInt(input.value || '1', 10); if (isNaN(v) || v < 1) v = 1; if (max && v > max) v = max; input.value = v; };
 
     function renderCart(){
         const container = document.getElementById('cart-items-container');
         if(!items.length){
             container.innerHTML = "<p class='text-center muted'>Giỏ hàng trống</p>";
             document.getElementById('summary-note').innerText = '';
-            updateTotals();
-            return;
+            updateTotals(); return;
         }
 
         let html = '<div class="table-responsive"><table class="table table-bordered align-middle text-center">'
@@ -315,12 +268,12 @@
         }
     }
 
-    /* ============== CART ACTIONS (CHẶN VƯỢT TỒN KHO) ============== */
+    /* ============== CART ACTIONS ============== */
     window.onQtyChange = async (idx,val)=>{
         const input = document.getElementById('qty-'+idx);
         let qty=Math.max(1,parseInt(val||'1',10));
         const max = Number(items[idx].max||0);
-        if (max && qty > max) qty = max; // chặn ngay ở FE
+        if (max && qty > max) qty = max;
 
         const spctId=items[idx].spctId;
         const res = await sendForm(API.update,{ spctId, soLuong:qty });
@@ -331,7 +284,6 @@
             return;
         }
         if(res.status===409){
-            // BE có thể trả {message, allowed | max | khaDung, appliedQty}
             const applied = Number(res.data?.appliedQty ?? res.data?.allowed ?? res.data?.max ?? res.data?.khaDung ?? 1);
             items[idx].soLuong = applied;
             if(input) input.value = applied;
@@ -362,7 +314,7 @@
         if(res.ok){ items=[]; renderCart(); invalidateShipping(); } else { alert('Không xoá được giỏ.'); }
     });
 
-    /* ============== GHN: ADDRESS PICKERS + AUTO FEE ============== */
+    /* ============== GHN (tự fill – khoá không cho sửa) ============== */
     async function initAddressPickers(){
         const pSel=document.getElementById('provinceSelect'),
             dSel=document.getElementById('districtSelect'),
@@ -372,44 +324,8 @@
             const provRes=await getJSON(GHN.provinces);
             const provList=Array.isArray(provRes)?provRes:(provRes.data||provRes.provinces||[]);
             const provs=provList.map(p=>({val:pick(p,'provinceId','ProvinceID','code','ProvinceCode','id'),label:pick(p,'provinceName','ProvinceName','name','province')})).filter(x=>x.val&&x.label);
-            fillSelect(pSel,provs,'Chọn Tỉnh - Thành phố'); dSel.disabled=true; wSel.disabled=true;
+            fillSelect(pSel,provs,''); // chỉ để có option phù hợp
         }catch(e){ console.error('Load provinces failed',e); }
-
-        pSel.addEventListener('change', async ()=>{
-            const pid=Number(pSel.value);
-            document.getElementById('toDistrictId').value=''; document.getElementById('toWardCode').value='';
-            wSel.innerHTML=''; wSel.disabled=true; invalidateShipping();
-            if(!pid){ dSel.innerHTML=''; dSel.disabled=true; return; }
-
-            const distRes=await getJSON(GHN.districts(pid));
-            const distList=Array.isArray(distRes)?distRes:(distRes.data||distRes.districts||[]);
-            const dists=distList.map(d=>({val:pick(d,'districtId','DistrictID','code','DistrictCode','id'),label:pick(d,'districtName','DistrictName','name','district')})).filter(x=>x.val&&x.label);
-            fillSelect(dSel,dists,'Chọn Quận - Huyện');
-        });
-
-        dSel.addEventListener('change', async ()=>{
-            const did=Number(dSel.value);
-            document.getElementById('toDistrictId').value = did || '';
-            document.getElementById('toWardCode').value   = '';
-            invalidateShipping();
-            if(!did){ wSel.innerHTML=''; wSel.disabled=true; return; }
-
-            const wardRes=await getJSON(GHN.wards(did));
-            const wardList=Array.isArray(wardRes)?wardRes:(wardRes.data||wardRes.wards||[]);
-            const wards=wardList.map(w=>({val:pick(w,'wardCode','WardCode','code','id'),label:pick(w,'wardName','WardName','name','ward')})).filter(x=>x.val&&x.label);
-            fillSelect(wSel,wards,'Chọn Phường - Xã');
-        });
-
-        wSel.addEventListener('change', ()=>{
-            document.getElementById('toWardCode').value = wSel.value || '';
-            autoLoadServiceAndFee(); // tự tính phí ngay
-        });
-
-        if(window.TomSelect){
-            new TomSelect('#provinceSelect',{create:false,sortField:{field:'text',direction:'asc'}});
-            new TomSelect('#districtSelect',{create:false,sortField:{field:'text',direction:'asc'}});
-            new TomSelect('#wardSelect',{create:false,sortField:{field:'text',direction:'asc'}});
-        }
     }
 
     function getToAddress(){
@@ -417,21 +333,21 @@
         const toWardCode   = (document.getElementById('toWardCode').value || document.getElementById('wardSelect')?.value || '').trim() || null;
         return { toDistrictId, toWardCode };
     }
-    function setBusy(b){ /* hook nếu cần spinner */ }
+
     function pickServiceId(services){
         if(!Array.isArray(services)||!services.length) return null;
         const fid=s=>s?.serviceId??s?.service_id??s?.serviceTypeId??s?.service_type_id;
-        const prefer=services.find(s=>String(fid(s))===String(DEFAULT_SERVICE_ID));
+        const prefer=services.find(s=>String(fid(s))==='53320');
         return fid(prefer||services[0])||null;
     }
+
     async function autoLoadServiceAndFee(){
         const {toDistrictId,toWardCode} = getToAddress();
         if(!toDistrictId || !toWardCode){ invalidateShipping(); return; }
         try{
-            setBusy(true);
             const services = await apiJson(GHN.services,'POST',{toDistrictId,toWardCode});
-            const chosenId = pickServiceId(services);
-            if(!chosenId){ invalidateShipping(); alert('Không có dịch vụ GHN phù hợp.'); return; }
+            const chosenId = pickServiceId(services) || services?.[0]?.serviceId;
+            if(!chosenId){ invalidateShipping(); return; }
 
             const dims = { ...DEFAULT_DIM };
             const resp = await apiJson(GHN.fee,'POST',{ serviceId:Number(chosenId), toDistrictId, toWardCode, ...dims });
@@ -449,44 +365,65 @@
             const bd=[]; if(serviceFee!=null) bd.push('Phí GHN: '+vnd(serviceFee));
             if(insurance!=null) bd.push('Bảo hiểm: '+vnd(insurance));
             if(lead) bd.push('Dự kiến: '+new Date(lead*1000).toLocaleString('vi-VN'));
-            shipping.breakdown = bd.join(' • ');
-            const bdEl=document.getElementById('shipBreakdown'); if(bdEl) bdEl.textContent=shipping.breakdown;
-            const noteEl=document.getElementById('ship-note'); if(noteEl) noteEl.textContent='(DV #'+chosenId+')';
+            document.getElementById('shipBreakdown').textContent = bd.join(' • ');
+            document.getElementById('ship-note').textContent='(DV #'+chosenId+')';
             updateTotals();
         }catch(e){
-            console.error(e); invalidateShipping(); alert('Không lấy được phí GHN: '+(e?.message||'Lỗi không xác định'));
-        }finally{ setBusy(false); }
+            console.error(e); invalidateShipping();
+        }
     }
 
-    /* ============== PREFILL TỪ TÀI KHOẢN ============== */
+    /* ============== PREFILL từ tài khoản (và khoá địa chỉ) ============== */
     async function prefillFromAccount(){
+
         try{
-            const me = await getJSON(API.me); // {loggedIn, hoTen/hoVaTen, soDienThoai, diaChiChiTiet, tinh,huyen,xa}
+            const me = await getJSON(API.me);
             if(!me || !me.loggedIn) return;
 
+            // Họ tên & SĐT (cho phép sửa)
             const nameCandidate = me.hoTen || me.hoVaTen || me.fullName || me.ten || me.name || "";
             if(nameCandidate) document.getElementById('hoTen').value = nameCandidate;
             if(me.soDienThoai) document.getElementById('sdt').value = me.soDienThoai;
-            if(me.diaChiChiTiet) document.getElementById('diaChi').value = me.diaChiChiTiet;
 
+            // Địa chỉ (tự điền – đã bị disable/readonly)
             const pSel=document.getElementById('provinceSelect');
             const dSel=document.getElementById('districtSelect');
             const wSel=document.getElementById('wardSelect');
 
-            const okP = await waitForOptions(pSel, 2);
-            if(!okP) return;
+            // chờ options tỉnh đã nạp
+            const wait = (sel)=>new Promise(r=>{const id=setInterval(()=>{if(sel.options.length){clearInterval(id);r();}},100)});
+            await wait(pSel);
 
-            if(me.tinh) setSelectByName(pSel, me.tinh);
-            await waitForOptions(dSel, 2);
-            if(me.huyen) setSelectByName(dSel, me.huyen);
-            await waitForOptions(wSel, 2);
-            if(me.xa){
-                setSelectByName(wSel, me.xa);
-                document.getElementById('toWardCode').value = wSel.value || '';
+            // đổ tỉnh/huyện/xã theo tên (nếu có)
+            if(me.tinh){
+                for(const o of pSel.options){ if(o.textContent.trim()===me.tinh){ pSel.value=o.value; break; } }
+                // load danh sách huyện
+                const distRes=await getJSON(GHN.districts(Number(pSel.value)));
+                const dists=(Array.isArray(distRes)?distRes:(distRes.data||distRes.districts||[]))
+                    .map(d=>({val:pick(d,'districtId','DistrictID','code','DistrictCode','id'),label:pick(d,'districtName','DistrictName','name','district')}))
+                    .filter(x=>x.val&&x.label);
+                fillSelect(dSel,dists,'');
+
+                if(me.huyen){
+                    for(const o of dSel.options){ if(o.textContent.trim()===me.huyen){ dSel.value=o.value; break; } }
+                    document.getElementById('toDistrictId').value = dSel.value || '';
+                    const wardRes=await getJSON(GHN.wards(Number(dSel.value)));
+                    const wards=(Array.isArray(wardRes)?wardRes:(wardRes.data||wardRes.wards||[]))
+                        .map(w=>({val:pick(w,'wardCode','WardCode','code','id'),label:pick(w,'wardName','WardName','name','ward')}))
+                        .filter(x=>x.val&&x.label);
+                    fillSelect(wSel,wards,'');
+                    if(me.xa){
+                        for(const o of wSel.options){ if(o.textContent.trim()===me.xa){ wSel.value=o.value; break; } }
+                        document.getElementById('toWardCode').value = wSel.value || '';
+                    }
+                }
             }
-            autoLoadServiceAndFee();
+            if(me.diaChiChiTiet) document.getElementById('diaChi').value = me.diaChiChiTiet;
+
+            // tính phí ship theo địa chỉ đã khoá
+            await autoLoadServiceAndFee();
         }catch(e){
-            console.warn('Không tự điền được từ tài khoản:', e);
+            console.warn('Không tự điền được địa chỉ:', e);
         }
     }
 
@@ -498,22 +435,39 @@
     });
     document.getElementById('btn-cancel-checkout').addEventListener('click', ()=> formEl.style.display='none');
 
+    // Chỉ kiểm tra Họ tên + SĐT; SĐT chỉ số
+    const hoTenEl = document.getElementById('hoTen');
+    const sdtEl   = document.getElementById('sdt');
+    function clearInvalid(el){ el.classList.remove('is-invalid'); }
+    function markInvalid(el){ el.classList.add('is-invalid'); }
+
+    // Lọc chỉ số khi gõ + giới hạn 11
+    sdtEl.addEventListener('input', e=>{
+        e.target.value = e.target.value.replace(/\D/g,'').slice(0,11);
+        clearInvalid(sdtEl);
+    });
+    hoTenEl.addEventListener('input', ()=> clearInvalid(hoTenEl));
+
     formEl.addEventListener('submit', async (e)=>{
         e.preventDefault();
-        const hoTen=document.getElementById('hoTen').value.trim();
-        const sdt=document.getElementById('sdt').value.trim();
-        const diaChi=document.getElementById('diaChi').value.trim();
-        if(!hoTen||!sdt||!diaChi){ alert('Vui lòng điền đầy đủ thông tin.'); return; }
 
-        // LẤY TÊN XÃ/HUYỆN/TỈNH TỪ SELECT
-        const tinh  = (document.querySelector('#provinceSelect')?.selectedOptions?.[0]?.textContent||'').trim();
-        const huyen = (document.querySelector('#districtSelect')?.selectedOptions?.[0]?.textContent||'').trim();
-        const xa    = (document.querySelector('#wardSelect')?.selectedOptions?.[0]?.textContent||'').trim();
+        const hoTen = hoTenEl.value.trim();
+        const sdt   = sdtEl.value.trim();
+
+        let ok = true;
+        if(!hoTen){ markInvalid(hoTenEl); ok=false; }
+        if(!validVNPhone(sdt)){ markInvalid(sdtEl); ok=false; }
+        if(!ok) return;
+
+        // Lấy tên địa chỉ (đã tự điền và bị khoá)
+        const diaChi = document.getElementById('diaChi').value.trim();
+        const tinh   = (document.querySelector('#provinceSelect')?.selectedOptions?.[0]?.textContent||'').trim();
+        const huyen  = (document.querySelector('#districtSelect')?.selectedOptions?.[0]?.textContent||'').trim();
+        const xa     = (document.querySelector('#wardSelect')?.selectedOptions?.[0]?.textContent||'').trim();
 
         try{
             const resp = await postForm(API.checkout,{
-                hoTen, sdt, diaChi,
-                xa, huyen, tinh,                         // >>> THÊM 3 TRƯỜNG NÀY <<<
+                hoTen, sdt, diaChi, xa, huyen, tinh,
                 shipServiceId:  shipping.serviceId??'',
                 shipToDistrictId: shipping.toDistrictId??'',
                 shipToWardCode:   shipping.toWardCode??'',
@@ -525,20 +479,16 @@
             });
             alert(typeof resp==='string'?resp:'Đặt hàng thành công');
             items=[]; renderCart(); invalidateShipping(); formEl.reset(); formEl.style.display='none';
-        }catch(e2){
-            alert('Thanh toán thất bại.'); console.error(e2);
+        }catch(err){
+            alert('Thanh toán thất bại.'); console.error(err);
         }
     });
-
 
     /* ============== INIT ============== */
     document.getElementById('btn-refresh').addEventListener('click', loadCart);
     (async function init(){
         await loadCart();
-        await initAddressPickers();
-        await prefillFromAccount();
+        await initAddressPickers();   // nạp danh sách để prefill
+        await prefillFromAccount();   // tự điền và giữ nguyên (đã khoá)
     })();
-    (window.copy||console.log)(JSON.stringify({fullName:(document.querySelector('#hoTen')?.value||'').trim(),phone:(document.querySelector('#sdt')?.value||'').trim(),addressDetail:(document.querySelector('#diaChi')?.value||'').trim(),province:{code:document.querySelector('#provinceSelect')?.value||'',name:(document.querySelector('#provinceSelect')?.selectedOptions?.[0]?.textContent||'').trim()},district:{code:document.querySelector('#districtSelect')?.value||'',name:(document.querySelector('#districtSelect')?.selectedOptions?.[0]?.textContent||'').trim()},ward:{code:document.querySelector('#wardSelect')?.value||'',name:(document.querySelector('#wardSelect')?.selectedOptions?.[0]?.textContent||'').trim()},toDistrictId:document.querySelector('#toDistrictId')?.value||'',toWardCode:(document.querySelector('#toWardCode')?.value||'').trim()}));
-
 </script>
-
