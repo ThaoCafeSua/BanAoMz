@@ -13,4 +13,6 @@ public interface HoaDonChiTietClientRepository extends JpaRepository<HoaDonChiTi
 
     // Lấy chi tiết hóa đơn theo hóa đơn
     List<HoaDonChiTiet> findByHoaDon(HoaDon hoaDon);
+
+    List<HoaDonChiTiet> findByHoaDonId(Long hoaDonId);
 }

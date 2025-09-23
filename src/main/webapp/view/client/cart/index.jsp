@@ -2,10 +2,7 @@
 <meta name="_csrf" content="${_csrf != null ? _csrf.token : ''}"/>
 <meta name="_csrf_header" content="${_csrf != null ? _csrf.headerName : ''}"/>
 
-<%-- (Tuỳ chọn) Tìm kiếm trong select
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css">
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
---%>
+
 
 <style>
     .cart-container{background:#f9f9f9;padding:30px;border-radius:10px;box-shadow:0 0 10px rgba(0,31,61,.1)}

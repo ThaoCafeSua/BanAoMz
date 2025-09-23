@@ -8,6 +8,81 @@
     <title>Theo dõi đơn hàng</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    h3.text-primary {
+        color: #001f3d !important;
+        font-weight: 600;
+    }
+
+    /* Table header */
+    .table-primary {
+        background-color: #001f3d !important;
+        color: #fff !important;
+    }
+
+    /* Nút quay lại */
+    .btn-secondary {
+        background-color: #72b4ef;
+        border-color: #001f3d;
+        color: #fff;
+    }
+    .btn-secondary:hover {
+        background-color: #003366;
+        border-color: #003366;
+        color: #fff;
+    }
+
+    /* Nút lọc */
+    .btn-primary {
+        background-color: #001f3d;
+        border-color: #001f3d;
+        color: #fff;
+    }
+    .btn-primary:hover {
+        background-color: #003366;
+        border-color: #003366;
+    }
+
+    /* Nút chi tiết */
+    .btn-info {
+        background-color: #72b4ef;
+        border-color: #001f3d;
+        color: #fff;
+    }
+    .btn-info:hover {
+        background-color: #003366;
+        border-color: #003366;
+    }
+
+    /* Nút hủy */
+    .btn-danger {
+        background-color: #e03131;
+        border-color: #e03131;
+        color: #fff;
+    }
+    .btn-danger:hover {
+        background-color: #c92a2a;
+        border-color: #c92a2a;
+    }
+
+    /* Alert */
+    .alert-info {
+        background-color: #e7f5ff;
+        color: #001f3d;
+    }
+    .alert-success {
+        background-color: #d3f9d8;
+        color: #2b8a3e;
+    }
+    .alert-danger {
+        background-color: #ffe3e3;
+        color: #c92a2a;
+    }
+</style>
 <body class="bg-light">
 <div class="container mt-4">
 
@@ -61,7 +136,7 @@
     </c:if>
     <c:if test="${donHangPage.totalElements > 0}">
         <table class="table table-bordered table-hover bg-white">
-            <thead class="table-primary text-center">
+            <thead class="table-primary text-center ">
             <tr>
                 <th>Mã đơn</th>
                 <th>Ngày tạo</th>
@@ -78,17 +153,35 @@
                     <td>${order.tongTien}</td>
                     <td>${order.trangThai}</td>
                     <td>
-                        <!-- Nút hủy đơn -->
                         <form action="${pageContext.request.contextPath}/khachhang/don-hang/huy"
                               method="post"
                               onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này không?');">
-                            <input type="hidden" name="customerId" value="${khachHang.id}" />
-                            <input type="hidden" name="id" value="${order.id}" />
-                            <button type="submit" class="btn btn-danger btn-sm">Hủy đơn</button>
+                            <input type="hidden" name="customerId" value="${customerId}"/>  <!-- SỬA Ở ĐÂY -->
+                            <input type="hidden" name="id" value="${order.id}"/>
+
+                            <c:choose>
+                                <c:when test="${order.trangThai ne 'DANG_GIAO'
+                     and order.trangThai ne 'GIAO_THAT_BAI'
+                     and order.trangThai ne 'DA_HOAN_HANG'
+                     and order.trangThai ne 'HOAN_HANG'
+                     and order.trangThai ne 'HOAN_THANH'
+                     and order.trangThai ne 'HUY'}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Hủy đơn</button>
+                                </c:when>
+                                <c:otherwise>
+                                    <button type="button" class="btn btn-secondary btn-sm" disabled>Không thể hủy</button>
+                                </c:otherwise>
+                            </c:choose>
+
                             <a href="${pageContext.request.contextPath}/khachhang/chitiet/${order.id}"
+
+                               class="btn btn-info btn-sm">🔍</a>
+
+
                                class="btn btn-info btn-sm">
                                 Xem chi tiết
                             </a>
+
                             <c:if test="${not empty _csrf}">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             </c:if>

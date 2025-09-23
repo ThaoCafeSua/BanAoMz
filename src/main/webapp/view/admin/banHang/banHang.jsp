@@ -188,7 +188,6 @@
     .table-hover tbody tr:hover{background:#f6f9ff}
     #productTable thead th{position:sticky; top:0; z-index:1}
 
-    /* Tabs */
     #hoaDonTabs .nav-link{border-radius:999px; background:#fff; border:1px solid #e6ebf2; transition:all .2s; font-weight:600; padding:6px 12px;}
     #hoaDonTabs .nav-link:hover{transform:translateY(-1px)}
     #hoaDonTabs .nav-link.active{background:var(--brand); color:#fff; border:2px solid var(--accent)}
@@ -196,16 +195,13 @@
     #hoaDonTabs .tab-title{font-weight:600;}
     #hoaDonTabs .close-tab{line-height:1;}
 
-    /* Tổng tiền nổi bật */
     #totalAmount{font-size:1.25rem}
     .summary-bar{background:#fff3cd; border:1px dashed #ffe08a; border-radius:10px}
 
-    /* Toolbar + scroll */
     .pos-toolbar{display:flex; gap:.5rem; align-items:center; margin-bottom:.75rem}
     .pos-toolbar .form-control{max-width:360px}
     .scroll-y{max-height:60vh; overflow:auto}
 
-    /* Buttons */
     .btn{border-radius:10px}
     .btn-primary{background:var(--brand); border-color:var(--brand)}
     .btn-primary:hover{background:var(--brand-2); border-color:var(--brand-2)}
@@ -219,6 +215,7 @@
     ========================= */
     const PHUONG_THUC_MAC_DINH = 'TIEN_MAT';
     const modal = new bootstrap.Modal(document.getElementById('variantModal'));
+    const MAX_HOA_DON_CHO = 10; // TỐI ĐA 10 HĐ CHỜ
 
     // Debounce
     const _debounce = (fn, t = 250) => {
@@ -238,6 +235,39 @@
     // Input invalid helpers
     function setInvalid($el, msg){ $el.addClass('is-invalid'); const $fb=$el.next('.invalid-feedback'); if($fb.length) $fb.text(msg||''); }
     function clearInvalid($el){ $el.removeClass('is-invalid'); }
+
+    /* ====== DAILY INVOICE SERIES (reset 24h) ====== */
+    function todayYMD(){
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+    function resetDailyCounterIfNeeded(){
+        const key = 'hoaDonSeriesDate';
+        const today = todayYMD();
+        const stored = localStorage.getItem(key);
+        if (stored !== today){
+            localStorage.setItem(key, today);
+            localStorage.setItem('hoaDonCounter', '1'); // lần tạo tiếp theo sẽ ra HD01
+        }
+    }
+    function nextInvoiceCode(width = 2){
+        resetDailyCounterIfNeeded();
+        let counter = parseInt(localStorage.getItem('hoaDonCounter')) || 1;
+
+        // tránh trùng với danh sách hiện tại
+        const used = new Set((hoaDonList || []).map(h => String(h.id)));
+        let code, guard = 0;
+        while (guard++ < 200){
+            code = 'HD' + String(counter).padStart(width, '0');
+            counter++;
+            if (!used.has(code)) break;
+        }
+        localStorage.setItem('hoaDonCounter', String(counter));
+        return code;
+    }
 
     // Validate khách hàng
     function validateCustomer(){
@@ -263,14 +293,27 @@
     if(!Array.isArray(hoaDonList)) hoaDonList = [];
     let currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
 
+    // Giữ tối đa 10 cái mới nhất
+    function trimHoaDonToMax(){
+        if (hoaDonList.length > MAX_HOA_DON_CHO){
+            hoaDonList = hoaDonList.slice(-MAX_HOA_DON_CHO);
+            if (!hoaDonList.find(h=>h.id===currentHoaDonId)){
+                currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
+            }
+            saveHoaDonList();
+        }
+    }
+
     (function ensureHoaDonIds(){
-        let changed=false; let counter=parseInt(localStorage.getItem('hoaDonCounter'))||1;
+        // dùng series theo ngày nếu thiếu id
+        let changed=false;
         hoaDonList.forEach(h=>{
             if(!h) return;
-            if(!h.id){ h.id='HD'+(counter++); changed=true; }
+            if(!h.id){ h.id = nextInvoiceCode(2); changed=true; }
             if(!Array.isArray(h.items)) { h.items=[]; changed=true; }
         });
-        if(changed){ localStorage.setItem('hoaDonCounter', counter); saveHoaDonList(); currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null; }
+        if(changed){ saveHoaDonList(); currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null; }
+        trimHoaDonToMax();
     })();
 
     function saveHoaDonList(){ localStorage.setItem('hoaDonList', JSON.stringify(hoaDonList)); }
@@ -290,15 +333,28 @@
         return map;
     }
 
-    // Render tồn hiển thị = data-stock (tồn gốc) - tổng đã đặt (mọi HD)
+    // Tổng số đã đặt theo từng BIẾN THỂ
+    function buildQtyBySpctAllTabs(){
+        const map = {};
+        (hoaDonList||[]).forEach(hd=>{
+            (hd.items||[]).forEach(it=>{
+                const k = String(it.idSPCT || it.idSpct || '');
+                if(!k) return;
+                map[k] = (map[k]||0) + (parseInt(it.soLuong||0,10)||0);
+            });
+        });
+        return map;
+    }
+
+    // Render tồn hiển thị
     function recalcAllVisibleStocks(){
         const qtyMap = buildQtyBySanPhamAllTabs();
 
         $('#productTable tbody tr.product-row').each(function(){
             const $tr  = $(this);
             const spId = String($tr.data('sanpham-id'));
-            const base = parseInt($tr.data('stock'),10) || 0;       // tồn gốc hiện lưu
-            const used = parseInt(qtyMap[spId]||0,10) || 0;         // tổng đã đặt ở mọi HD
+            const base = parseInt($tr.data('stock'),10) || 0;
+            const used = parseInt(qtyMap[spId]||0,10) || 0;
             const avail= Math.max(0, base - used);
 
             const $span = $('#stock-sp-'+spId);
@@ -326,11 +382,15 @@
        Tabs hóa đơn
     ========================= */
     function renderHoaDonList(){
+        trimHoaDonToMax();
+
         const container = document.getElementById('hoaDonListContainer');
         const tabList = document.createElement('ul');
         tabList.className='nav nav-pills mb-2'; tabList.id='hoaDonTabs'; tabList.setAttribute('role','tablist');
 
-        hoaDonList.forEach(hd=>{
+        const displayList = hoaDonList.slice(-MAX_HOA_DON_CHO);
+
+        displayList.forEach(hd=>{
             const li = document.createElement('li'); li.className='nav-item me-1'; li.setAttribute('role','presentation');
 
             const btn = document.createElement('button');
@@ -349,18 +409,30 @@
             btn.append(title, badge, close); li.appendChild(btn); tabList.appendChild(li);
         });
 
+        // Nút thêm HĐ: disable nếu đã đủ 10
         const liAdd=document.createElement('li'); liAdd.className='nav-item';
-        const btnAdd=document.createElement('button'); btnAdd.className='nav-link text-success fw-bold'; btnAdd.textContent='+';
-        btnAdd.onclick = ()=> taoHoaDonMoiVaRender(); liAdd.appendChild(btnAdd); tabList.appendChild(liAdd);
+        const btnAdd=document.createElement('button');
+        const canAdd = hoaDonList.length < MAX_HOA_DON_CHO;
+        btnAdd.className='nav-link fw-bold ' + (canAdd ? 'text-success' : 'text-muted');
+        btnAdd.textContent='+';
+        btnAdd.title = canAdd ? 'Thêm hóa đơn chờ' : ('Đã đạt tối đa ' + MAX_HOA_DON_CHO + ' hóa đơn chờ');
+        btnAdd.disabled = !canAdd;
+        btnAdd.onclick = ()=> { if(canAdd) taoHoaDonMoiVaRender(); };
+        liAdd.appendChild(btnAdd); tabList.appendChild(liAdd);
 
         container.innerHTML=''; container.appendChild(tabList);
     }
 
+    // TẠO HÓA ĐƠN MỚI (giới hạn 10, series theo ngày)
     function taoHoaDonMoiVaRender(){
-        let counter = parseInt(localStorage.getItem('hoaDonCounter')) || 1;
-        if (counter > 1000) counter = 1;
-        const id = 'HD' + counter++; localStorage.setItem('hoaDonCounter', counter);
-        hoaDonList.push({ id, items: [] }); currentHoaDonId = id;
+        trimHoaDonToMax();
+        if (hoaDonList.length >= MAX_HOA_DON_CHO){
+            alert('Chỉ được tạo tối đa ' + MAX_HOA_DON_CHO + ' hóa đơn chờ.');
+            return;
+        }
+        const id = nextInvoiceCode(2); // -> HD01, HD02...
+        hoaDonList.push({ id, items: [] });
+        currentHoaDonId = id;
         saveHoaDonList(); renderHoaDonList(); loadCart(); recalcAllVisibleStocks(); bindCustomerInputs();
     }
 
@@ -418,22 +490,43 @@
             if(!res.id){ alert('Không tìm thấy sản phẩm phù hợp!'); return; }
             if(res.soLuongTon<=0){ alert('Sản phẩm đã hết hàng.'); return; }
 
-            // Check tồn tổng theo sản phẩm
+            // Check tồn tổng theo sản phẩm (ảnh chụp trên UI)
             const $row   = $('#productTable tbody tr.product-row[data-sanpham-id="'+idSanPham+'"]');
             const base   = parseInt($row.data('stock'),10) || 0; // tồn gốc
-            const usedAll= parseInt(buildQtyBySanPhamAllTabs()[String(idSanPham)]||0,10) || 0;
-            if(usedAll + 1 > base){ alert('Vượt quá tồn kho còn lại của sản phẩm này (tính trên tất cả hóa đơn).'); return; }
+            const usedAllByProduct = parseInt(buildQtyBySanPhamAllTabs()[String(idSanPham)]||0,10) || 0;
+            if(usedAllByProduct + 1 > base){
+                alert('Vượt quá tồn kho còn lại của sản phẩm này (tính trên tất cả hóa đơn).');
+                return;
+            }
+
+            // Check theo BIẾN THỂ trên toàn bộ hóa đơn
+            const usedSpctAll = (buildQtyBySpctAllTabs()[String(res.id)]||0);
+            const spctTon = parseInt(res.soLuongTon||0,10);
+            if (usedSpctAll + 1 > spctTon){
+                const left = Math.max(0, spctTon - usedSpctAll);
+                alert('Biến thể này chỉ còn ' + left + ' chiếc khả dụng trên các hóa đơn đang mở.');
+                return;
+            }
 
             const hd = hoaDonList.find(h=>h.id===currentHoaDonId); if(!hd) return;
-            const spct = {
-                idSPCT: res.id, idSanPham: parseInt(idSanPham,10),
-                ten: res.tenSanPham, mau: res.tenMauSac, size: res.tenSize,
-                soLuong: 1, giaBan: res.giaBan||0, soLuongTon: res.soLuongTon
-            };
+            const ex = hd.items.find(i=>i.idSPCT===res.id);
 
-            const ex = hd.items.find(i=>i.idSPCT===spct.idSPCT);
-            if(ex){ if(ex.soLuong < spct.soLuongTon) ex.soLuong += 1; else return alert('Đã đạt số lượng tối đa cho biến thể này.'); }
-            else { hd.items.push(spct); }
+            // trần cho HĐ hiện tại = tồn biến thể - phần đã giữ ở HĐ khác
+            const usedOther = usedSpctAll - (ex ? ex.soLuong : 0);
+            const maxForThisOrder = Math.max(0, spctTon - usedOther);
+
+            if(ex){
+                if(ex.soLuong < maxForThisOrder) ex.soLuong += 1;
+                else return alert('Đã đạt tối đa ('+maxForThisOrder+') cho biến thể này ở hóa đơn hiện tại.');
+            } else {
+                if (maxForThisOrder <= 0) return alert('Hết khả dụng cho biến thể này.');
+                hd.items.push({
+                    idSPCT: res.id, idSanPham: parseInt(idSanPham,10),
+                    ten: res.tenSanPham, mau: res.tenMauSac, size: res.tenSize,
+                    soLuong: 1, giaBan: res.giaBan||0, soLuongTon: spctTon
+                });
+            }
+
             saveHoaDonList(); modal.hide(); loadCart(); recalcAllVisibleStocks();
         });
     }
@@ -447,13 +540,23 @@
             $('#cartItems').html('<tr><td colspan="4" class="text-center">Chưa có hóa đơn nào</td></tr>');
             $('#totalAmount').text('0 ₫'); return;
         }
+
+        const usedSpctAll = buildQtyBySpctAllTabs();
+
         let html='', total=0;
         hd.items.forEach(item=>{
             const name = (item.ten||'Không tên') + ' - ' + (item.mau||'') + ' - ' + (item.size||'');
             const qty  = item.soLuong||0, price=item.giaBan||0, ton=item.soLuongTon||0, tt=qty*price;
+
+            // max cho HĐ hiện tại = tồn biến thể - phần đã giữ ở HĐ khác
+            const usedOther = (usedSpctAll[String(item.idSPCT)]||0) - qty;
+            const maxForThisOrder = Math.max(1, Math.max(0, ton - usedOther));
+
             html += '<tr class="text-center">';
             html += '<td>'+name+'</td>';
-            html += '<td><input type="number" class="form-control form-control-sm text-center qty-input" data-idspct="'+item.idSPCT+'" min="1" max="'+ton+'" value="'+qty+'" oninput="capNhatSoLuongLocal(\''+item.idSPCT+'\', this.value)" /></td>';
+            html += '<td><input type="number" class="form-control form-control-sm text-center qty-input" '+
+                'data-idspct="'+item.idSPCT+'" min="1" max="'+maxForThisOrder+'" value="'+qty+'" '+
+                'oninput="capNhatSoLuongLocal(\''+item.idSPCT+'\', this.value)" /></td>';
             html += '<td>'+ tt.toLocaleString('vi-VN') +' ₫</td>';
             html += '<td><button class="btn btn-danger btn-sm" onclick="xoaSanPhamLocal(\''+item.idSPCT+'\')">X</button></td>';
             html += '</tr>';
@@ -469,11 +572,16 @@
         const hd = hoaDonList.find(h=>h.id===currentHoaDonId); if(!hd) return;
         const item = hd.items.find(i=>String(i.idSPCT)===String(idSPCT)); if(!item) return;
 
-        const max = parseInt(item.soLuongTon||0,10);
         let val = parseInt(soLuongMoi,10);
 
         if(isNaN(val) || val < 1){ alert('Số lượng phải ≥ 1.'); val = 1; }
-        else if(val > max){ alert('Vượt quá tồn kho. Tối đa: '+max); val = max; }
+
+        // kẹp theo khả dụng biến thể (trừ phần đã giữ ở HĐ khác)
+        const usedAll = buildQtyBySpctAllTabs();
+        const usedOther = (usedAll[String(item.idSPCT)]||0) - (item.soLuong||0);
+        const hardMax = Math.max(1, Math.max(0, (item.soLuongTon||0) - usedOther));
+
+        if(val > hardMax){ alert('Vượt quá tồn khả dụng. Tối đa: '+hardMax); val = hardMax; }
 
         if(val !== item.soLuong){ item.soLuong = val; saveHoaDonList(); }
         loadCart(); recalcAllVisibleStocks();
@@ -514,6 +622,10 @@
     /* =========================
        Khởi tạo
     ========================= */
+    // Reset series theo ngày ngay khi load, và kiểm tra lại mỗi phút
+    resetDailyCounterIfNeeded();
+    setInterval(resetDailyCounterIfNeeded, 60 * 1000);
+
     renderHoaDonList(); loadCart(); recalcAllVisibleStocks(); bindCustomerInputs();
 
     // Tooltip
@@ -546,14 +658,12 @@
     /* =========================
        Thanh toán (+ giảm tồn gốc ngay)
     ========================= */
-    // gom {sanPhamId: soLuong} từ HĐ hiện tại
     function buildSoldMapFromHoaDon(hd){
         const map={}; (hd.items||[]).forEach(it=>{
             const spId=String(it.idSanPham||''); if(!spId) return;
             map[spId]=(map[spId]||0)+(parseInt(it.soLuong||0,10)||0);
         }); return map;
     }
-    // áp vào data-stock ở bảng sản phẩm
     function applySoldToBaseStock(soldMap){
         $('#productTable tbody tr.product-row').each(function(){
             const $tr=$(this); const spId=String($tr.data('sanpham-id'));
@@ -582,11 +692,9 @@
         })).done(function(hoaDon){
             alert('Thanh toán thành công!\nMã HĐ: '+ (hoaDon?.maHoaDon || '—'));
 
-            // Giảm "tồn gốc" ngay trên UI theo hóa đơn vừa bán
             const soldMap = buildSoldMapFromHoaDon(hd);
             applySoldToBaseStock(soldMap);
 
-            // Xoá hóa đơn, render lại, không cần F5
             hoaDonList = hoaDonList.filter(h=>h.id!==currentHoaDonId);
             currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
             saveHoaDonList(); renderHoaDonList(); loadCart(); recalcAllVisibleStocks();
@@ -595,5 +703,21 @@
             alert('Lỗi thanh toán: ' + (xhr.responseText||''));
         });
     });
-</script>
 
+    /* =========================
+       Đồng bộ đa tab (storage event)
+    ========================= */
+    window.addEventListener('storage', function(e){
+        if (e.key === 'hoaDonList'){
+            try { hoaDonList = JSON.parse(e.newValue)||[]; } catch(_) { hoaDonList = []; }
+            if (!hoaDonList.find(h=>h.id===currentHoaDonId)){
+                currentHoaDonId = hoaDonList.length ? hoaDonList[0].id : null;
+            }
+            trimHoaDonToMax();
+            renderHoaDonList(); loadCart(); recalcAllVisibleStocks(); bindCustomerInputs();
+        }
+        if (e.key === 'hoaDonSeriesDate' || e.key === 'hoaDonCounter'){
+            // lần tạo tiếp theo sẽ dùng series mới
+        }
+    });
+</script>

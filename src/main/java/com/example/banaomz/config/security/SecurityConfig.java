@@ -49,12 +49,18 @@ public class SecurityConfig {
                         "/admin/category/update",// chỉ endpoint này
                         "/admin/customer/address",
                         "auth/forgot-password",
+
+                        "khachhang/dangnhap",
+                        "/admin/employee/create"
+
+
                         "/auth/forgot-password",
                         "khachhang/dangnhap",
                         "/khachhang/update",
                         "/khachhang/forgot-password"
 
-                ))
+
+                        ))
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**","/js/**","/images/**").permitAll()

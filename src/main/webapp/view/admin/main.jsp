@@ -1,7 +1,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <meta name="_csrf" content="${_csrf.token}">
 <meta name="_csrf_header" content="${_csrf.headerName}">
-
+<link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
 
 <!-- main.jsp -->
 <div class="main-content">

@@ -3,11 +3,13 @@ package com.example.banaomz.controller.admin.product;
 import com.example.banaomz.dto.admin.PhieuGiamGia.PhieuGiamGiaDTO;
 import com.example.banaomz.dto.admin.ResponseObject;
 import com.example.banaomz.service.admin.IPhieuGiamGiaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +31,7 @@ public class PhieuGiamGiaController {
     @ResponseBody
     public ResponseEntity<?> getPhieuGiamGia(@RequestParam String search) {
         List<PhieuGiamGiaDTO> lst = phieuGiamGiaService.findAllPhieuGiamGia(search);
-        return new ResponseEntity<>(ResponseObject.builder().data(lst).build() , HttpStatus.OK);
+        return new ResponseEntity<>(ResponseObject.builder().data(lst).build(), HttpStatus.OK);
     }
 
     @GetMapping("/create")
@@ -42,7 +44,15 @@ public class PhieuGiamGiaController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute PhieuGiamGiaDTO req) {
+    public String create(@Valid @ModelAttribute PhieuGiamGiaDTO req,
+            BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("phieuGiamGia", req);
+            model.addAttribute("btnText", "Thêm Phiếu Giảm Giá");
+            model.addAttribute("action", "/admin/phieu-giam-gia/create");
+            model.addAttribute("page", "phieuGiamGia/form");
+            return "admin/main"; // Trả lại form kèm lỗi
+        }
         phieuGiamGiaService.createPhieuGiamGia(req);
         return "redirect:/admin/phieu-giam-gia";
     }
@@ -61,7 +71,15 @@ public class PhieuGiamGiaController {
     }
 
     @PostMapping("/update")
-    public String update(@ModelAttribute PhieuGiamGiaDTO req) {
+    public String update(@Valid @ModelAttribute PhieuGiamGiaDTO req,
+            BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("phieuGiamGia", req);
+            model.addAttribute("btnText", "Cập Nhật");
+            model.addAttribute("action", "/admin/phieu-giam-gia/update");
+            model.addAttribute("page", "phieuGiamGia/form");
+            return "admin/main"; // Trả lại form kèm lỗi
+        }
         phieuGiamGiaService.updatePhieuGiamGia(req);
         return "redirect:/admin/phieu-giam-gia";
     }
