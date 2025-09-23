@@ -63,9 +63,10 @@
         Chi Tiết Hóa Đơn - <c:out value="${hoaDonDetail.maHoaDon}" default="Không có"/>
     </h4>
     <div class="mt-3">
-        <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+        <a href="${pageContext.request.contextPath}/khachhang/${khachHang.id}/donhang"
+           class="btn btn-primary">
             ⬅
-        </button>
+        </a>
     </div>
 
 

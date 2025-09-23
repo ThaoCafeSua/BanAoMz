@@ -113,18 +113,24 @@ public class dangKyController {
 
     @PostMapping("/update")
     public String updateCustomer(@ModelAttribute("khachHang") KhachHangDTO dto,
+                                 RedirectAttributes redirectAttributes,
                                  HttpSession session) {
         try {
+            // ✅ Cập nhật khách hàng
             KhachHangDTO updated = khachHangService.updateCustomer(dto);
+
+            // ✅ Cập nhật lại session đăng nhập (nếu đang login)
             session.setAttribute("khachHang", updated);
-            session.setAttribute("success", "Cập nhật khách hàng thành công!");
+
+            // ✅ Thông báo chỉ hiển thị 1 lần
+            redirectAttributes.addFlashAttribute("success", "Cập nhật khách hàng thành công!");
+
             return "redirect:/khachhang/detail/" + dto.getId();
         } catch (RuntimeException e) {
-            session.setAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/khachhang/detail/" + dto.getId();
         }
     }
-
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
