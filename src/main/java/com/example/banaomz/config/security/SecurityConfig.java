@@ -51,7 +51,7 @@ public class SecurityConfig {
                         "auth/forgot-password",
 
                         "khachhang/dangnhap",
-                        "/admin/employee/create"
+                        "/admin/employee/create",
 
 
                         "/auth/forgot-password",
