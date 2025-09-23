@@ -23,6 +23,8 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -108,12 +110,29 @@ public class HoaDonServiceImpl implements IHoaDonService {
     }
 
     @Override
+    public Page<HoaDon> findByKhachHangId(Long khachHangId, Pageable pageable) {
+        return hoaDonRepository.findByKhachHangId(khachHangId, pageable);
+    }
+
+    @Override
     public void huyDonHang(Long id) {
         HoaDon hoaDon = hoaDonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
         if ("DANG_GIAO".equalsIgnoreCase(hoaDon.getTrangThai())) {
             throw new RuntimeException("Đơn hàng đang được giao không thể hủy.");
+        }
+
+        if ("GIAO_THAT_BAI".equalsIgnoreCase(hoaDon.getTrangThai())) {
+            throw new RuntimeException("Giao thất bại. Đơn hàng đang được giao lại.");
+        }
+
+        if ("HOAN_HANG".equalsIgnoreCase(hoaDon.getTrangThai())) {
+            throw new RuntimeException("Đơn hàng đang được hoàn trả.");
+        }
+
+        if ("DA_HOAN_HANG".equalsIgnoreCase(hoaDon.getTrangThai())) {
+            throw new RuntimeException("Đơn hàng đã hoàn trả về kho.");
         }
 
         if ("HOAN_THANH".equalsIgnoreCase((hoaDon.getTrangThai()))) {

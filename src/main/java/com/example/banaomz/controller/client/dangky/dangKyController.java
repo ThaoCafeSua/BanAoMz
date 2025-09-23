@@ -16,6 +16,10 @@ import com.example.banaomz.service.client.IHoaDonClientService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -148,17 +152,25 @@ public class dangKyController {
 
     @PostMapping("/update")
     public String updateCustomer(@ModelAttribute("khachHang") KhachHangDTO dto,
+                                 RedirectAttributes redirectAttributes,
                                  HttpSession session) {
         try {
+            // ✅ Cập nhật khách hàng
             KhachHangDTO updated = khachHangService.updateCustomer(dto);
+
+            // ✅ Cập nhật lại session đăng nhập (nếu đang login)
             session.setAttribute("khachHang", updated);
-            session.setAttribute("success", "Cập nhật khách hàng thành công!");
+
+            // ✅ Thông báo chỉ hiển thị 1 lần
+            redirectAttributes.addFlashAttribute("success", "Cập nhật khách hàng thành công!");
+
             return "redirect:/khachhang/detail/" + dto.getId();
         } catch (RuntimeException e) {
-            session.setAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/khachhang/detail/" + dto.getId();
         }
     }
+
 
     @GetMapping("/{id}/donhang")
     public String getDonHangByCustomer(@PathVariable("id") Long id,
@@ -174,8 +186,35 @@ public class dangKyController {
         List<HoaDon> donHangList = (status == null || status.isBlank() || status.equals("ALL"))
                 ? hoaDonRepository.findByKhachHangId(id)
                 : hoaDonRepository.findByKhachHangIdAndTrangThai(id, status);
+      
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/khachhang/dangnhap";
+    }
 
-        model.addAttribute("donHangList", donHangList);
+    @GetMapping("/{id}/donhang")
+    public String getDonHangByCustomer(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "status", defaultValue = "ALL") String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            Model model) {
+
+        Optional<KhachHang> khachHang = khachHangService.findById(id);
+        if (khachHang.isEmpty()) {
+            return "redirect:/error";
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayDat").descending());
+        Page<HoaDon> donHangPage = "ALL".equalsIgnoreCase(status)
+                ? hoaDonRepository.findByKhachHangId(id, pageable)
+                : hoaDonRepository.findByKhachHangIdAndTrangThai(id, status, pageable);
+
+        model.addAttribute("khachHang", khachHang.get());
+        model.addAttribute("donHangPage", donHangPage);
+        model.addAttribute("totalPages", donHangPage.getTotalPages());
+        model.addAttribute("currentPage", page);
         model.addAttribute("selectedStatus", status);
         return "client/khachhang/donhang";
     }

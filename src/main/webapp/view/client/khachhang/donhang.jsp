@@ -91,9 +91,10 @@
 
         <!-- Nút quay lại -->
         <div class="mt-3">
-            <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+            <a href="${pageContext.request.contextPath}/khachhang/detail/${khachHang.id}"
+               class="btn btn-info btn-sm">
                 ⬅
-            </button>
+            </a>
         </div>
 
     </div>
@@ -107,6 +108,9 @@
                 <option value="CHO_XAC_NHAN" ${selectedStatus == 'CHO_XAC_NHAN' ? 'selected' : ''}>Chờ xử lý</option>
                 <option value="CHO_CHUAN_BI_HANG" ${selectedStatus == 'CHO_CHUAN_BI_HANG' ? 'selected' : ''}>Chờ chuẩn bị hàng</option>
                 <option value="DANG_GIAO" ${selectedStatus == 'DANG_GIAO' ? 'selected' : ''}>Đang giao</option>
+                <option value="GIAO_THAT_BAI" ${selectedStatus == 'GIAO_THAT_BAI' ? 'selected' : ''}>Giao thất bại</option>
+                <option value="HOAN_HANG" ${selectedStatus == 'HOAN_HANG' ? 'selected' : ''}>Hoàn hàng</option>
+                <option value="DA_HOAN_HANG" ${selectedStatus == 'DA_HOAN_HANG' ? 'selected' : ''}>Đã hoàn hàng</option>
                 <option value="HOAN_THANH" ${selectedStatus == 'HOAN_THANH' ? 'selected' : ''}>Hoàn thành</option>
                 <option value="HUY" ${selectedStatus == 'HUY' ? 'selected' : ''}>Đã hủy</option>
             </select>
@@ -127,11 +131,10 @@
         <div class="alert alert-info">Không tìm thấy đơn hàng phù hợp.</div>
     </c:if>
 
-    <c:if test="${empty donHangList}">
+    <c:if test="${donHangPage.totalElements == 0}">
         <div class="alert alert-info">Bạn chưa có đơn hàng nào.</div>
     </c:if>
-
-    <c:if test="${not empty donHangList}">
+    <c:if test="${donHangPage.totalElements > 0}">
         <table class="table table-bordered table-hover bg-white">
             <thead class="table-primary text-center ">
             <tr>
@@ -143,7 +146,7 @@
             </tr>
             </thead>
             <tbody class="text-center">
-            <c:forEach var="order" items="${donHangList}">
+            <c:forEach var="order" items="${donHangPage.content}">
                 <tr>
                     <td>${order.maHoaDon}</td>
                     <td>${order.ngayDat}</td>
@@ -171,7 +174,13 @@
                             </c:choose>
 
                             <a href="${pageContext.request.contextPath}/khachhang/chitiet/${order.id}"
+
                                class="btn btn-info btn-sm">🔍</a>
+
+
+                               class="btn btn-info btn-sm">
+                                Xem chi tiết
+                            </a>
 
                             <c:if test="${not empty _csrf}">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
@@ -182,6 +191,20 @@
             </c:forEach>
             </tbody>
         </table>
+        <c:if test="${donHangPage.totalElements > 0}">
+            <table>
+                <c:forEach var="order" items="${donHangPage.content}"> ... </c:forEach> </table>
+            <nav>
+                <ul class="pagination">
+                    <c:forEach var="i" begin="0" end="${totalPages - 1}">
+                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                            <a class="page-link"
+                               href="?page=${i}&size=5&status=${selectedStatus}">${i + 1}</a>
+                        </li>
+                    </c:forEach>
+                </ul>
+            </nav>
+        </c:if>
     </c:if>
 </div>
 </body>
