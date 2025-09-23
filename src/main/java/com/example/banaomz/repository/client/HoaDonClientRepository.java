@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -15,4 +16,6 @@ public interface HoaDonClientRepository extends JpaRepository<HoaDon, Integer> {
 
     // Lấy hóa đơn theo trạng thái (ví dụ: CHO_XAC_NHAN, DA_THANH_TOAN...)
     List<HoaDon> findByTrangThai(String trangThai);
+
+    Optional<HoaDon> findByIdAndKhachHangId(Long id, Long khachHangId);
 }

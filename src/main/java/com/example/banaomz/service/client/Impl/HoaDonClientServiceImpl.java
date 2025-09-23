@@ -17,7 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -237,5 +240,55 @@ public class HoaDonClientServiceImpl implements IHoaDonClientService {
         if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long)
             return BigDecimal.valueOf(((Number) n).longValue());
         return BigDecimal.valueOf(n.doubleValue());
+    }
+
+    @Transactional
+    @Override
+    public void huyDonHangByCustomer(Long orderId, Long khachHangId) {
+        HoaDon hd = hoaDonRepository.findByIdAndKhachHangId(orderId, khachHangId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hoặc không thuộc quyền của bạn"));
+
+        String st = Optional.ofNullable(hd.getTrangThai()).orElse("").toUpperCase();
+        // Chặn các trạng thái không cho huỷ
+        if ("DANG_GIAO".equals(st))      throw new RuntimeException("Đơn đang giao, không thể huỷ.");
+        if ("HOAN_THANH".equals(st))     throw new RuntimeException("Đơn đã hoàn thành.");
+        if ("HUY".equals(st))            throw new RuntimeException("Đơn đã được huỷ trước đó.");
+
+        // Hoàn kho & giảm đã bán (vì bạn đã TRỪ kho + CỘNG đã bán ngay khi tạo đơn online)
+        var ctList = hoaDonChiTietRepository.findByHoaDonId(hd.getId().longValue());
+        if (ctList != null) {
+            // gộp theo sản phẩm cha để trừ soLuongDaBan
+            Map<Long, Integer> sumBySanPham = new HashMap<>();
+            for (HoaDonChiTiet ct : ctList) {
+                SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+                if (spct == null) continue;
+
+                int qty = Optional.ofNullable(ct.getSoLuong()).orElse(0);
+
+                // cộng lại kho biến thể
+                int ton = Optional.ofNullable(spct.getSoLuong()).orElse(0);
+                spct.setSoLuong(ton + qty);
+                spctRepository.save(spct);
+
+                // trừ lại đã bán ở sản phẩm cha
+                SanPham sp = spct.getSanPham();
+                if (sp != null) {
+                    sumBySanPham.merge(sp.getId(), qty, Integer::sum);
+                }
+            }
+            for (var e : sumBySanPham.entrySet()) {
+                SanPham sp = sanPhamRepository.findById(e.getKey()).orElse(null);
+                if (sp == null) continue;
+                int sold = Optional.ofNullable(sp.getSoLuongDaBan()).orElse(0);
+                sold = Math.max(0, sold - e.getValue());
+                sp.setSoLuongDaBan(sold);
+                sanPhamRepository.save(sp);
+            }
+        }
+
+        // Cập nhật trạng thái
+        hd.setTrangThai("HUY");
+        hd.setNgaySua(LocalDateTime.now());
+        hoaDonRepository.save(hd);
     }
 }
