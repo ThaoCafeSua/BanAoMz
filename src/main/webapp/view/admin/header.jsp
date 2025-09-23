@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt"  prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setLocale value="vi_VN"/>
 
 <!DOCTYPE html>
@@ -9,10 +9,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ban Ao MzShop</title>
-<<<<<<< HEAD
-=======
+
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/includes/images/MzShop.png">
->>>>>>> 0c046853ee37b97f7f98972bf550d79a5e392eb1
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +24,7 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
     <!-- Select2 -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Toastr -->
@@ -39,44 +37,108 @@
     <style>
         /* Header */
         header {
-            position: fixed; top: 0; left: 0; right: 0; height: 60px;
-            background-color: #001f3d; color: white; z-index: 1000;
-            box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: #001f3d;
+            color: white;
+            z-index: 1000;
+            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
         }
-        .header-flex { display: flex; align-items: center; gap: 10px; }
-        .header-flex img { width: 50px; height: auto; }
+
+        .header-flex {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-flex img {
+            width: 50px;
+            height: auto;
+        }
 
         /* Sidebar */
         .sidebar {
-            width: 20%; transition: width 0.3s; background-color: #001f3d;
-            position: fixed; top: 60px; left: 0; bottom: 0; padding: 10px; color: white;
+            width: 20%;
+            transition: width 0.3s;
+            background-color: #001f3d;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            padding: 10px;
+            color: white;
         }
-        .sidebar.collapsed { width: 60px; padding: 20px 10px; }
+
+        .sidebar.collapsed {
+            width: 60px;
+            padding: 20px 10px;
+        }
 
         .sidebar a {
-            color: white; text-decoration: none; display: block; padding: 10px;
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
             transition: background-color 0.3s;
         }
-        .sidebar a:hover { background-color: #004080; }
+
+        .sidebar a:hover {
+            background-color: #004080;
+        }
 
         /* Content */
-        .content { margin-left: 20%; padding-top: 70px; transition: margin-left 0.3s; }
-        .content.expanded { margin-left: 60px; }
+        .content {
+            margin-left: 20%;
+            padding-top: 70px;
+            transition: margin-left 0.3s;
+        }
+
+        .content.expanded {
+            margin-left: 60px;
+        }
 
         /* Toggle */
         #toggleSidebar {
-            position: fixed; top: 10px; left: 10px; z-index: 1100; padding: 10px;
-            background-color: #001f3d; border: none; color: white; font-size: 20px;
-            cursor: pointer; border-radius: 5px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1100;
+            padding: 10px;
+            background-color: #001f3d;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 5px;
         }
-        #toggleSidebar:hover { background-color: #004080; }
+
+        #toggleSidebar:hover {
+            background-color: #004080;
+        }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .sidebar { width: 60px; padding: 10px; top: 60px; }
-            .content { margin-left: 60px; }
-            .sidebar.collapsed { width: 0; padding: 0; }
-            .content.expanded { margin-left: 0; }
+            .sidebar {
+                width: 60px;
+                padding: 10px;
+                top: 60px;
+            }
+
+            .content {
+                margin-left: 60px;
+            }
+
+            .sidebar.collapsed {
+                width: 0;
+                padding: 0;
+            }
+
+            .content.expanded {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -86,7 +148,7 @@
 <header>
     <div class="container header-flex justify-content-between">
         <div class="d-flex align-items-center gap-2">
-            <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid" />
+            <img src="/includes/images/MzShop.png" alt="Logo" class="img-fluid"/>
             <h3 class="m-0">MzShop</h3>
         </div>
 
@@ -226,7 +288,7 @@
 
 <!-- Main Content -->
 <div class="content">
-    <jsp:include page="${page}.jsp" />
+    <jsp:include page="${page}.jsp"/>
 </div>
 
 </body>

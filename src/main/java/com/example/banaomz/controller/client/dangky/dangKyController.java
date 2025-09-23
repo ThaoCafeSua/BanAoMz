@@ -13,6 +13,7 @@ import com.example.banaomz.service.admin.IDiaChiService;
 import com.example.banaomz.service.admin.IHoaDonService;
 import com.example.banaomz.service.admin.IKhachHangService;
 import com.example.banaomz.service.client.IHoaDonClientService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/khachhang")
@@ -33,54 +34,104 @@ public class dangKyController {
 
     private final IKhachHangService khachHangService;
     private final IDiaChiService diaChiService;
-    private final IHoaDonService hoaDonService;      // vẫn dùng cho các chỗ khác
+    private final IHoaDonService hoaDonService;
     private final IHoaDonRepository hoaDonRepository;
-    private final IHoaDonClientService hoaDonClientService; // 👉 NEW
+    private final IHoaDonClientService hoaDonClientService;
 
     @Autowired
     public dangKyController(IKhachHangService khachHangService,
                             IDiaChiService diaChiService,
                             IHoaDonService hoaDonService,
                             IHoaDonRepository hoaDonRepository,
-                            IHoaDonClientService hoaDonClientService) { // 👉 NEW
+                            IHoaDonClientService hoaDonClientService) {
         this.khachHangService = khachHangService;
         this.diaChiService = diaChiService;
         this.hoaDonService = hoaDonService;
         this.hoaDonRepository = hoaDonRepository;
-        this.hoaDonClientService = hoaDonClientService; // 👉 NEW
+        this.hoaDonClientService = hoaDonClientService;
     }
 
-    // Trang đăng ký
+    /* =======================
+       ĐĂNG KÝ
+    ======================= */
     @GetMapping("/dangky")
-    public String showRegisterForm(Model model) {
+    public String showRegisterForm(@RequestParam(value = "next", required = false) String next,
+                                   Model model) {
         model.addAttribute("khachHangDTO", new KhachHangDTO());
+        model.addAttribute("next", next);
         return "client/khachhang/dangky";
     }
 
     @PostMapping("/dangky")
-    public String dangKy(@ModelAttribute("khachHang") KhachHangDTO khachHangDTO,
+    public String dangKy(@ModelAttribute("khachHangDTO") KhachHangDTO khachHangDTO,
+                         @RequestParam(value = "next", required = false) String next,
                          HttpSession session,
                          Model model) {
         try {
             KhachHangDTO savedCustomer = khachHangService.createCustomer(khachHangDTO);
+            session.setAttribute("KH_ID", savedCustomer.getId());
             session.setAttribute("khachHang", savedCustomer);
-            return "redirect:/home";
+            return safeRedirect(next, "/home");
         } catch (Exception e) {
             model.addAttribute("error", "Đăng ký thất bại: " + e.getMessage());
+            model.addAttribute("next", next);
             return "client/khachhang/dangky";
         }
     }
 
-    // Trang chi tiết khách hàng
+    /* =======================
+       ĐĂNG NHẬP
+    ======================= */
+    @GetMapping("/dangnhap")
+    public String showLoginForm(@RequestParam(value = "next", required = false) String next,
+                                Model model) {
+        model.addAttribute("next", next);
+        return "client/khachhang/dangnhap";
+    }
+
+    @PostMapping("/dangnhap")
+    public String dangNhap(@RequestParam("email") String email,
+                           @RequestParam("matKhau") String matKhau,
+                           @RequestParam(value = "next", required = false) String next,
+                           HttpSession session,
+                           Model model) {
+        KhachHang khachHang = khachHangService.login(email, matKhau);
+        if (khachHang != null) {
+            session.setAttribute("KH_ID", khachHang.getId());
+            session.setAttribute("khachHang", khachHang);
+            return safeRedirect(next, "/home");
+        } else {
+            model.addAttribute("error", "Sai email hoặc mật khẩu!");
+            model.addAttribute("next", next);
+            return "client/khachhang/dangnhap";
+        }
+    }
+
+    /* =======================
+       ĐĂNG XUẤT
+    ======================= */
+    @GetMapping("/logout")
+    public String logout(@RequestParam(value = "next", required = false) String next,
+                         HttpSession session) {
+        session.invalidate();
+        // trở lại trang login, có thể đính kèm next nếu muốn quay lại
+        if (next != null && !next.isBlank()) {
+            return "redirect:/khachhang/dangnhap?next=" + next;
+        }
+        return "redirect:/khachhang/dangnhap";
+    }
+
+    /* =======================
+       INFO / ĐỊA CHỈ / ĐƠN HÀNG
+    ======================= */
     @GetMapping("/detail/{id}")
     public String detailKhachHang(@PathVariable("id") Long id, Model model) {
         KhachHang khachHang = khachHangService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
         model.addAttribute("customerId", id);
-        return "client/khachhang/detail"; // JSP detail
+        return "client/khachhang/detail";
     }
 
-    // API lấy danh sách địa chỉ
     @GetMapping("/{id}/addresses")
     @ResponseBody
     public ResponseEntity<?> getAddresses(@PathVariable("id") Long id) {
@@ -88,34 +139,11 @@ public class dangKyController {
         return ResponseEntity.ok(ResponseObject.builder().data(diaChiList).build());
     }
 
-    // API thêm/sửa địa chỉ
     @PostMapping("/address")
     @ResponseBody
     public ResponseEntity<?> addressCustomer(@RequestBody DiaChiDTO req) {
         DiaChiDTO saved = khachHangService.addressCustomer(req);
         return ResponseEntity.ok(ResponseObject.builder().data(saved).build());
-    }
-
-    // Trang đăng nhập
-    @GetMapping("/dangnhap")
-    public String showLoginForm() {
-        return "client/khachhang/dangnhap";
-    }
-
-    @PostMapping("/dangnhap")
-    public String dangNhap(@RequestParam("email") String email,
-                           @RequestParam("matKhau") String matKhau,
-                           HttpSession session,
-                           Model model) {
-        KhachHang khachHang = khachHangService.login(email, matKhau);
-        if (khachHang != null) {
-            session.setAttribute("KH_ID", khachHang.getId());
-            session.setAttribute("khachHang", khachHang);
-            return "redirect:/home";
-        } else {
-            model.addAttribute("error", "Sai email hoặc mật khẩu!");
-            return "client/khachhang/dangnhap";
-        }
     }
 
     @PostMapping("/update")
@@ -132,37 +160,25 @@ public class dangKyController {
         }
     }
 
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/khachhang/dangnhap";
-    }
-
     @GetMapping("/{id}/donhang")
-    public String getDonHangByCustomer(@PathVariable("id") Long id,@RequestParam(value = "status", required = false) String status, Model model) {
+    public String getDonHangByCustomer(@PathVariable("id") Long id,
+                                       @RequestParam(value = "status", required = false) String status,
+                                       Model model) {
         Optional<KhachHang> khachHang = khachHangService.findById(id);
-        if (khachHang.isEmpty()) {
-            return "redirect:/error"; // hoặc thông báo "Khách hàng không tồn tại"
-        }
+        if (khachHang.isEmpty()) return "redirect:/error";
+
         List<HoaDonDetailResponseDTO> list = hoaDonService.getOrdersByCustomerId(id);
         model.addAttribute("customerId", id);
         model.addAttribute("donHangList", list);
-        List<HoaDon> donHangList;
 
-        if (status == null || status.isEmpty() || status.equals("ALL")) {
-            donHangList = hoaDonRepository.findByKhachHangId(id);
-        } else {
-            donHangList = hoaDonRepository.findByKhachHangIdAndTrangThai(id, status);
-        }
+        List<HoaDon> donHangList = (status == null || status.isBlank() || status.equals("ALL"))
+                ? hoaDonRepository.findByKhachHangId(id)
+                : hoaDonRepository.findByKhachHangIdAndTrangThai(id, status);
 
         model.addAttribute("donHangList", donHangList);
         model.addAttribute("selectedStatus", status);
-        model.addAttribute("customerId", id);
         return "client/khachhang/donhang";
     }
-
-
 
     @PostMapping("/don-hang/huy")
     public String huyDon(@RequestParam("id") Long id,
@@ -170,7 +186,6 @@ public class dangKyController {
                          HttpSession session,
                          RedirectAttributes redirectAttributes) {
         try {
-            // Lấy KH_ID từ session để đảm bảo đúng chủ đơn
             Object v = session.getAttribute("KH_ID");
             Long khId = (v instanceof Long) ? (Long) v :
                     (v instanceof Integer) ? ((Integer) v).longValue() : null;
@@ -180,9 +195,7 @@ public class dangKyController {
                 return "redirect:/khachhang/" + customerId + "/donhang";
             }
 
-            // 👉 Dùng service CLIENT riêng: hoàn kho & giảm soLuongDaBan ngay khi KH huỷ
             hoaDonClientService.huyDonHangByCustomer(id, khId);
-
             redirectAttributes.addFlashAttribute("message", "Đã hủy đơn hàng thành công!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -190,14 +203,9 @@ public class dangKyController {
         return "redirect:/khachhang/" + customerId + "/donhang";
     }
 
-
     @GetMapping("/chitiet/{id}")
     public String xemChiTiet(@PathVariable Long id, Model model) {
-
-        // Lấy thông tin header (dùng service như cũ)
         HoaDonDetailResponseDTO hoaDon = hoaDonService.getDetailById(id);
-
-        // Lấy entity để map list chi tiết trực tiếp trong controller
         HoaDon hd = hoaDonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn ID: " + id));
 
@@ -213,7 +221,6 @@ public class dangKyController {
                 ))
                 .toList();
 
-        // Format ngày để JSP hiển thị
         String ngayDat = hoaDon.getNgayDat()
                 .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
 
@@ -228,18 +235,21 @@ public class dangKyController {
         try { return c.call(); } catch (Exception e) { return ""; }
     }
 
-
-
-
-    @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam("email") String email,
-                                 RedirectAttributes redirectAttributes) {
+    /* =======================
+       Helpers
+    ======================= */
+    private String safeRedirect(String next, String fallback) {
+        // chỉ cho phép đường dẫn nội bộ dạng relative (bắt đầu bằng "/")
+        if (next == null || next.isBlank()) return "redirect:" + fallback;
         try {
-            khachHangService.resetPassword(email);
-            redirectAttributes.addFlashAttribute("success", "Mật khẩu mới đã được gửi vào email!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            URI uri = new URI(next);
+            if (uri.isAbsolute()) return "redirect:" + fallback; // chặn http://domain lạ
+        } catch (Exception ignored) {
+            return "redirect:" + fallback;
         }
-        return "redirect:/khachhang/dangnhap";
+        if (!next.startsWith("/")) next = "/" + next;
+        // tránh CRLF
+        if (next.contains("\r") || next.contains("\n")) return "redirect:" + fallback;
+        return "redirect:" + next;
     }
 }
