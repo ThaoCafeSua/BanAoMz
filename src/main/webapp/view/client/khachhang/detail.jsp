@@ -136,6 +136,70 @@
 
 </style>
 
+<script>
+    $(document).ready(function () {
+        // Validate form cập nhật KH
+        $('form[action$="/khachhang/update"]').on('submit', function (e) {
+            let hoVaTen = $.trim($('input[name="hoVaTen"]').val());
+            let ngaySinh = $('input[name="ngaySinh"]').val();
+            let soDienThoai = $.trim($('input[name="soDienThoai"]').val());
+            let email = $.trim($('input[name="email"]').val());
+            let matKhau = $.trim($('input[name="matKhau"]').val());
+
+            const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/; // số VN
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            // ⚠️ Tên
+            if (hoVaTen === "") {
+                toastr.error("Vui lòng nhập tên khách hàng");
+                e.preventDefault(); return;
+            }
+
+            // ⚠️ Ngày sinh
+            if (ngaySinh === "") {
+                toastr.error("Vui lòng chọn ngày sinh");
+                e.preventDefault(); return;
+            } else if (new Date(ngaySinh) > new Date()) {
+                toastr.error("Ngày sinh không hợp lệ");
+                e.preventDefault(); return;
+            }
+
+            // ⚠️ Số điện thoại
+            if (soDienThoai === "" || !phoneRegex.test(soDienThoai)) {
+                toastr.error("Số điện thoại không hợp lệ");
+                e.preventDefault(); return;
+            }
+
+            // ⚠️ Email
+            if (email === "" || !emailRegex.test(email)) {
+                toastr.error("Email không hợp lệ");
+                e.preventDefault(); return;
+            }
+
+            // ⚠️ Mật khẩu
+            if (matKhau.length < 6) {
+                toastr.error("Mật khẩu tối thiểu 6 ký tự");
+                e.preventDefault(); return;
+            }
+        });
+    });
+</script>
+
+        <c:if test="${not empty success}">
+        <script>
+            $(function () {
+                toastr.success("${success}");
+            });
+        </script>
+        </c:if>
+
+        <c:if test="${not empty error}">
+        <script>
+            $(function () {
+                toastr.error("${error}");
+            });
+        </script>
+        </c:if>
 
 <div class="container mt-4">
     <div class="container mt-4">

@@ -99,6 +99,9 @@ public interface IHoaDonRepository extends JpaRepository<HoaDon, Long> {
 
     List<HoaDon> findByKhachHangIdAndTrangThai(Long khachHangId, String trangThai);
 
+    Page<HoaDon> findByKhachHangId(Long khachHangId, Pageable pageable);
+
+    Page<HoaDon> findByKhachHangIdAndTrangThai(Long khachHangId, String trangThai, Pageable pageable);
 
 
     @Query("SELECT h FROM HoaDon h WHERE h.khachHang.id = :customerId AND h.loaiHoaDon = 'ONLINE'")
