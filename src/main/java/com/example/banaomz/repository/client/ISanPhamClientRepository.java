@@ -44,56 +44,68 @@ public interface ISanPhamClientRepository extends IBaseRepository<SanPham, Long>
       @Param("status") String status);
 
   @Query(value = """
-      SELECT TOP 10
-          sp.id                              AS id,
-          sp.ma_san_pham                     AS maSanPham,
-          sp.ten_san_pham                    AS tenSanPham,
-          th.ten_thuong_hieu                 AS thuongHieu,
-          xx.ten_xuat_xu                     AS xuatXu,
-          dm.ten_danh_muc                    AS danhMuc,
-          COALESCE(SUM(spct.so_luong), 0)    AS soLuong,
-          sp.url_anh                         AS urlAnh,
-          sp.trang_thai                      AS trangThai,
-          sp.ngay_tao                        AS ngayTao,
-          COALESCE(MIN(spct.gia_ban), 0)     AS giaBan,
-          sp.so_luong_da_ban                 AS soLuongDaBan
-      FROM san_pham sp
-      LEFT JOIN san_pham_chi_tiet spct ON sp.id = spct.id_san_pham
-      LEFT JOIN thuong_hieu th        ON sp.id_thuong_hieu = th.id
-      LEFT JOIN xuat_xu xx            ON sp.id_xuat_xu   = xx.id
-      LEFT JOIN danh_muc dm           ON sp.id_danh_muc  = dm.id
-      GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham,
-               th.ten_thuong_hieu, xx.ten_xuat_xu, dm.ten_danh_muc,
-               sp.url_anh, sp.trang_thai, sp.ngay_tao, sp.so_luong_da_ban
-      ORDER BY sp.so_luong_da_ban DESC
-      """, nativeQuery = true)
+  SELECT TOP 10
+      sp.id                              AS id,
+      sp.ma_san_pham                     AS maSanPham,
+      sp.ten_san_pham                    AS tenSanPham,
+      th.ten_thuong_hieu                 AS thuongHieu,
+      xx.ten_xuat_xu                     AS xuatXu,
+      dm.ten_danh_muc                    AS danhMuc,
+      COALESCE(SUM(
+          CASE WHEN spct.trang_thai = 'HOAT_DONG' THEN spct.so_luong ELSE 0 END
+      ), 0)                               AS soLuong,
+      sp.url_anh                         AS urlAnh,
+      sp.trang_thai                      AS trangThai,
+      sp.ngay_tao                        AS ngayTao,
+      COALESCE(MIN(
+          CASE WHEN spct.trang_thai = 'HOAT_DONG' THEN spct.gia_ban END
+      ), 0)                               AS giaBan,
+      sp.so_luong_da_ban                 AS soLuongDaBan
+  FROM san_pham sp
+  LEFT JOIN san_pham_chi_tiet spct ON sp.id = spct.id_san_pham
+  LEFT JOIN thuong_hieu th        ON sp.id_thuong_hieu = th.id
+  LEFT JOIN xuat_xu xx            ON sp.id_xuat_xu   = xx.id
+  LEFT JOIN danh_muc dm           ON sp.id_danh_muc  = dm.id
+  WHERE sp.trang_thai = 'HOAT_DONG'
+  GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham,
+           th.ten_thuong_hieu, xx.ten_xuat_xu, dm.ten_danh_muc,
+           sp.url_anh, sp.trang_thai, sp.ngay_tao, sp.so_luong_da_ban
+  ORDER BY sp.so_luong_da_ban DESC
+  """, nativeQuery = true)
   List<IProductItemClient> getTop10SanPhamBanChay();
 
+
   @Query(value = """
-      SELECT
-          sp.id                              AS id,
-          sp.ma_san_pham                     AS maSanPham,
-          sp.ten_san_pham                    AS tenSanPham,
-          th.ten_thuong_hieu                 AS thuongHieu,
-          xx.ten_xuat_xu                     AS xuatXu,
-          dm.ten_danh_muc                    AS danhMuc,
-          COALESCE(SUM(spct.so_luong), 0)    AS soLuong,
-          sp.url_anh                         AS urlAnh,
-          sp.trang_thai                      AS trangThai,
-          sp.ngay_tao                        AS ngayTao,
-          COALESCE(MIN(spct.gia_ban), 0)     AS giaBan,
-          sp.so_luong_da_ban                 AS soLuongDaBan
-      FROM san_pham sp
-      LEFT JOIN san_pham_chi_tiet spct ON sp.id = spct.id_san_pham
-      LEFT JOIN thuong_hieu th        ON sp.id_thuong_hieu = th.id
-      LEFT JOIN xuat_xu xx            ON sp.id_xuat_xu   = xx.id
-      LEFT JOIN danh_muc dm           ON sp.id_danh_muc  = dm.id
-      WHERE sp.id = :id
-      GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham,
-               th.ten_thuong_hieu, xx.ten_xuat_xu, dm.ten_danh_muc,
-               sp.url_anh, sp.trang_thai, sp.ngay_tao, sp.so_luong_da_ban
-      """, nativeQuery = true)
+  SELECT
+      sp.id                              AS id,
+      sp.ma_san_pham                     AS maSanPham,
+      sp.ten_san_pham                    AS tenSanPham,
+      th.ten_thuong_hieu                 AS thuongHieu,
+      xx.ten_xuat_xu                     AS xuatXu,
+      dm.ten_danh_muc                    AS danhMuc,
+      COALESCE(SUM(
+          CASE 
+              WHEN spct.trang_thai = 'HOAT_DONG' THEN spct.so_luong 
+              ELSE 0 
+          END
+      ), 0)                               AS soLuong,
+      sp.url_anh                         AS urlAnh,
+      sp.trang_thai                      AS trangThai,
+      sp.ngay_tao                        AS ngayTao,
+      COALESCE(MIN(spct.gia_ban), 0)     AS giaBan,
+      sp.so_luong_da_ban                 AS soLuongDaBan
+  FROM san_pham sp
+  LEFT JOIN san_pham_chi_tiet spct ON sp.id = spct.id_san_pham
+  LEFT JOIN thuong_hieu th        ON sp.id_thuong_hieu = th.id
+  LEFT JOIN xuat_xu xx            ON sp.id_xuat_xu   = xx.id
+  LEFT JOIN danh_muc dm           ON sp.id_danh_muc  = dm.id
+  WHERE sp.id = :id
+  GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham,
+           th.ten_thuong_hieu, xx.ten_xuat_xu, dm.ten_danh_muc,
+           sp.url_anh, sp.trang_thai, sp.ngay_tao, sp.so_luong_da_ban
+  """, nativeQuery = true)
   IProductItemClient getSanPhamById(@Param("id") Long id);
+
 
   @Query(value = """
       SELECT

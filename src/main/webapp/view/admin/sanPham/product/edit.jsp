@@ -190,7 +190,6 @@
                     <th>Số Lượng</th>
                     <th>Giá Bán</th>
                     <th>Trạng Thái</th>
-                    <th>Hành Động</th>
                 </tr>
                 </thead>
                 <tbody></tbody>
@@ -394,12 +393,14 @@
                 url: '/admin/product/detail',
                 method: 'POST',
                 contentType: 'application/json',
-                data: sanPhamId,
+                data: JSON.stringify(Number(sanPhamId)),
                 success: function (response) {
                     let data = response.data;
 
                     loadDataProdcutDetail(data)
                     getDataDanhMuc(data.danhMuc.id, data.danhMuc.tenDanhMuc);
+                    getDataThuongHieu(data.thuongHieu.id, data.thuongHieu.tenThuongHieu);
+                    getDataXuatXu(data.xuatXu.id, data.xuatXu.tenXuatXu);
 
                     productDetailArr = response.data.lstChiTietSanPham.map(item => {
                         return {
@@ -524,10 +525,10 @@
         });
 
         function loadDataProdcutDetail(data){
-            $('#xuatXuSelect').val(data.xuatXu.id); // Gán giá trị ID của xuất xứ
-            $('#danhMucSelect').val(data.danhMuc.id); // Gán giá trị ID của danh mục
-            $('#thuongHieuSelect').val(data.thuongHieu.id); // Gán giá trị ID của thương hiệu
-            $('#tenSanPham').val(data.tenSanPham); // Gán tên sản phẩm
+            $('#xuatXuSelect').val(data.xuatXu.id);
+            $('#danhMucSelect').val(data.danhMuc.id);
+            $('#thuongHieuSelect').val(data.thuongHieu.id);
+            $('#tenSanPham').val(data.tenSanPham);
             $("input[name='status_product'][value='" + data.trangThai + "']").prop('checked', true); // Gán trạng thái
             $('#imagePreview').attr('src', data.urlAnh);
 
@@ -543,7 +544,7 @@
                 console.log('ITEM STATUS =', item.trangThai);
 
                 // 2) Chuẩn hoá thành uppercase để so sánh bất chấp chữ hoa/chữ thường
-                const isActive = String(item.trangThai).toUpperCase() === 'HOAT_DONG';
+                const isActive = String(item.trangThai || 'HOAT_DONG').toUpperCase() === 'HOAT_DONG';
 
                 // 3) Sinh HTML công tắc với khoảng trắng trước checked nếu active
                 let toggleSwitch =
@@ -566,8 +567,7 @@
                     item.size.tenSize,
                     '<input class="form-control soLuong-input" type="number" min="1" value="' + item.soLuong + '" data-index="' + index + '" />',
                     '<input class="form-control giaBan-input" type="number" min="5000" value="' + item.giaBan + '" data-index="' + index + '" />',
-                    toggleSwitch,
-                    '<button class="btn btn-danger deleteProduct" data-index="' + index + '"><i class="fa-solid fa-trash"></i></button>'
+                    toggleSwitch
                 ]);
             });
 
@@ -617,7 +617,8 @@
                             mauSac: color,
                             size: size,
                             soLuong: 1,
-                            giaBan: 100000
+                            giaBan: 100000,
+                            trangThai: 'HOAT_DONG'
                         };
                         productArr.push(productDetail);
                     }
@@ -629,32 +630,18 @@
         }
 
 
-        $('#productTable').on('click', '.deleteProduct', function () {
-            var indexToDelete = $(this).data('index'); // Lấy index của item cần xóa
-            productDetailArr.splice(indexToDelete, 1); // Xóa phần tử tại index từ mảng data
-            console.log(productDetailArr);
-            loadTableProductDetail(productDetailArr); // Cập nhật lại bảng sau khi xóa
-        });
-
         // Lắng nghe sự kiện thay đổi số lượng
         $('#productTable').on('change', '.soLuong-input', function () {
-            var indexToUpdate = $(this).data('index'); // Lấy index của item cần cập nhật
-            var newQuantity = $(this).val(); // Lấy giá trị mới của số lượng
+            const idx = $(this).data('index');
+            let q = parseInt($(this).val() || '0', 10);
+            if (q < 0) q = 0;
+            $(this).val(q);
+            productDetailArr[idx].soLuong = q;
 
-            if (newQuantity === "" || isNaN(newQuantity) || parseInt(newQuantity) < 0) {
-                newQuantity = 0;
-                $(this).val(newQuantity);
-            } else {
-                newQuantity = parseInt(newQuantity, 10);
-            }
-            // Cập nhật số lượng trong mảng dữ liệu
-            productDetailArr[indexToUpdate].soLuong = newQuantity;
-            console.log(productDetailArr);
-
-            // Cập nhật lại bảng nếu cần (nếu bạn muốn làm điều này)
+            if (q === 0) productDetailArr[idx].trangThai = 'NGUNG_HOAT_DONG';
             loadTableProductDetail(productDetailArr);
         });
-       // Dùng ủy quyền (delegation) – phù hợp với DataTables
+        // Dùng ủy quyền (delegation) – phù hợp với DataTables
         $('#productTable').on('change', 'input.status-toggle', function () {
             const index = $(this).data('index');
             const isChecked = this.checked;
