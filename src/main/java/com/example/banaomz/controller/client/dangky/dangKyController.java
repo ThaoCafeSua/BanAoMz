@@ -164,6 +164,31 @@ public class dangKyController {
         }
     }
 
+
+
+
+    @GetMapping("/{id}/donhang")
+    public String getDonHangByCustomer(@PathVariable("id") Long id,
+                                       @RequestParam(value = "status", required = false) String status,
+                                       Model model) {
+        Optional<KhachHang> khachHang = khachHangService.findById(id);
+        if (khachHang.isEmpty()) return "redirect:/error";
+
+        List<HoaDonDetailResponseDTO> list = hoaDonService.getOrdersByCustomerId(id);
+        model.addAttribute("customerId", id);
+        model.addAttribute("donHangList", list);
+
+        List<HoaDon> donHangList = (status == null || status.isBlank() || status.equals("ALL"))
+                ? hoaDonRepository.findByKhachHangId(id)
+                : hoaDonRepository.findByKhachHangIdAndTrangThai(id, status);
+      
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/khachhang/dangnhap";
+    }
+
     @GetMapping("/{id}/donhang")
     public String getDonHangByCustomer(
             @PathVariable Long id,
