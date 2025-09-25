@@ -43,11 +43,10 @@
                     <div id="chucVuTen" class="text-dark"></div>
                 </div>
 
-
-            <%--                <div class="col-md-4">--%>
-<%--                    <label class="form-label fw-bold text-primary">Ngày tạo:</label>--%>
-<%--                    <div id="ngayTao" class="text-dark"></div>--%>
-<%--                </div>--%>
+                <%-- <div class="col-md-4">
+                    <label class="form-label fw-bold text-primary">Ngày tạo:</label>
+                    <div id="ngayTao" class="text-dark"></div>
+                </div> --%>
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-primary">Ngày sửa:</label>
                     <div id="ngaySua" class="text-dark"></div>
@@ -58,24 +57,76 @@
 </div>
 
 <script>
-    $(document).ready(function () {
-        let employeeId = ${employeeId};
+    // ---- Helpers: parse và format ngày an toàn từ nhiều định dạng ----
+    function parseToDate(val){
+        if(!val) return null;
+
+        // Epoch milliseconds/seconds?
+        if(typeof val === 'number'){
+            // nếu server trả giây (10 chữ số) -> nhân 1000
+            if(String(val).length === 10) return new Date(val * 1000);
+            return new Date(val);
+        }
+
+        if(typeof val === 'string'){
+            const s = val.trim();
+            if(!s) return null;
+
+            // dd/MM/yyyy hoặc dd/MM/yyyy HH:mm[:ss]
+            if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){
+                const [datePart, timePart] = s.split(' ');
+                const [d,m,y] = datePart.split('/').map(Number);
+                if(timePart){
+                    const [hh,mm,ss] = timePart.split(':').map(x=>Number(x||0));
+                    return new Date(y, m-1, d, hh||0, mm||0, ss||0);
+                }
+                return new Date(y, m-1, d);
+            }
+
+            // yyyy-MM-dd HH:mm:ss -> đổi thành ISO
+            if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(s)){
+                return new Date(s.replace(' ', 'T'));
+            }
+
+            // ISO 8601 hoặc yyyy-MM-dd
+            const d = new Date(s);
+            return isNaN(d) ? null : d;
+        }
+        return null;
+    }
+    function pad(n){ return String(n).padStart(2,'0'); }
+
+    function toVNDateTime(val){
+        const d = parseToDate(val); if(!d) return '';
+        return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear()
+            + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function toVNDate(val){
+        const d = parseToDate(val); if(!d) return '';
+        return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear();
+    }
+
+    // ---- Load data và đổ lên UI ----
+    $(function () {
+        var employeeId = ${employeeId};
         $.ajax({
             url: '/admin/employee/detail',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(employeeId),
             success: function (res) {
-                let nv = res.data;
-                $('#tenNhanVien').text(nv.tenNhanVien);
-                $('#ngaySinh').text(nv.ngaySinh ?? '');
+                const nv = res.data || {};
+                $('#tenNhanVien').text(nv.tenNhanVien ?? '');
+                $('#ngaySinh').text(toVNDate(nv.ngaySinh));
                 $('#gioiTinh').text(nv.gioiTinh === 'Male' ? 'Nam' : 'Nữ');
                 $('#soDienThoai').text(nv.soDienThoai ?? '');
                 $('#email').text(nv.email ?? '');
                 $('#matKhau').text(nv.matKhau ?? '');
                 $('#chucVuTen').text(nv.chucVuTen ?? '');
-                // $('#ngayTao').text(nv.ngayTao ?? '');
-                $('#ngaySua').text(nv.ngaySua ?? '');
+                $('#ngaySua').text(toVNDateTime(nv.ngaySua));
+                // Nếu cần hiển thị ngày tạo:
+                // $('#ngayTao').text(toVNDateTime(nv.ngayTao));
             },
             error: function () {
                 toastr.error('Không thể tải dữ liệu nhân viên.');
@@ -85,20 +136,8 @@
 </script>
 
 <style>
-    .form-label {
-        color: #001f3d;
-        font-weight: bold;
-    }
-    .text-dark {
-        font-size: 15px;
-        margin-top: 5px;
-    }
-    .btn-outline-secondary {
-        border-radius: 20px;
-        color: #001f3d;
-    }
-    .btn-outline-secondary:hover {
-        background-color: #004080;
-        color: white;
-    }
+    .form-label { color: #001f3d; font-weight: bold; }
+    .text-dark  { font-size: 15px; margin-top: 5px; }
+    .btn-outline-secondary { border-radius: 20px; color: #001f3d; }
+    .btn-outline-secondary:hover { background-color: #004080; color: #fff; }
 </style>

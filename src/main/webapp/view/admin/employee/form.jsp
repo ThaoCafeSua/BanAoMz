@@ -1,10 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<c:set var="ngaySinhRaw" value="${employee.ngaySinh}"/>
+<fmt:formatDate value="${employee.ngaySinh}" pattern="yyyy-MM-dd" var="ngaySinhYMD"/>
 
 <div class="container">
     <h3 style="color: #001f3d;" class="mt-4">Thông tin Nhân viên</h3>
@@ -14,10 +18,10 @@
 
     <div class="card" style="border: 1px solid #006d7f; border-radius: 10px;">
         <div class="card-body">
-            <form id="employeeForm" action="${action}" method="post">
-                <input type="hidden" name="id" value="${employee.id}">
+            <form id="employeeForm" action="${action}" method="post" novalidate>
+                <input type="hidden" name="id" value="${employee.id}"/>
 
-<%--                chuc vu--%>
+                <!-- Chức vụ -->
                 <div class="mb-3">
                     <label class="form-label">Chức vụ</label>
                     <select class="form-select" name="chucVuId">
@@ -30,11 +34,11 @@
                     </select>
                 </div>
 
-
                 <!-- Tên nhân viên -->
                 <div class="mb-3">
                     <label class="form-label">Tên nhân viên</label>
-                    <input type="text" class="form-control" name="tenNhanVien" value="${employee.tenNhanVien}" placeholder="Nhập tên nhân viên">
+                    <input type="text" class="form-control" name="tenNhanVien"
+                           value="${employee.tenNhanVien}" placeholder="Nhập tên nhân viên"/>
                 </div>
 
                 <!-- Giới tính -->
@@ -43,7 +47,9 @@
                     <div class="d-flex">
                         <c:forEach var="entry" items="${gender}">
                             <div class="me-4">
-                                <input type="radio" id="gender${entry.key}" name="gioiTinh" value="${entry.key}" <c:if test="${employee.gioiTinh == entry.key}">checked</c:if>>
+                                <input type="radio" id="gender${entry.key}" name="gioiTinh"
+                                       value="${entry.key}"
+                                       <c:if test="${employee.gioiTinh == entry.key}">checked</c:if>/>
                                 <label for="gender${entry.key}" class="form-check-label">${entry.value}</label>
                             </div>
                         </c:forEach>
@@ -53,44 +59,40 @@
                 <!-- Ngày sinh -->
                 <div class="mb-3">
                     <label class="form-label">Ngày sinh</label>
-                    <input type="date" class="form-control" name="ngaySinh" value="${employee.ngaySinh}">
+                    <input type="date" class="form-control" id="ngaySinh" name="ngaySinh"
+                           value="${not empty ngaySinhYMD ? ngaySinhYMD : ngaySinhRaw}"/>
+                    <div class="invalid-feedback" id="dobInvalid">Ngày sinh không được ở tương lai.</div>
                 </div>
 
                 <!-- SĐT -->
                 <div class="mb-3">
                     <label class="form-label">Số điện thoại</label>
-                    <input type="text" class="form-control" name="soDienThoai" value="${employee.soDienThoai}">
+                    <input type="text" class="form-control" name="soDienThoai"
+                           value="${employee.soDienThoai}" inputmode="numeric" maxlength="11"
+                           placeholder="Chỉ 10–11 chữ số"/>
                 </div>
 
                 <!-- Email -->
                 <div class="mb-3">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-control" name="email" value="${employee.email}">
+                    <input type="email" class="form-control" name="email" value="${employee.email}"/>
                 </div>
 
                 <!-- Địa chỉ -->
                 <div class="mb-3">
                     <label class="form-label">Địa chỉ</label>
-                    <input type="text" class="form-control" name="diaChi" value="${employee.diaChi}">
+                    <input type="text" class="form-control" name="diaChi" value="${employee.diaChi}"/>
                 </div>
 
                 <!-- Mật khẩu -->
                 <div class="mb-3">
                     <label class="form-label">Mật khẩu</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" name="matKhau" id="passwordField" value="${employee.matKhau}">
+                        <input type="password" class="form-control" name="matKhau" id="passwordField"
+                               value="${employee.matKhau}"/>
                         <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">👁️</button>
                     </div>
                 </div>
-
-<%--                <!-- Ngày tạo -->--%>
-<%--                <input type="date" class="form-control" name="ngayTao" readonly--%>
-<%--                       value="${employee.ngayTao != null ? employee.ngayTao.toLocalDate() : ''}"/>--%>
-
-<%--                <!-- Ngày sửa -->--%>
-<%--                <input type="date" class="form-control" readonly--%>
-<%--                       value="${employee.ngaySua != null ? employee.ngaySua.toLocalDate() : ''}"/>--%>
-
 
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-teal">${btnText}</button>
@@ -101,91 +103,137 @@
 </div>
 
 <style>
-    .btn-teal {
-        background-color: #001f3d;
-        color: white;
-        border-radius: 20px;
-        padding: 6px 20px;
-        border: 1px solid #cccccc;
-    }
-    .btn-teal:hover {
-        background-color: #004080;
-        color: white;
-    }
+    .btn-teal { background-color:#001f3d;color:#fff;border-radius:20px;padding:6px 20px;border:1px solid #ccc; }
+    .btn-teal:hover { background-color:#004080;color:#fff; }
+    .is-invalid { border-color:#dc3545 !important; }
+    .invalid-feedback { display:none; }
+    .form-control.is-invalid + .invalid-feedback { display:block; }
+    #toast-container { z-index: 99999 !important; }
 </style>
 
 <script>
+    // ---- Toastr options (đảm bảo toast luôn nổi) ----
+    (function(){
+        if (window.toastr) {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 3000,
+                extendedTimeOut: 1500,
+                preventDuplicates: true,
+                newestOnTop: true
+            };
+        }
+    })();
+
     function togglePassword() {
         const pw = document.getElementById("passwordField");
         pw.type = pw.type === "password" ? "text" : "password";
     }
 
-        function validateForm(event) {
+    // ----- Helpers -----
+    function parseYMD(str){ // 'yyyy-MM-dd' -> Date (local, 00:00)
+        const [y,m,d] = (str||'').split('-').map(Number);
+        if(!y || !m || !d) return null;
+        return new Date(y, m-1, d, 0, 0, 0, 0);
+    }
+    function startOfToday(){
+        const t = new Date(); t.setHours(0,0,0,0); return t;
+    }
+    function markInvalid($el, msg){
+        $el.addClass('is-invalid');
+        if(msg) $('#dobInvalid').text(msg);
+    }
+    function clearInvalid($el){
+        $el.removeClass('is-invalid');
+    }
+
+    // ----- Validation & submit -----
+    function validateForm(event) {
         event.preventDefault();
 
-        let tenNhanVien = $("input[name='tenNhanVien']").val().trim();
-        let gioiTinh = $("input[name='gioiTinh']:checked").val();
-        let ngaySinh = $("input[name='ngaySinh']").val();
-        let sdt = $("input[name='soDienThoai']").val().trim();
-        let email = $("input[name='email']").val().trim();
-        let diaChi = $("input[name='diaChi']").val().trim();
-        let matKhau = $("input[name='matKhau']").val().trim();
+        const $form = $("#employeeForm");
+        const tenNhanVien = $("input[name='tenNhanVien']").val().trim();
+        const gioiTinh = $("input[name='gioiTinh']:checked").val();
+        const dobStr = $("#ngaySinh").val();
+        const sdt = $("input[name='soDienThoai']").val().trim();
+        const email = $("input[name='email']").val().trim();
+        const diaChi = $("input[name='diaChi']").val().trim();
+        const matKhau = $("input[name='matKhau']").val().trim();
 
-        if (tenNhanVien === "") {
-        toastr.error("Vui lòng nhập tên nhân viên.");
-        return;
+        // reset trạng thái invalid
+        clearInvalid($("#ngaySinh"));
+
+        if (tenNhanVien === "") { toastr.error("Vui lòng nhập tên nhân viên."); return; }
+        if (!gioiTinh) { toastr.error("Vui lòng chọn giới tính."); return; }
+        if (dobStr === "") {
+            markInvalid($("#ngaySinh"), "Vui lòng chọn ngày sinh.");
+            toastr.error("Vui lòng chọn ngày sinh.");
+            return;
+        }
+
+        const dob = parseYMD(dobStr);
+        const today = startOfToday();
+        if (!dob || isNaN(dob.getTime())) {
+            markInvalid($("#ngaySinh"), "Ngày sinh không hợp lệ.");
+            toastr.error("Ngày sinh không hợp lệ.");
+            return;
+        }
+        if (dob > today) {
+            markInvalid($("#ngaySinh"), "Ngày sinh không được ở tương lai.");
+            toastr.error("Ngày sinh không được ở tương lai.");
+            return;
+        }
+
+        if (!/^\d{10,11}$/.test(sdt)) { toastr.error("Số điện thoại không hợp lệ. Phải gồm 10–11 chữ số."); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toastr.error("Email không hợp lệ."); return; }
+        if (diaChi === "") { toastr.error("Vui lòng nhập địa chỉ."); return; }
+        if (matKhau.length < 6) { toastr.error("Mật khẩu phải có ít nhất 6 ký tự."); return; }
+
+        // Hợp lệ -> submit
+        $form[0].submit();
     }
 
-        if (!gioiTinh) {
-        toastr.error("Vui lòng chọn giới tính.");
-        return;
+    // ----- Khởi tạo UI & gán handler an toàn -----
+    function initPage(){
+        // Set max cho input date = hôm nay (chặn chọn tương lai bằng datepicker)
+        const todayStr = new Date().toISOString().split('T')[0];
+        $("#ngaySinh").attr('max', todayStr);
+
+        // Chỉ số cho SĐT
+        $("input[name='soDienThoai']").on('input', function(){
+            this.value = this.value.replace(/\D/g,'').slice(0,11);
+        });
+
+        // Xóa trạng thái lỗi khi người dùng thay đổi ngày
+        $("#ngaySinh").on('input change', function(){ clearInvalid($(this)); });
+
+        // Gán handler submit (tránh gắn trùng)
+        $("#employeeForm").off("submit").on("submit", validateForm);
+
+        // Backup vanilla nếu jQuery bị reload/ghi đè ở layout
+        const form = document.getElementById("employeeForm");
+        if (form && !form._vanillaBound) {
+            form.addEventListener("submit", validateForm);
+            form._vanillaBound = true;
+        }
     }
 
-        if (ngaySinh === "") {
-        toastr.error("Vui lòng nhập ngày sinh.");
-        return;
+    // Ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+        initPage();
     }
-
-        if (!/^\d{10,11}$/.test(sdt)) {
-        toastr.error("Số điện thoại không hợp lệ. Phải gồm 10–11 chữ số.");
-        return;
-    }
-
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        toastr.error("Email không hợp lệ.");
-        return;
-    }
-
-        if (diaChi === "") {
-        toastr.error("Vui lòng nhập địa chỉ.");
-        return;
-    }
-
-        if (matKhau.length < 6) {
-        toastr.error("Mật khẩu phải có ít nhất 6 ký tự.");
-        return;
-    }
-
-        // Nếu hợp lệ -> gửi form
-        $("#employeeForm")[0].submit();
-    }
-
-        $(document).ready(function () {
-        $("#employeeForm").on("submit", validateForm);
-    });
-
-// (Optional: Thêm kiểm tra form bằng JS nếu muốn)
 </script>
+
 <c:if test="${not empty sessionScope.error}">
-    <script>
-        toastr.error('${sessionScope.error}');
-    </script>
+    <script>toastr.error('${sessionScope.error}');</script>
     <c:remove var="error" scope="session"/>
 </c:if>
 
 <c:if test="${not empty sessionScope.success}">
-    <script>
-        toastr.success('${sessionScope.success}');
-    </script>
+    <script>toastr.success('${sessionScope.success}');</script>
     <c:remove var="success" scope="session"/>
 </c:if>

@@ -43,7 +43,6 @@
                     <th>Giới Tính</th>
 <%--                    <th>Mật khẩu</th>--%>
 <%--                    <th>Ngày Tạo</th>--%>
-                    <th>Ngày sửa</th>
                     <th>Hành Động</th>
                 </tr>
                 </thead>
@@ -106,7 +105,6 @@
                             emp.gioiTinh == 'Male' ? 'Nam' : 'Nữ',
                             //emp.matKhau,
                             // emp.ngayTao,
-                            emp.ngaySua,
                             '<a href="/admin/employee/detail/' + emp.id + '" class="btn btn-info btn-sm me-1">' +
                             '<i class="fa-solid fa-info"></i></a>' +
                             '<a href="/admin/employee/update/' + emp.id + '" class="btn btn-success btn-sm">' +

@@ -1,5 +1,6 @@
 package com.example.banaomz.dto.admin.nhanVien;
 
+import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,6 +22,7 @@ public class NhanVienDTO {
     private String diaChi;
     private String email;
     @DateTimeFormat(pattern = "yyyy-MM-dd") // ✅ dòng cần thêm
+    @Past(message = "Ngày sinh không được ở tương lai")
     private Date ngaySinh;         // Giữ nguyên nếu form dùng type="date"
     private String gioiTinh;
     private String matKhau;
